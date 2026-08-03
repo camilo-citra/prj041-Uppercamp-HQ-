@@ -1,0 +1,194 @@
+{
+  "main": {
+    "id": "679ede4520e303a0",
+    "type": "split",
+    "children": [
+      {
+        "id": "334a7f02f83c8fb2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "32440815c48f659a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "prj041 - Uppercamp HQ Design- Minutes04"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "4fd159082c663868",
+    "type": "split",
+    "children": [
+      {
+        "id": "354550877e54cfa7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8aa48f5efe48e797",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "ee69f3f1bf14535b",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "4e4d2beee3162530",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 471.5
+  },
+  "right": {
+    "id": "fff26c3259d22b8c",
+    "type": "split",
+    "children": [
+      {
+        "id": "bc9fee038641d55d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c65b2e49be731fcc",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for prj041 - Uppercamp HQ Design- Minutes04"
+            }
+          },
+          {
+            "id": "ab214088fcac2bba",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from prj041 - Uppercamp HQ Design- Minutes04"
+            }
+          },
+          {
+            "id": "085d4844a8925ad3",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "6d13fa582e5f22d4",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "9ba130e1df6a937a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of prj041 - Uppercamp HQ Design- Minutes04"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "8aa48f5efe48e797",
+  "lastOpenFiles": [
+    "Raw/prj041 - Uppercamp HQ Design- Minutes03.md",
+    "Raw/prj041 - Uppercamp HQ Design- Minutes02.md",
+    "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
+    "Raw/prj041 - Uppercamp HQ Design- Minutes01.md",
+    "Raw/prj041 - Uppercamp HQ Design- Minutes00.md"
+  ]
+}
