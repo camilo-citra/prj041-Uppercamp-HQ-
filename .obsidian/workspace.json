@@ -83,12 +83,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Project Brief/Architecture.md",
+                "file": "RAG/Minutes analisys.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Architecture"
+              "title": "Minutes analisys"
             }
           }
         ],
@@ -149,7 +149,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 471.5
+    "width": 350.5
   },
   "right": {
     "id": "fff26c3259d22b8c",
@@ -165,7 +165,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Project Brief/Architecture.md",
+                "file": "RAG/Minutes analisys.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -175,7 +175,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Architecture"
+              "title": "Backlinks for Minutes analisys"
             }
           },
           {
@@ -184,12 +184,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Project Brief/Architecture.md",
+                "file": "RAG/Minutes analisys.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Architecture"
+              "title": "Outgoing links from Minutes analisys"
             }
           },
           {
@@ -227,13 +227,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Project Brief/Architecture.md",
+                "file": "RAG/Minutes analisys.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Architecture"
+              "title": "Outline of Minutes analisys"
             }
           }
         ]
@@ -254,7 +254,7 @@
       "bases:Create new base": false
     }
   },
-  "active": "8aa48f5efe48e797",
+  "active": "1f0b67d07b4442db",
   "lastOpenFiles": [
     "Project Brief/Preliminary Development Plan.md",
     "Project Brief/Architecture.md",
