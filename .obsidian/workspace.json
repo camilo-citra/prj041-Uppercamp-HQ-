@@ -55,7 +55,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Project Team Skill Definitions.md",
+                "file": "Skills/Project Team Skill Definitions.md",
                 "mode": "source",
                 "source": false
               },
@@ -137,7 +137,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Project Team Skill Definitions.md",
+                "file": "Skills/Project Team Skill Definitions.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -156,7 +156,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Project Team Skill Definitions.md",
+                "file": "Skills/Project Team Skill Definitions.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -199,7 +199,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Project Team Skill Definitions.md",
+                "file": "Skills/Project Team Skill Definitions.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -226,11 +226,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "8712750828cb6f67",
+  "active": "8aa48f5efe48e797",
   "lastOpenFiles": [
     "RAG/RAG Set up.md",
     "RAG/Minutes analisys.md",
-    "Project Team Skill Definitions.md",
+    "Skills/Project Team Skill Definitions.md",
     "Skills",
     "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
     "Raw/prj041 - Uppercamp HQ Design- Minutes02.md",
