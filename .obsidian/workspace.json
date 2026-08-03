@@ -20,8 +20,51 @@
               "icon": "lucide-file",
               "title": "prj041 - Uppercamp HQ Design- Minutes04"
             }
+          },
+          {
+            "id": "5d2e985eba5bb3c9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "RAG/RAG Set up.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "RAG Set up"
+            }
+          },
+          {
+            "id": "218772e0af47c478",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "RAG/Minutes analisys.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Minutes analisys"
+            }
+          },
+          {
+            "id": "8712750828cb6f67",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Project Team Skill Definitions.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Project Team Skill Definitions"
+            }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -94,7 +137,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
+                "file": "Project Team Skill Definitions.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +147,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for prj041 - Uppercamp HQ Design- Minutes04"
+              "title": "Backlinks for Project Team Skill Definitions"
             }
           },
           {
@@ -113,12 +156,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
+                "file": "Project Team Skill Definitions.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from prj041 - Uppercamp HQ Design- Minutes04"
+              "title": "Outgoing links from Project Team Skill Definitions"
             }
           },
           {
@@ -156,13 +199,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
+                "file": "Project Team Skill Definitions.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of prj041 - Uppercamp HQ Design- Minutes04"
+              "title": "Outline of Project Team Skill Definitions"
             }
           }
         ]
@@ -183,12 +226,19 @@
       "bases:Create new base": false
     }
   },
-  "active": "8aa48f5efe48e797",
+  "active": "8712750828cb6f67",
   "lastOpenFiles": [
-    "Raw/prj041 - Uppercamp HQ Design- Minutes03.md",
-    "Raw/prj041 - Uppercamp HQ Design- Minutes02.md",
+    "RAG/RAG Set up.md",
+    "RAG/Minutes analisys.md",
+    "Project Team Skill Definitions.md",
+    "Skills",
     "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
+    "Raw/prj041 - Uppercamp HQ Design- Minutes02.md",
     "Raw/prj041 - Uppercamp HQ Design- Minutes01.md",
+    "image11.md",
+    "image2.md",
+    "Raw/prj041 - Uppercamp HQ Design- Minutes03.md",
+    "RAG",
     "Raw/prj041 - Uppercamp HQ Design- Minutes00.md"
   ]
 }
