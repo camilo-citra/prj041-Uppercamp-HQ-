@@ -566,6 +566,9 @@ export default function App() {
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
                           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <span className="badge badge-in-progress" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.3)', fontWeight: 700 }}>
+                              {risk.risk_code || `RSK-${String(risk.id).padStart(3, '0')}`}
+                            </span>
                             <span className="badge badge-in-progress">{risk.meeting_id}</span>
                             <span className={`badge ${risk.status === 'Closed' ? 'badge-completed' : 'badge-pending'}`}>
                               {risk.status || 'Open'}
@@ -785,8 +788,13 @@ export default function App() {
 function RiskCard({ risk, onEdit }) {
   return (
     <div style={{ background: 'rgba(15, 23, 42, 0.85)', padding: '0.6rem', borderRadius: '6px', fontSize: '0.78rem', borderLeft: '3px solid var(--primary-cyan)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ fontWeight: 600, color: '#f3f4f6' }}>{risk.description}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+        <div style={{ fontWeight: 600, color: '#f3f4f6' }}>
+          <span style={{ color: '#c084fc', marginRight: '0.4rem', fontWeight: 700 }}>
+            {risk.risk_code || `RSK-${String(risk.id).padStart(3, '0')}`}:
+          </span>
+          {risk.description}
+        </div>
         <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
           <span className={`badge ${risk.status === 'Closed' ? 'badge-completed' : 'badge-pending'}`} style={{ fontSize: '0.65rem', padding: '0.1rem 0.35rem' }}>
             {risk.status || 'Open'}

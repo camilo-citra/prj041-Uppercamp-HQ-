@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS action_items (
 
 CREATE TABLE IF NOT EXISTS risk_raised (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  risk_code TEXT,
   description TEXT NOT NULL,
   contingency_measure TEXT,
   impact_level TEXT NOT NULL DEFAULT 'Medium',

@@ -108,10 +108,11 @@ app.get('/api/risks', (req, res) => {
 });
 
 app.patch('/api/risks/:id', (req, res) => {
-  const { description, contingency_measure, impact_level, likelihood, status } = req.body;
+  const { risk_code, description, contingency_measure, impact_level, likelihood, status } = req.body;
   const current = db.prepare('SELECT * FROM risk_raised WHERE id = ?').get(req.params.id);
   if (!current) return res.status(404).json({ error: 'Risk not found' });
 
+  const updatedCode = risk_code !== undefined ? risk_code : (current.risk_code || `RSK-${String(current.id).padStart(3, '0')}`);
   const updatedDesc = description !== undefined ? description : current.description;
   const updatedCont = contingency_measure !== undefined ? contingency_measure : current.contingency_measure;
   const updatedImpact = impact_level !== undefined ? impact_level : current.impact_level;
@@ -120,13 +121,14 @@ app.patch('/api/risks/:id', (req, res) => {
 
   db.prepare(`
     UPDATE risk_raised 
-    SET description = ?, contingency_measure = ?, impact_level = ?, likelihood = ?, status = ?
+    SET risk_code = ?, description = ?, contingency_measure = ?, impact_level = ?, likelihood = ?, status = ?
     WHERE id = ?
-  `).run(updatedDesc, updatedCont, updatedImpact, updatedLikelihood, updatedStatus, req.params.id);
+  `).run(updatedCode, updatedDesc, updatedCont, updatedImpact, updatedLikelihood, updatedStatus, req.params.id);
 
   res.json({
     success: true,
     id: req.params.id,
+    risk_code: updatedCode,
     description: updatedDesc,
     contingency_measure: updatedCont,
     impact_level: updatedImpact,
