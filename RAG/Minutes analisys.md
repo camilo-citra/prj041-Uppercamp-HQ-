@@ -24,6 +24,7 @@ Meeting file contains the following important information:
 		1. risk may contain contingency measures
 		2. classification impact of low risk, medium risk high risk
 		3. likely to happen clarification is low, medium or high
+		4. risk analysis should exclude action items (action items are tracked separately under Action Items)
 	7. Assumptions register
 		1. this section records the assumptions taken at the time of the meeting based on the information at the time
 		2. assumptions can be adjusted in new meeting records

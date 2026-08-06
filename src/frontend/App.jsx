@@ -192,7 +192,7 @@ export default function App() {
             className={`tab-btn ${activeTab === 'actions-risks' ? 'active' : ''}`}
             onClick={() => setActiveTab('actions-risks')}
           >
-            <CheckSquare size={16} /> Actions & Risk Matrix
+            <CheckSquare size={16} /> Risk Matrix & Actions
           </button>
           <button 
             className={`tab-btn ${activeTab === 'brief' ? 'active' : ''}`}
@@ -355,42 +355,6 @@ export default function App() {
         {activeTab === 'actions-risks' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div className="glass-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>Project Action Items Tracker ({filteredActions.length})</h3>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {['All', 'Pending', 'In Progress', 'Completed'].map((status) => (
-                    <button 
-                      key={status}
-                      className={`tab-btn ${actionStatusFilter === status ? 'active' : ''}`}
-                      onClick={() => setActionStatusFilter(status)}
-                      style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
-                    >
-                      {status}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem' }}>
-                {filteredActions.map((item) => (
-                  <div key={item.id} style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                        <span className="badge badge-in-progress">{item.meeting_id}</span>
-                        <span className={`badge badge-${item.status.toLowerCase().replace(' ', '-')}`}>{item.status}</span>
-                      </div>
-                      <p style={{ fontSize: '0.9rem', fontWeight: 500, color: '#f3f4f6' }}>{item.description}</p>
-                    </div>
-                    <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                      <span>Assignee: <strong style={{ color: '#fff' }}>{item.assignee}</strong></span>
-                      <span>Due: {item.due_date}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="glass-card">
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', marginBottom: '0.5rem' }}>
                 Risk & Roadblock Matrix (3x3 Impact vs Likelihood)
               </h3>
@@ -436,6 +400,42 @@ export default function App() {
                 <div className="matrix-cell">
                   {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'High').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
+              </div>
+            </div>
+
+            <div className="glass-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>Project Action Items Tracker ({filteredActions.length})</h3>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {['All', 'Pending', 'In Progress', 'Completed'].map((status) => (
+                    <button 
+                      key={status}
+                      className={`tab-btn ${actionStatusFilter === status ? 'active' : ''}`}
+                      onClick={() => setActionStatusFilter(status)}
+                      style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem' }}>
+                {filteredActions.map((item) => (
+                  <div key={item.id} style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <span className="badge badge-in-progress">{item.meeting_id}</span>
+                        <span className={`badge badge-${item.status.toLowerCase().replace(' ', '-')}`}>{item.status}</span>
+                      </div>
+                      <p style={{ fontSize: '0.9rem', fontWeight: 500, color: '#f3f4f6' }}>{item.description}</p>
+                    </div>
+                    <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      <span>Assignee: <strong style={{ color: '#fff' }}>{item.assignee}</strong></span>
+                      <span>Due: {item.due_date}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

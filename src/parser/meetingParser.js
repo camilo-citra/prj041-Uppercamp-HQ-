@@ -155,18 +155,26 @@ export function parseMeetingMarkdown(filePath) {
   const riskSectionMatch = content.match(/#+\s*\*?\*?\s*5[\.\\\s]+Risks, Issues, & Roadblocks\*?\*?\s*([\s\S]*?)(?=#+\s*\*?\*?\s*6|\n#\s*\*?\*?\s*6|$)/i);
   if (riskSectionMatch) {
     const riskText = riskSectionMatch[1];
-    const riskBlocks = riskText.split(/(?=\*?\s*\*\*Risk\/Issue:\*\*|\n\s*\*?\s*\*\*)/i);
+    const riskBlocks = riskText.split(/(?=(?:^\s*|\n\s*)[\*\-]\s*\*\*(?:Risk\/Issue|Risk|Issue|Description):\*\*)/im);
     for (const block of riskBlocks) {
       if (!block.trim()) continue;
-      const descMatch = block.match(/\*\*Risk\/Issue:\*\*?\s*([^\n]+)/i) || block.match(/\*\*([^\*]+):\*\*\s*([^\n]+)/i);
-      const mitMatch = block.match(/\*\*Mitigation\/Next Step:\*\*?\s*([^\n]+)/i);
+      const descMatch = block.match(/\*\*(?:Risk\/Issue|Risk|Issue|Description):\*\*?\s*([^\n]+)/i);
+      const mitMatch = block.match(/\*\*(?:Mitigation\/Next Step|Mitigation|Contingency):\*\*?\s*([^\n]+)/i);
       if (descMatch) {
-        const desc = descMatch[2] ? `${descMatch[1]}: ${descMatch[2]}` : descMatch[1];
+        let desc = descMatch[1].trim();
+        desc = desc.replace(/^Description:\s*/i, '').trim();
+
+        // Strictly exclude if description is an action item or mitigation step header
+        const descLower = desc.toLowerCase();
+        if (descLower.startsWith('mitigation') || descLower.startsWith('next step') || descLower.startsWith('action item') || descLower.startsWith('task')) {
+          continue;
+        }
+
         const contingency = mitMatch ? mitMatch[1].trim() : 'To be evaluated in next sync';
-        const impact = desc.toLowerCase().includes('severe') || desc.toLowerCase().includes('cost') || desc.toLowerCase().includes('fire') ? 'High' : 'Medium';
-        const likelihood = desc.toLowerCase().includes('delay') || desc.toLowerCase().includes('capacity') ? 'High' : 'Medium';
+        const impact = descLower.includes('severe') || descLower.includes('cost') || descLower.includes('fire') || descLower.includes('excavation') ? 'High' : 'Medium';
+        const likelihood = descLower.includes('delay') || descLower.includes('capacity') || descLower.includes('unknown') ? 'High' : 'Medium';
         risks.push({
-          description: desc.trim(),
+          description: desc,
           contingency_measure: contingency,
           impact_level: impact,
           likelihood: likelihood
