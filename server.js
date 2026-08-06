@@ -107,6 +107,34 @@ app.get('/api/risks', (req, res) => {
   res.json(risks);
 });
 
+app.patch('/api/risks/:id', (req, res) => {
+  const { description, contingency_measure, impact_level, likelihood, status } = req.body;
+  const current = db.prepare('SELECT * FROM risk_raised WHERE id = ?').get(req.params.id);
+  if (!current) return res.status(404).json({ error: 'Risk not found' });
+
+  const updatedDesc = description !== undefined ? description : current.description;
+  const updatedCont = contingency_measure !== undefined ? contingency_measure : current.contingency_measure;
+  const updatedImpact = impact_level !== undefined ? impact_level : current.impact_level;
+  const updatedLikelihood = likelihood !== undefined ? likelihood : current.likelihood;
+  const updatedStatus = status !== undefined ? status : (current.status || 'Open');
+
+  db.prepare(`
+    UPDATE risk_raised 
+    SET description = ?, contingency_measure = ?, impact_level = ?, likelihood = ?, status = ?
+    WHERE id = ?
+  `).run(updatedDesc, updatedCont, updatedImpact, updatedLikelihood, updatedStatus, req.params.id);
+
+  res.json({
+    success: true,
+    id: req.params.id,
+    description: updatedDesc,
+    contingency_measure: updatedCont,
+    impact_level: updatedImpact,
+    likelihood: updatedLikelihood,
+    status: updatedStatus
+  });
+});
+
 // Brief & Assumptions endpoint
 app.get('/api/brief', (req, res) => {
   const brief = db.prepare(`SELECT * FROM brief WHERE id = 1`).get();

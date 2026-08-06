@@ -254,6 +254,18 @@ body {
   gap: 0.5rem;
 }
 
+.cell-count-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--primary-cyan);
+  background: rgba(15, 23, 42, 0.85);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  margin-bottom: 0.2rem;
+  align-self: flex-start;
+  border: 1px solid var(--border-color);
+}
+
 .matrix-cell.high-risk {
   background: rgba(244, 63, 94, 0.08);
   border-color: rgba(244, 63, 94, 0.25);

@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS risk_raised (
   contingency_measure TEXT,
   impact_level TEXT NOT NULL DEFAULT 'Medium',
   likelihood TEXT NOT NULL DEFAULT 'Medium',
+  status TEXT NOT NULL DEFAULT 'Open',
   meeting_id TEXT NOT NULL,
   FOREIGN KEY (meeting_id) REFERENCES meeting_metadata(id)
 );

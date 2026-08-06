@@ -158,15 +158,49 @@ export default function App() {
     }
   };
 
-  const copyToClipboard = (text, index) => {
-    navigator.clipboard.writeText(text);
-    setCopiedIdx(index);
-    setTimeout(() => setCopiedIdx(null), 2000);
+  const [riskStatusFilter, setRiskStatusFilter] = useState('All');
+  const [editingRiskId, setEditingRiskId] = useState(null);
+  const [editRiskForm, setEditRiskForm] = useState({
+    description: '',
+    contingency_measure: '',
+    impact_level: 'Medium',
+    likelihood: 'Medium',
+    status: 'Open'
+  });
+
+  const handleStartEditRisk = (risk) => {
+    setEditingRiskId(risk.id);
+    setEditRiskForm({
+      description: risk.description || '',
+      contingency_measure: risk.contingency_measure || '',
+      impact_level: risk.impact_level || 'Medium',
+      likelihood: risk.likelihood || 'Medium',
+      status: risk.status || 'Open'
+    });
+  };
+
+  const handleSaveRisk = async (riskId) => {
+    try {
+      await fetch(`/api/risks/${riskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editRiskForm)
+      });
+      setEditingRiskId(null);
+      fetchRisks();
+    } catch (err) {
+      console.error('Risk update failed:', err);
+    }
   };
 
   const filteredActions = actions.filter(a => {
     if (actionStatusFilter === 'All') return true;
     return a.status.toLowerCase() === actionStatusFilter.toLowerCase();
+  });
+
+  const filteredRisks = risks.filter(r => {
+    if (riskStatusFilter === 'All') return true;
+    return (r.status || 'Open').toLowerCase() === riskStatusFilter.toLowerCase();
   });
 
   return (
@@ -189,10 +223,16 @@ export default function App() {
             <Calendar size={16} /> Meeting Minutes
           </button>
           <button 
-            className={`tab-btn ${activeTab === 'actions-risks' ? 'active' : ''}`}
-            onClick={() => setActiveTab('actions-risks')}
+            className={`tab-btn ${activeTab === 'risks' ? 'active' : ''}`}
+            onClick={() => setActiveTab('risks')}
           >
-            <CheckSquare size={16} /> Risk Matrix & Actions
+            <AlertTriangle size={16} /> Risk Matrix
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'actions' ? 'active' : ''}`}
+            onClick={() => setActiveTab('actions')}
+          >
+            <CheckSquare size={16} /> Action Items
           </button>
           <button 
             className={`tab-btn ${activeTab === 'brief' ? 'active' : ''}`}
@@ -351,16 +391,25 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 2: ACTIONS & RISK MATRIX */}
-        {activeTab === 'actions-risks' && (
+        {/* TAB 2: RISK MATRIX & RISK REGISTER */}
+        {activeTab === 'risks' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div className="glass-card">
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', marginBottom: '0.5rem' }}>
-                Risk & Roadblock Matrix (3x3 Impact vs Likelihood)
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                Categorized risks extracted from meeting notes with active contingency measures.
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem' }}>
+                    Risk & Roadblock Matrix (3x3 Impact vs Likelihood)
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                    Categorized risk distribution extracted from meeting notes with active contingency measures.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span className="badge badge-in-progress" style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}>
+                    Total Risks: {risks.length} ({risks.filter(r => (r.status || 'Open') === 'Open').length} Open, {risks.filter(r => r.status === 'Closed').length} Closed)
+                  </span>
+                </div>
+              </div>
 
               <div className="matrix-grid">
                 <div className="matrix-header">Impact \ Likelihood</div>
@@ -368,51 +417,74 @@ export default function App() {
                 <div className="matrix-header">Medium Likelihood</div>
                 <div className="matrix-header">High Likelihood</div>
 
-                <div className="matrix-header" style={{ color: '#f87171' }}>High Impact</div>
+                <div className="matrix-header" style={{ color: '#f87171' }}>
+                  High Impact
+                </div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Low').map((r, i) => <RiskCard key={i} risk={r} />)}
+                  <div className="cell-count-badge">Count: {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Low').length}</div>
+                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Low').map((r) => <RiskCard key={r.id} risk={r} onEdit={() => handleStartEditRisk(r)} />)}
                 </div>
                 <div className="matrix-cell high-risk">
-                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Medium').map((r, i) => <RiskCard key={i} risk={r} />)}
+                  <div className="cell-count-badge">Count: {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Medium').length}</div>
+                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Medium').map((r) => <RiskCard key={r.id} risk={r} onEdit={() => handleStartEditRisk(r)} />)}
                 </div>
                 <div className="matrix-cell high-risk" style={{ background: 'rgba(244, 63, 94, 0.15)' }}>
-                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'High').map((r, i) => <RiskCard key={i} risk={r} />)}
+                  <div className="cell-count-badge">Count: {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'High').length}</div>
+                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'High').map((r) => <RiskCard key={r.id} risk={r} onEdit={() => handleStartEditRisk(r)} />)}
                 </div>
 
-                <div className="matrix-header" style={{ color: '#fbbf24' }}>Medium Impact</div>
-                <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Low').map((r, i) => <RiskCard key={i} risk={r} />)}
+                <div className="matrix-header" style={{ color: '#fbbf24' }}>
+                  Medium Impact
                 </div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Medium').map((r, i) => <RiskCard key={i} risk={r} />)}
+                  <div className="cell-count-badge">Count: {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Low').length}</div>
+                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Low').map((r) => <RiskCard key={r.id} risk={r} onEdit={() => handleStartEditRisk(r)} />)}
+                </div>
+                <div className="matrix-cell">
+                  <div className="cell-count-badge">Count: {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Medium').length}</div>
+                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Medium').map((r) => <RiskCard key={r.id} risk={r} onEdit={() => handleStartEditRisk(r)} />)}
                 </div>
                 <div className="matrix-cell high-risk">
-                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'High').map((r, i) => <RiskCard key={i} risk={r} />)}
+                  <div className="cell-count-badge">Count: {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'High').length}</div>
+                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'High').map((r) => <RiskCard key={r.id} risk={r} onEdit={() => handleStartEditRisk(r)} />)}
                 </div>
 
-                <div className="matrix-header" style={{ color: '#34d399' }}>Low Impact</div>
-                <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Low').map((r, i) => <RiskCard key={i} risk={r} />)}
+                <div className="matrix-header" style={{ color: '#34d399' }}>
+                  Low Impact
                 </div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Medium').map((r, i) => <RiskCard key={i} risk={r} />)}
+                  <div className="cell-count-badge">Count: {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Low').length}</div>
+                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Low').map((r) => <RiskCard key={r.id} risk={r} onEdit={() => handleStartEditRisk(r)} />)}
                 </div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'High').map((r, i) => <RiskCard key={i} risk={r} />)}
+                  <div className="cell-count-badge">Count: {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Medium').length}</div>
+                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Medium').map((r) => <RiskCard key={r.id} risk={r} onEdit={() => handleStartEditRisk(r)} />)}
+                </div>
+                <div className="matrix-cell">
+                  <div className="cell-count-badge">Count: {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'High').length}</div>
+                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'High').map((r) => <RiskCard key={r.id} risk={r} onEdit={() => handleStartEditRisk(r)} />)}
                 </div>
               </div>
             </div>
 
+            {/* SECTION BELOW MATRIX: ALL RISKS COUNTED TO DATE */}
             <div className="glass-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>Project Action Items Tracker ({filteredActions.length})</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                <div>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem' }}>
+                    All Project Risks Counted to Date ({filteredRisks.length})
+                  </h3>
+                  <p style={{ fontSize: '0.83rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                    Detailed register showing risk valuation (Impact & Likelihood), contingency mitigations, and editable status.
+                  </p>
+                </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {['All', 'Pending', 'In Progress', 'Completed'].map((status) => (
+                  {['All', 'Open', 'Closed'].map((status) => (
                     <button 
                       key={status}
-                      className={`tab-btn ${actionStatusFilter === status ? 'active' : ''}`}
-                      onClick={() => setActionStatusFilter(status)}
-                      style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
+                      className={`tab-btn ${riskStatusFilter === status ? 'active' : ''}`}
+                      onClick={() => setRiskStatusFilter(status)}
+                      style={{ fontSize: '0.8rem', padding: '0.4rem 0.88rem' }}
                     >
                       {status}
                     </button>
@@ -420,23 +492,150 @@ export default function App() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem' }}>
-                {filteredActions.map((item) => (
-                  <div key={item.id} style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                        <span className="badge badge-in-progress">{item.meeting_id}</span>
-                        <span className={`badge badge-${item.status.toLowerCase().replace(' ', '-')}`}>{item.status}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {filteredRisks.map((risk) => (
+                  <div key={risk.id} style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.2rem' }}>
+                    {editingRiskId === risk.id ? (
+                      /* EDIT RISK FORM */
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--primary-cyan)', fontSize: '0.95rem' }}>
+                          Editing Risk Entry #{risk.id} ({risk.meeting_id})
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Description:</label>
+                          <textarea 
+                            value={editRiskForm.description}
+                            onChange={(e) => setEditRiskForm({...editRiskForm, description: e.target.value})}
+                            style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem', fontSize: '0.88rem', marginTop: '0.2rem' }}
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Mitigation / Contingency Measure:</label>
+                          <textarea 
+                            value={editRiskForm.contingency_measure}
+                            onChange={(e) => setEditRiskForm({...editRiskForm, contingency_measure: e.target.value})}
+                            style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem', fontSize: '0.88rem', marginTop: '0.2rem' }}
+                            rows={2}
+                          />
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block' }}>Impact Level:</label>
+                            <select 
+                              value={editRiskForm.impact_level}
+                              onChange={(e) => setEditRiskForm({...editRiskForm, impact_level: e.target.value})}
+                              style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
+                            >
+                              <option value="High">High Impact</option>
+                              <option value="Medium">Medium Impact</option>
+                              <option value="Low">Low Impact</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block' }}>Likelihood:</label>
+                            <select 
+                              value={editRiskForm.likelihood}
+                              onChange={(e) => setEditRiskForm({...editRiskForm, likelihood: e.target.value})}
+                              style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
+                            >
+                              <option value="High">High Likelihood</option>
+                              <option value="Medium">Medium Likelihood</option>
+                              <option value="Low">Low Likelihood</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block' }}>Status:</label>
+                            <select 
+                              value={editRiskForm.status}
+                              onChange={(e) => setEditRiskForm({...editRiskForm, status: e.target.value})}
+                              style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
+                            >
+                              <option value="Open">Open</option>
+                              <option value="Closed">Closed</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                          <button onClick={() => handleSaveRisk(risk.id)} className="tab-btn active" style={{ fontSize: '0.8rem', padding: '0.35rem 0.8rem' }}>Save Changes</button>
+                          <button onClick={() => setEditingRiskId(null)} className="tab-btn" style={{ fontSize: '0.8rem', padding: '0.35rem 0.8rem' }}>Cancel</button>
+                        </div>
                       </div>
-                      <p style={{ fontSize: '0.9rem', fontWeight: 500, color: '#f3f4f6' }}>{item.description}</p>
-                    </div>
-                    <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                      <span>Assignee: <strong style={{ color: '#fff' }}>{item.assignee}</strong></span>
-                      <span>Due: {item.due_date}</span>
-                    </div>
+                    ) : (
+                      /* READ-ONLY RISK ITEM */
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <span className="badge badge-in-progress">{risk.meeting_id}</span>
+                            <span className={`badge ${risk.status === 'Closed' ? 'badge-completed' : 'badge-pending'}`}>
+                              {risk.status || 'Open'}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Date: {risk.date}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', borderRadius: '4px', background: risk.impact_level === 'High' ? 'rgba(244, 63, 94, 0.2)' : 'rgba(251, 191, 36, 0.2)', color: risk.impact_level === 'High' ? '#f87171' : '#fbbf24', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                              Impact: {risk.impact_level}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                              Likelihood: {risk.likelihood}
+                            </span>
+                            <button onClick={() => handleStartEditRisk(risk)} className="tab-btn" style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem', marginLeft: '0.5rem' }}>
+                              Edit
+                            </button>
+                          </div>
+                        </div>
+
+                        <div style={{ fontSize: '0.95rem', fontWeight: 500, color: '#f3f4f6', marginBottom: '0.5rem' }}>
+                          {risk.description}
+                        </div>
+
+                        <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', background: 'rgba(15, 23, 42, 0.6)', padding: '0.6rem 0.8rem', borderRadius: '8px', borderLeft: '3px solid var(--primary-cyan)' }}>
+                          <strong style={{ color: 'var(--primary-cyan)' }}>Mitigation / Next Step:</strong> {risk.contingency_measure}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: ACTION ITEMS TRACKER */}
+        {activeTab === 'actions' && (
+          <div className="glass-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>Project Action Items Tracker ({filteredActions.length})</h3>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {['All', 'Pending', 'In Progress', 'Completed'].map((status) => (
+                  <button 
+                    key={status}
+                    className={`tab-btn ${actionStatusFilter === status ? 'active' : ''}`}
+                    onClick={() => setActionStatusFilter(status)}
+                    style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem' }}>
+              {filteredActions.map((item) => (
+                <div key={item.id} style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <span className="badge badge-in-progress">{item.meeting_id}</span>
+                      <span className={`badge badge-${item.status.toLowerCase().replace(' ', '-')}`}>{item.status}</span>
+                    </div>
+                    <p style={{ fontSize: '0.9rem', fontWeight: 500, color: '#f3f4f6' }}>{item.description}</p>
+                  </div>
+                  <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    <span>Assignee: <strong style={{ color: '#fff' }}>{item.assignee}</strong></span>
+                    <span>Due: {item.due_date}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -583,11 +782,23 @@ export default function App() {
   );
 }
 
-function RiskCard({ risk }) {
+function RiskCard({ risk, onEdit }) {
   return (
-    <div style={{ background: 'rgba(15, 23, 42, 0.85)', padding: '0.5rem', borderRadius: '6px', fontSize: '0.78rem', borderLeft: '2px solid var(--primary-cyan)' }}>
-      <div style={{ fontWeight: 600, color: '#f3f4f6' }}>{risk.description}</div>
-      <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '0.2rem' }}>
+    <div style={{ background: 'rgba(15, 23, 42, 0.85)', padding: '0.6rem', borderRadius: '6px', fontSize: '0.78rem', borderLeft: '3px solid var(--primary-cyan)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ fontWeight: 600, color: '#f3f4f6' }}>{risk.description}</div>
+        <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+          <span className={`badge ${risk.status === 'Closed' ? 'badge-completed' : 'badge-pending'}`} style={{ fontSize: '0.65rem', padding: '0.1rem 0.35rem' }}>
+            {risk.status || 'Open'}
+          </span>
+          {onEdit && (
+            <button onClick={onEdit} className="tab-btn" style={{ fontSize: '0.65rem', padding: '0.1rem 0.35rem' }}>
+              Edit
+            </button>
+          )}
+        </div>
+      </div>
+      <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
         <strong>Mitigation:</strong> {risk.contingency_measure}
       </div>
     </div>

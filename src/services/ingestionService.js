@@ -54,8 +54,8 @@ export function ingestAllMeetings(rawDirectoryPath) {
   `);
 
   const insertRiskStmt = db.prepare(`
-    INSERT INTO risk_raised (description, contingency_measure, impact_level, likelihood, meeting_id)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO risk_raised (description, contingency_measure, impact_level, likelihood, status, meeting_id)
+    VALUES (?, ?, ?, ?, ?, ?)
   `);
 
   const insertAssumptionStmt = db.prepare(`
@@ -89,7 +89,7 @@ export function ingestAllMeetings(rawDirectoryPath) {
       }
 
       for (const rsk of mtg.risks) {
-        insertRiskStmt.run(rsk.description, rsk.contingency_measure, rsk.impact_level, rsk.likelihood, mtg.id);
+        insertRiskStmt.run(rsk.description, rsk.contingency_measure, rsk.impact_level, rsk.likelihood, rsk.status || 'Open', mtg.id);
       }
 
       for (const asmp of mtg.assumptions) {

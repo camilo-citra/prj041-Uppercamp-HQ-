@@ -118,11 +118,32 @@ export function parseMeetingMarkdown(filePath) {
       let itemNum = 1;
       for (const row of rows) {
         const cols = row.split('|').map(c => c.trim()).filter(c => c !== '');
-        if (cols.length >= 3 && !cols[0].toLowerCase().includes('task') && !cols[0].toLowerCase().includes('action')) {
-          let desc = cols[0].replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim();
-          let assignee = cols[1] || 'Unassigned';
-          let dueDate = cols[2] || 'TBD';
-          let status = cols[3] || 'Pending';
+        if (cols.length >= 3) {
+          const c0Lower = cols[0].toLowerCase();
+          const c1Lower = cols[1] ? cols[1].toLowerCase() : '';
+          // Skip header row
+          if (c0Lower.includes('task') || c0Lower.includes('action') || c0Lower === 'id' || c1Lower.includes('description')) {
+            continue;
+          }
+
+          let desc = '';
+          let assignee = 'Unassigned';
+          let dueDate = 'TBD';
+          let status = 'Pending';
+
+          // Handle 5-column table format: | ID | Task Description | Assignee | Deadline | Status |
+          if (cols.length >= 5 || c0Lower.startsWith('act-')) {
+            desc = `${cols[0]}: ${cols[1].replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()}`;
+            assignee = cols[2] || 'Unassigned';
+            dueDate = cols[3] || 'TBD';
+            status = cols[4] || 'Pending';
+          } else {
+            desc = cols[0].replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim();
+            assignee = cols[1] || 'Unassigned';
+            dueDate = cols[2] || 'TBD';
+            status = cols[3] || 'Pending';
+          }
+
           action_items.push({
             num: itemNum++,
             description: desc,
@@ -150,35 +171,67 @@ export function parseMeetingMarkdown(filePath) {
     }
   }
 
-  // Extract Risks & Issues
+  // Extract Risks & Issues (strictly from Section 5 / Risk Register)
   const risks = [];
-  const riskSectionMatch = content.match(/#+\s*\*?\*?\s*5[\.\\\s]+Risks, Issues, & Roadblocks\*?\*?\s*([\s\S]*?)(?=#+\s*\*?\*?\s*6|\n#\s*\*?\*?\s*6|$)/i);
+  const riskSectionMatch = content.match(/#+\s*\*?\*?\s*(?:5[\.\\\s]+Risks, Issues, & Roadblocks|5[\.\\\s]+Risks|Risk Register)\*?\*?\s*([\s\S]*?)(?=#+\s*\*?\*?\s*(?:6|Action Items|Issue Register)|\n#\s*\*?\*?\s*(?:6|Action Items|Issue Register)|$)/i);
   if (riskSectionMatch) {
     const riskText = riskSectionMatch[1];
-    const riskBlocks = riskText.split(/(?=(?:^\s*|\n\s*)[\*\-]\s*\*\*(?:Risk\/Issue|Risk|Issue|Description):\*\*)/im);
-    for (const block of riskBlocks) {
-      if (!block.trim()) continue;
-      const descMatch = block.match(/\*\*(?:Risk\/Issue|Risk|Issue|Description):\*\*?\s*([^\n]+)/i);
-      const mitMatch = block.match(/\*\*(?:Mitigation\/Next Step|Mitigation|Contingency):\*\*?\s*([^\n]+)/i);
-      if (descMatch) {
-        let desc = descMatch[1].trim();
-        desc = desc.replace(/^Description:\s*/i, '').trim();
 
-        // Strictly exclude if description is an action item or mitigation step header
-        const descLower = desc.toLowerCase();
-        if (descLower.startsWith('mitigation') || descLower.startsWith('next step') || descLower.startsWith('action item') || descLower.startsWith('task')) {
-          continue;
+    if (riskText.includes('|') && riskText.toLowerCase().includes('mitigation')) {
+      const rows = riskText.split('\n').filter(r => r.includes('|') && !r.includes('---'));
+      for (const row of rows) {
+        const cols = row.split('|').map(c => c.trim()).filter(c => c !== '');
+        if (cols.length >= 3 && !cols[0].toLowerCase().includes('risk name')) {
+          const riskName = cols[0].replace(/\*\*/g, '').trim();
+          const desc = cols[1].replace(/\*\*/g, '').trim();
+          const mit = cols[2].replace(/\*\*/g, '').trim();
+
+          const fullDesc = `${riskName}: ${desc}`;
+          const descLower = fullDesc.toLowerCase();
+          const impact = descLower.includes('high') || descLower.includes('fire') || descLower.includes('cost') ? 'High' : 'Medium';
+          const likelihood = descLower.includes('high') || descLower.includes('delay') || descLower.includes('uncertainty') ? 'High' : 'Medium';
+
+          risks.push({
+            description: fullDesc,
+            contingency_measure: mit,
+            impact_level: impact,
+            likelihood: likelihood,
+            status: 'Open'
+          });
         }
+      }
+    } else {
+      const riskBlocks = riskText.split(/(?=(?:^\s*|\n\s*)[\*\-]\s*\*\*(?:Risk\/Issue|Risk|Issue|Risk Name):\*\*)/im);
+      for (const block of riskBlocks) {
+        if (!block.trim()) continue;
 
-        const contingency = mitMatch ? mitMatch[1].trim() : 'To be evaluated in next sync';
-        const impact = descLower.includes('severe') || descLower.includes('cost') || descLower.includes('fire') || descLower.includes('excavation') ? 'High' : 'Medium';
-        const likelihood = descLower.includes('delay') || descLower.includes('capacity') || descLower.includes('unknown') ? 'High' : 'Medium';
-        risks.push({
-          description: desc,
-          contingency_measure: contingency,
-          impact_level: impact,
-          likelihood: likelihood
-        });
+        const headerMatch = block.match(/\*\*(?:Risk\/Issue|Risk|Issue|Risk Name)[^\*]*:\*\*?\s*([^\n]+)/i);
+        const descMatch = block.match(/\*\*Description:\*\*?\s*([^\n]+)/i);
+        const mitMatch = block.match(/\*\*(?:Mitigation\/Next Step|Mitigation|Contingency):\*\*?\s*([^\n]+)/i);
+
+        if (headerMatch) {
+          let headerText = headerMatch[1].trim();
+          let description = descMatch ? `${headerText} - ${descMatch[1].trim()}` : headerText;
+          if (!descMatch) description = headerText;
+
+          const contingency = mitMatch ? mitMatch[1].trim() : 'To be evaluated in next sync';
+          const descLower = description.toLowerCase();
+
+          if (descLower.startsWith('mitigation') || descLower.startsWith('next step') || descLower.startsWith('action item')) {
+            continue;
+          }
+
+          const impact = descLower.includes('severe') || descLower.includes('cost') || descLower.includes('fire') || descLower.includes('excavation') || descLower.includes('catastrophic') ? 'High' : 'Medium';
+          const likelihood = descLower.includes('delay') || descLower.includes('capacity') || descLower.includes('unknown') || descLower.includes('vulnerable') ? 'High' : 'Medium';
+
+          risks.push({
+            description: description,
+            contingency_measure: contingency,
+            impact_level: impact,
+            likelihood: likelihood,
+            status: 'Open'
+          });
+        }
       }
     }
   }
