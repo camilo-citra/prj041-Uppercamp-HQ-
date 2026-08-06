@@ -41,13 +41,23 @@ export function parseMeetingMarkdown(filePath) {
 
   // Extract Attendees
   let attendees = '';
-  const attSectionMatch = content.match(/\*\*(?:Attendees|Participants):\*\*?\s*([^\n]+(?:\n\s*\*?[^\n]+)*)/i) ||
-                          content.match(/##\s*\*\*Participants\*\*?\s*([^\n]+(?:\n\s*\*?[^\n]+)*)/i);
-  if (attSectionMatch) {
-    attendees = attSectionMatch[1].split('\n')
-      .map(line => line.replace(/^[\s*\-•]+/, '').trim())
-      .filter(line => line && !line.toLowerCase().startsWith('apologies') && !line.startsWith('##'))
-      .join(', ');
+  const inlineAttMatch = content.match(/(?:##\s*\*?\*?Attendees:\*?\*?|\*\*Attendees:\*\*)\s*([^\n]+)/i);
+  if (inlineAttMatch && inlineAttMatch[1].trim()) {
+    attendees = inlineAttMatch[1]
+      .replace(/\\\*/g, '')
+      .replace(/\*\*/g, '')
+      .trim();
+  }
+  
+  if (!attendees) {
+    const attSectionMatch = content.match(/(?:##\s*\*?\*?\s*(?:Participants|Attendees)\*?\*?|\*?\s*\*\*(?:Attendees|Participants):\*\*?)([\s\S]*?)(?=\n#|\n\*\*(?:Apologies|Location|Project Manager|Date|Title|Meeting Details|Metadata|1\.)|$)/i);
+    if (attSectionMatch) {
+      attendees = attSectionMatch[1]
+        .split('\n')
+        .map(line => line.replace(/^[\s*\-•\\*]+/, '').replace(/\*\*/g, '').trim())
+        .filter(line => line && !line.startsWith('#') && !line.toLowerCase().startsWith('apologies') && !line.toLowerCase().startsWith('attachments') && line.length < 80)
+        .join(', ');
+    }
   }
 
   // Extract Apologies
