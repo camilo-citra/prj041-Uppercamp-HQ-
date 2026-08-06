@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import db from './src/db/index.js';
 import { ingestAllMeetings } from './src/services/ingestionService.js';
@@ -13,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Ingest trigger endpoint
 app.post('/api/ingest', (req, res) => {
@@ -23,6 +24,41 @@ app.post('/api/ingest', (req, res) => {
     res.json({ success: true, message: 'Ingestion completed successfully.' });
   } catch (error) {
     console.error('Ingestion failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Upload & Process New Meeting Summary Endpoint
+app.post('/api/meetings/upload', (req, res) => {
+  try {
+    const { filename, content } = req.body;
+    if (!filename || !content) {
+      return res.status(400).json({ error: 'Filename and content are required.' });
+    }
+
+    let safeFilename = filename.trim();
+    if (!safeFilename.endsWith('.md')) safeFilename += '.md';
+
+    const rawDir = path.join(__dirname, 'Raw');
+    const targetPath = path.join(rawDir, safeFilename);
+
+    // Save markdown file directly into Raw/ folder
+    fs.writeFileSync(targetPath, content, 'utf8');
+
+    // Trigger full ingestion pipeline (Parses markdown, updates DB & indexes RAG vector chunks)
+    ingestAllMeetings(rawDir);
+
+    const idMatch = safeFilename.match(/Minutes\d+/i);
+    const meetingId = idMatch ? idMatch[0] : safeFilename.replace(/\.md$/, '');
+
+    res.json({
+      success: true,
+      message: `Successfully saved ${safeFilename} to Raw/ and ingested into RAG vector store & database.`,
+      filename: safeFilename,
+      meeting_id: meetingId
+    });
+  } catch (error) {
+    console.error('Upload processing failed:', error);
     res.status(500).json({ error: error.message });
   }
 });

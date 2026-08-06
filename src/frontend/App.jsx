@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw, 
-  ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check 
+  ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check,
+  Upload, FilePlus, CheckCircle, X
 } from 'lucide-react';
 
 export default function App() {
@@ -17,6 +18,13 @@ export default function App() {
   const [stakeholderOrgFilter, setStakeholderOrgFilter] = useState('All');
   const [showRawMarkdown, setShowRawMarkdown] = useState(false);
   const [actionStatusFilter, setActionStatusFilter] = useState('All');
+
+  // Upload Meeting Summary to RAW state
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadFilename, setUploadFilename] = useState('prj041 - Uppercamp HQ Design- Minutes05.md');
+  const [uploadContent, setUploadContent] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadStatusMsg, setUploadStatusMsg] = useState(null);
 
   // RAG Chat & Consolidated Module state
   const [chatQuery, setChatQuery] = useState('');
@@ -119,6 +127,61 @@ export default function App() {
       console.error('Ingestion error:', err);
     } finally {
       setIngesting(false);
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadFilename(file.name);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setUploadContent(event.target.result);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleSaveAndProcessMeeting = async () => {
+    if (!uploadFilename || !uploadContent) {
+      alert('Please provide a filename and meeting markdown content.');
+      return;
+    }
+    setUploading(true);
+    setUploadStatusMsg('Saving file to Raw/ & processing into RAG...');
+    try {
+      const res = await fetch('/api/meetings/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: uploadFilename,
+          content: uploadContent
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUploadStatusMsg('✅ Saved to Raw/ and ingested into RAG & Database!');
+        await fetchMeetings();
+        await fetchActions();
+        await fetchRisks();
+        await fetchBrief();
+        await fetchStakeholders();
+        if (data.meeting_id) {
+          setSelectedMeetingId(data.meeting_id);
+          fetchMeetingDetail(data.meeting_id);
+        }
+        setTimeout(() => {
+          setShowUploadModal(false);
+          setUploadContent('');
+          setUploadStatusMsg(null);
+        }, 1200);
+      } else {
+        setUploadStatusMsg(`❌ Error: ${data.error}`);
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      setUploadStatusMsg(`❌ Error: ${err.message}`);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -332,15 +395,25 @@ export default function App() {
           </button>
         </nav>
 
-        <button 
-          className="tab-btn" 
-          onClick={handleIngest} 
-          disabled={ingesting}
-          style={{ background: 'rgba(56, 189, 248, 0.1)', borderColor: 'var(--border-highlight)' }}
-        >
-          <RefreshCw size={16} className={ingesting ? 'animate-spin' : ''} />
-          {ingesting ? 'Parsing Raw Files...' : 'Re-Sync Minutes'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button 
+            className="tab-btn active" 
+            onClick={() => setShowUploadModal(true)}
+            style={{ background: 'var(--primary-cyan)', color: '#090d16', fontWeight: 700 }}
+          >
+            <Upload size={16} /> Upload Summary to RAW
+          </button>
+
+          <button 
+            className="tab-btn" 
+            onClick={handleIngest} 
+            disabled={ingesting}
+            style={{ background: 'rgba(56, 189, 248, 0.1)', borderColor: 'var(--border-highlight)' }}
+          >
+            <RefreshCw size={16} className={ingesting ? 'animate-spin' : ''} />
+            {ingesting ? 'Parsing Raw Files...' : 'Re-Sync Minutes'}
+          </button>
+        </div>
       </header>
 
       {/* Main Viewport Content */}
@@ -1060,6 +1133,96 @@ export default function App() {
             </div>
           </div>
         )}
+
+      {/* UPLOAD MEETING SUMMARY TO RAW MODAL */}
+      {showUploadModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+          <div style={{ background: '#0b1120', border: '1px solid var(--border-color)', borderRadius: '16px', width: '100%', maxWidth: '680px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                <Upload color="var(--primary-cyan)" size={22} />
+                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: 'var(--primary-cyan)' }}>
+                  Upload Meeting Summary to RAW & Index into RAG
+                </h3>
+              </div>
+              <button onClick={() => setShowUploadModal(false)} className="tab-btn" style={{ padding: '0.3rem 0.6rem' }}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.45' }}>
+              Add a new meeting markdown summary. It will be saved directly to the <code style={{ color: '#38bdf8' }}>Raw/</code> directory, parsed into SQLite, and indexed into the RAG vector store.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                  Target Filename in <code style={{ color: '#38bdf8' }}>Raw/</code>:
+                </label>
+                <input 
+                  type="text" 
+                  value={uploadFilename}
+                  onChange={(e) => setUploadFilename(e.target.value)}
+                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                />
+              </div>
+
+              <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '0.85rem', borderRadius: '10px', border: '1px border-color' }}>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>
+                  Option A: Select Markdown File (.md / .txt):
+                </label>
+                <input 
+                  type="file" 
+                  accept=".md,.txt"
+                  onChange={handleFileUpload}
+                  style={{ fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                  Option B: Paste Raw Markdown Content:
+                </label>
+                <textarea 
+                  rows={9}
+                  placeholder="# prj041 - UC 6A Design: Uppercamp Offices&#10;&#10;## Meeting Details...&#10;* **Date**: 2026-08-05&#10;* **Location**: Google Meet&#10;..."
+                  value={uploadContent}
+                  onChange={(e) => setUploadContent(e.target.value)}
+                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.75rem', color: '#cbd5e1', fontSize: '0.82rem', fontFamily: 'monospace', lineHeight: '1.4' }}
+                />
+              </div>
+            </div>
+
+            {uploadStatusMsg && (
+              <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: uploadStatusMsg.includes('❌') ? 'rgba(244, 63, 94, 0.15)' : 'rgba(56, 189, 248, 0.15)', border: uploadStatusMsg.includes('❌') ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid var(--border-highlight)', fontSize: '0.85rem', color: uploadStatusMsg.includes('❌') ? '#f87171' : '#38bdf8', fontWeight: 600 }}>
+                {uploadStatusMsg}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button onClick={() => setShowUploadModal(false)} className="tab-btn">
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveAndProcessMeeting} 
+                disabled={uploading || !uploadContent} 
+                className="tab-btn active"
+                style={{ background: 'var(--primary-cyan)', color: '#090d16', fontWeight: 700, padding: '0.45rem 1rem' }}
+              >
+                {uploading ? (
+                  <>
+                    <RefreshCw size={16} className="animate-spin" /> Processing into RAG...
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} /> Save to RAW & Index into RAG
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </main>
     </div>
   );
