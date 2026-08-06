@@ -85,13 +85,29 @@ app.get('/api/actions', (req, res) => {
 });
 
 app.patch('/api/actions/:id', (req, res) => {
-  const { status } = req.body;
-  if (!status) return res.status(400).json({ error: 'Status is required' });
+  const { description, assignee, due_date, status } = req.body;
+  const current = db.prepare('SELECT * FROM action_items WHERE id = ?').get(req.params.id);
+  if (!current) return res.status(404).json({ error: 'Action item not found' });
 
-  const result = db.prepare(`UPDATE action_items SET status = ? WHERE id = ?`).run(status, req.params.id);
-  if (result.changes === 0) return res.status(404).json({ error: 'Action item not found' });
+  const updatedDesc = description !== undefined ? description : current.description;
+  const updatedAssignee = assignee !== undefined ? assignee : current.assignee;
+  const updatedDue = due_date !== undefined ? due_date : current.due_date;
+  const updatedStatus = status !== undefined ? status : current.status;
 
-  res.json({ success: true, id: req.params.id, status });
+  db.prepare(`
+    UPDATE action_items 
+    SET description = ?, assignee = ?, due_date = ?, status = ?
+    WHERE id = ?
+  `).run(updatedDesc, updatedAssignee, updatedDue, updatedStatus, req.params.id);
+
+  res.json({
+    success: true,
+    id: req.params.id,
+    description: updatedDesc,
+    assignee: updatedAssignee,
+    due_date: updatedDue,
+    status: updatedStatus
+  });
 });
 
 // Risks endpoint

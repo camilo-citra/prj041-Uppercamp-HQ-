@@ -193,9 +193,43 @@ export default function App() {
     }
   };
 
+  const [editingActionId, setEditingActionId] = useState(null);
+  const [editActionForm, setEditActionForm] = useState({
+    description: '',
+    assignee: '',
+    due_date: '',
+    status: 'Pending'
+  });
+  const [actionSearchTerm, setActionSearchTerm] = useState('');
+
+  const handleStartEditAction = (action) => {
+    setEditingActionId(action.id);
+    setEditActionForm({
+      description: action.description || '',
+      assignee: action.assignee || '',
+      due_date: action.due_date || '',
+      status: action.status || 'Pending'
+    });
+  };
+
+  const handleSaveAction = async (actionId) => {
+    try {
+      await fetch(`/api/actions/${actionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editActionForm)
+      });
+      setEditingActionId(null);
+      fetchActions();
+    } catch (err) {
+      console.error('Action update failed:', err);
+    }
+  };
+
   const filteredActions = actions.filter(a => {
-    if (actionStatusFilter === 'All') return true;
-    return a.status.toLowerCase() === actionStatusFilter.toLowerCase();
+    if (!actionSearchTerm) return true;
+    const term = actionSearchTerm.toLowerCase();
+    return a.description.toLowerCase().includes(term) || a.assignee.toLowerCase().includes(term) || a.meeting_id.toLowerCase().includes(term);
   });
 
   const filteredRisks = risks.filter(r => {
@@ -604,41 +638,81 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 3: ACTION ITEMS TRACKER */}
+        {/* TAB 3: KANBAN ACTION ITEMS BOARD */}
         {activeTab === 'actions' && (
-          <div className="glass-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>Project Action Items Tracker ({filteredActions.length})</h3>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {['All', 'Pending', 'In Progress', 'Completed'].map((status) => (
-                  <button 
-                    key={status}
-                    className={`tab-btn ${actionStatusFilter === status ? 'active' : ''}`}
-                    onClick={() => setActionStatusFilter(status)}
-                    style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
-                  >
-                    {status}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="glass-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem' }}>
+                    Project Action Items Board ({actions.length})
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                    Vertical execution structure tracking Pending, In Progress, and Completed task items.
+                  </p>
+                </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem' }}>
-              {filteredActions.map((item) => (
-                <div key={item.id} style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <span className="badge badge-in-progress">{item.meeting_id}</span>
-                      <span className={`badge badge-${item.status.toLowerCase().replace(' ', '-')}`}>{item.status}</span>
-                    </div>
-                    <p style={{ fontSize: '0.9rem', fontWeight: 500, color: '#f3f4f6' }}>{item.description}</p>
-                  </div>
-                  <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    <span>Assignee: <strong style={{ color: '#fff' }}>{item.assignee}</strong></span>
-                    <span>Due: {item.due_date}</span>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                  <div style={{ position: 'relative' }}>
+                    <Search size={14} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input 
+                      type="text"
+                      placeholder="Search task or assignee..."
+                      value={actionSearchTerm}
+                      onChange={(e) => setActionSearchTerm(e.target.value)}
+                      style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.4rem 0.6rem 0.4rem 2rem', color: '#fff', fontSize: '0.82rem', width: '220px' }}
+                    />
                   </div>
                 </div>
-              ))}
+              </div>
+
+              {/* 3 VERTICAL KANBAN COLUMNS */}
+              <div className="kanban-board">
+                {/* COLUMN 1: PENDING */}
+                <KanbanColumn 
+                  title="Pending"
+                  color="#fbbf24"
+                  badgeClass="badge-pending"
+                  items={filteredActions.filter(a => a.status === 'Pending')}
+                  editingActionId={editingActionId}
+                  editActionForm={editActionForm}
+                  setEditActionForm={setEditActionForm}
+                  onStartEdit={handleStartEditAction}
+                  onSaveEdit={handleSaveAction}
+                  onCancelEdit={() => setEditingActionId(null)}
+                  onStatusChange={handleActionStatusChange}
+                />
+
+                {/* COLUMN 2: IN PROGRESS */}
+                <KanbanColumn 
+                  title="In Progress"
+                  color="#60a5fa"
+                  badgeClass="badge-in-progress"
+                  items={filteredActions.filter(a => a.status === 'In Progress')}
+                  editingActionId={editingActionId}
+                  editActionForm={editActionForm}
+                  setEditActionForm={setEditActionForm}
+                  onStartEdit={handleStartEditAction}
+                  onSaveEdit={handleSaveAction}
+                  onCancelEdit={() => setEditingActionId(null)}
+                  onStatusChange={handleActionStatusChange}
+                />
+
+                {/* COLUMN 3: COMPLETED */}
+                <KanbanColumn 
+                  title="Completed"
+                  color="#34d399"
+                  badgeClass="badge-completed"
+                  items={filteredActions.filter(a => a.status === 'Completed')}
+                  editingActionId={editingActionId}
+                  editActionForm={editActionForm}
+                  setEditActionForm={setEditActionForm}
+                  onStartEdit={handleStartEditAction}
+                  onSaveEdit={handleSaveAction}
+                  onCancelEdit={() => setEditingActionId(null)}
+                  onStatusChange={handleActionStatusChange}
+                />
+              </div>
             </div>
           </div>
         )}
@@ -808,6 +882,123 @@ function RiskCard({ risk, onEdit }) {
       </div>
       <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
         <strong>Mitigation:</strong> {risk.contingency_measure}
+      </div>
+    </div>
+  );
+}
+
+function KanbanColumn({ 
+  title, color, badgeClass, items, 
+  editingActionId, editActionForm, setEditActionForm, 
+  onStartEdit, onSaveEdit, onCancelEdit, onStatusChange 
+}) {
+  return (
+    <div className={`kanban-column ${title.toLowerCase().replace(' ', '-')}`}>
+      <div className="kanban-column-header">
+        <div className="kanban-column-title" style={{ color }}>
+          <span>{title === 'Pending' ? '⏳' : title === 'In Progress' ? '⚡' : '✅'}</span>
+          {title}
+        </div>
+        <span className={`badge ${badgeClass}`}>{items.length}</span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        {items.length === 0 ? (
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', textAlign: 'center', padding: '2rem 0' }}>
+            No tasks in {title}
+          </div>
+        ) : (
+          items.map((item) => (
+            <div 
+              key={item.id} 
+              style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}
+            >
+              {editingActionId === item.id ? (
+                /* EDIT ACTION ITEM FORM */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--primary-cyan)' }}>
+                    Edit Action Item #{item.id} ({item.meeting_id})
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Description:</label>
+                    <textarea 
+                      value={editActionForm.description}
+                      onChange={(e) => setEditActionForm({...editActionForm, description: e.target.value})}
+                      style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
+                      rows={2}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Assignee:</label>
+                    <input 
+                      type="text"
+                      value={editActionForm.assignee}
+                      onChange={(e) => setEditActionForm({...editActionForm, assignee: e.target.value})}
+                      style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.35rem 0.5rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Due Date:</label>
+                      <input 
+                        type="text"
+                        value={editActionForm.due_date}
+                        onChange={(e) => setEditActionForm({...editActionForm, due_date: e.target.value})}
+                        style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.5rem', fontSize: '0.8rem', marginTop: '0.2rem' }}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Status:</label>
+                      <select 
+                        value={editActionForm.status}
+                        onChange={(e) => setEditActionForm({...editActionForm, status: e.target.value})}
+                        style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.4rem', fontSize: '0.8rem', marginTop: '0.2rem' }}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.3rem' }}>
+                    <button onClick={() => onSaveEdit(item.id)} className="tab-btn active" style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}>Save</button>
+                    <button onClick={onCancelEdit} className="tab-btn" style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}>Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                /* READ ONLY ACTION ITEM CARD */
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <span className="badge badge-in-progress" style={{ fontSize: '0.7rem' }}>{item.meeting_id}</span>
+                    <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+                      <select 
+                        value={item.status}
+                        onChange={(e) => onStatusChange(item.id, e.target.value)}
+                        style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', padding: '0.15rem 0.35rem', borderRadius: '4px', fontSize: '0.72rem' }}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                      <button onClick={() => onStartEdit(item)} className="tab-btn" style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}>
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+
+                  <p style={{ fontSize: '0.88rem', fontWeight: 500, color: '#f3f4f6', lineHeight: '1.4' }}>
+                    {item.description}
+                  </p>
+
+                  <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                    <span>Assignee: <strong style={{ color: '#fff' }}>{item.assignee}</strong></span>
+                    <span>Due: {item.due_date}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
