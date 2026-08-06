@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw, 
-  ExternalLink, Layers, MessageSquare, ChevronRight, User, MapPin, Clock, Copy, Check 
+  ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check 
 } from 'lucide-react';
 
 export default function App() {
@@ -12,6 +12,9 @@ export default function App() {
   const [actions, setActions] = useState([]);
   const [risks, setRisks] = useState([]);
   const [briefData, setBriefData] = useState(null);
+  const [stakeholders, setStakeholders] = useState([]);
+  const [stakeholderSearch, setStakeholderSearch] = useState('');
+  const [stakeholderOrgFilter, setStakeholderOrgFilter] = useState('All');
   const [showRawMarkdown, setShowRawMarkdown] = useState(false);
   const [actionStatusFilter, setActionStatusFilter] = useState('All');
 
@@ -35,7 +38,18 @@ export default function App() {
     fetchActions();
     fetchRisks();
     fetchBrief();
+    fetchStakeholders();
   }, []);
+
+  const fetchStakeholders = async () => {
+    try {
+      const res = await fetch('/api/stakeholders');
+      const data = await res.json();
+      setStakeholders(data);
+    } catch (err) {
+      console.error('Error fetching stakeholders:', err);
+    }
+  };
 
   const fetchMeetings = async () => {
     try {
@@ -99,6 +113,7 @@ export default function App() {
       await fetchActions();
       await fetchRisks();
       await fetchBrief();
+      await fetchStakeholders();
       if (selectedMeetingId) fetchMeetingDetail(selectedMeetingId);
     } catch (err) {
       console.error('Ingestion error:', err);
@@ -302,6 +317,12 @@ export default function App() {
             onClick={() => setActiveTab('brief')}
           >
             <Layers size={16} /> Brief & Assumptions
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'team' ? 'active' : ''}`}
+            onClick={() => setActiveTab('team')}
+          >
+            <Users size={16} /> Project Team ({stakeholders.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'rag' ? 'active' : ''}`}
@@ -839,6 +860,100 @@ export default function App() {
                     </span>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: PROJECT TEAM & STAKEHOLDERS DIRECTORY */}
+        {activeTab === 'team' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="glass-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', color: 'var(--primary-cyan)' }}>
+                    Project Team & Stakeholders Directory ({stakeholders.length})
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                    Comprehensive directory of project stakeholders, design consultants, engineering leads, and HODs.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative' }}>
+                    <Search size={14} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input 
+                      type="text"
+                      placeholder="Search name, role, or org..."
+                      value={stakeholderSearch}
+                      onChange={(e) => setStakeholderSearch(e.target.value)}
+                      style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.4rem 0.6rem 0.4rem 2rem', color: '#fff', fontSize: '0.82rem', width: '210px' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.35rem' }}>
+                    {['All', 'Citra', 'Kim Williams Design', 'Engineering Consultants'].map((org) => (
+                      <button
+                        key={org}
+                        className={`tab-btn ${stakeholderOrgFilter === org ? 'active' : ''}`}
+                        onClick={() => setStakeholderOrgFilter(org)}
+                        style={{ fontSize: '0.78rem', padding: '0.35rem 0.75rem' }}
+                      >
+                        {org}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* STAKEHOLDERS GRID */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+                {stakeholders
+                  .filter(s => {
+                    const matchSearch = !stakeholderSearch || 
+                      s.name.toLowerCase().includes(stakeholderSearch.toLowerCase()) || 
+                      s.role.toLowerCase().includes(stakeholderSearch.toLowerCase()) || 
+                      s.organization.toLowerCase().includes(stakeholderSearch.toLowerCase());
+                    const matchOrg = stakeholderOrgFilter === 'All' || s.organization.toLowerCase().includes(stakeholderOrgFilter.toLowerCase());
+                    return matchSearch && matchOrg;
+                  })
+                  .map((person) => {
+                    const initials = person.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+                    const orgColor = person.organization.includes('Kim Williams') ? '#c084fc' : 
+                                     person.organization.includes('Engineering') ? '#f87171' : 
+                                     person.organization.includes('Executive') ? '#fbbf24' : '#38bdf8';
+
+                    return (
+                      <div key={person.id} style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1rem' }}>
+                        <div>
+                          <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center', marginBottom: '0.85rem' }}>
+                            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: `rgba(${orgColor === '#c084fc' ? '192, 132, 252' : orgColor === '#f87171' ? '248, 113, 113' : orgColor === '#fbbf24' ? '251, 191, 36' : '56, 189, 248'}, 0.2)`, color: orgColor, border: `1px solid ${orgColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.05rem', fontFamily: 'var(--font-heading)' }}>
+                              {initials}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <h4 style={{ fontSize: '1.02rem', fontWeight: 700, color: '#f3f4f6' }}>{person.name}</h4>
+                              <div style={{ fontSize: '0.78rem', color: orgColor, fontWeight: 600 }}>{person.role}</div>
+                            </div>
+                          </div>
+
+                          <div style={{ marginBottom: '0.75rem' }}>
+                            <span className="badge badge-in-progress" style={{ fontSize: '0.72rem', background: 'rgba(30, 41, 59, 0.8)' }}>
+                              {person.organization}
+                            </span>
+                          </div>
+
+                          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.45', background: 'rgba(15, 23, 42, 0.5)', padding: '0.65rem 0.8rem', borderRadius: '8px', borderLeft: `3px solid ${orgColor}` }}>
+                            <strong style={{ color: '#fff' }}>Responsibilities:</strong> {person.key_responsibilities}
+                          </p>
+                        </div>
+
+                        <div style={{ paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                          <span>Meetings Attended: <strong style={{ color: '#fff' }}>{person.meetings_attended} / 5</strong></span>
+                          <span>Actions Assigned: <strong style={{ color: person.actions_assigned > 0 ? 'var(--primary-cyan)' : 'var(--text-muted)' }}>{person.actions_assigned}</strong></span>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           </div>

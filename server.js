@@ -157,6 +157,31 @@ app.patch('/api/risks/:id', (req, res) => {
   });
 });
 
+// Stakeholders & Team Directory Endpoint
+app.get('/api/stakeholders', (req, res) => {
+  const stakeholders = db.prepare(`SELECT * FROM stakeholders ORDER BY id ASC`).all();
+  const meetingList = db.prepare(`SELECT id, attendees FROM meeting_metadata`).all();
+  const actionList = db.prepare(`SELECT assignee FROM action_items`).all();
+
+  const enriched = stakeholders.map(s => {
+    const meetingsAttended = meetingList.filter(m => 
+      m.attendees && m.attendees.toLowerCase().includes(s.name.toLowerCase())
+    ).length;
+
+    const actionsAssigned = actionList.filter(a => 
+      a.assignee && a.assignee.toLowerCase().includes(s.name.toLowerCase().split(' ')[0])
+    ).length;
+
+    return {
+      ...s,
+      meetings_attended: meetingsAttended,
+      actions_assigned: actionsAssigned
+    };
+  });
+
+  res.json(enriched);
+});
+
 // Brief & Assumptions endpoint
 app.get('/api/brief', (req, res) => {
   const brief = db.prepare(`SELECT * FROM brief WHERE id = 1`).get();

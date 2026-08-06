@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS decisions_taken (
 CREATE TABLE IF NOT EXISTS action_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   item_num INTEGER,
+  action_code TEXT,
   description TEXT NOT NULL,
   assignee TEXT DEFAULT 'Unassigned',
   due_date TEXT DEFAULT 'TBD',

@@ -113,6 +113,33 @@ export function ingestAllMeetings(rawDirectoryPath) {
       // Build RAG vector chunks for this meeting
       indexMeetingChunks(mtg);
     }
+
+    const insertStakeholderStmt = db.prepare(`
+      INSERT OR REPLACE INTO stakeholders (name, role, organization, key_responsibilities, status)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+
+    const coreStakeholders = [
+      { name: 'Camilo Mogni', role: 'Project Manager & Lead', organization: 'Citra Management', key_responsibilities: 'Overall project governance, Stage 3 concept freeze, budget alignment & stakeholder coordination', status: 'Active' },
+      { name: 'John Walter Shaidi', role: 'Project Coordinator & Financial Model Lead', organization: 'Citra Management', key_responsibilities: 'Consultant cash flow modeling, master schedule tracking, and Seloxis alignment', status: 'Active' },
+      { name: 'Kim Williams', role: 'Principal Interior Designer & Framework Lead', organization: 'Kim Williams Design', key_responsibilities: 'Behavioral neighborhood framework (Connect, Build, Inspire, Community) & layout design', status: 'Active' },
+      { name: 'Pieter Fourie', role: 'Fire, Wet Services & Mechanical Lead Engineer', organization: 'Engineering Consultants', key_responsibilities: 'Fire safety egress compliance, 1200mm passage verification, staircase & MEP coordination', status: 'Active' },
+      { name: 'Nicole Vivier', role: 'Interior Architectural Specialist', organization: 'Kim Williams Design', key_responsibilities: 'Section, mezzanine concepts, and detailed architectural development documentation', status: 'Active' },
+      { name: 'Cheryl Hillman', role: 'Workspace Strategy & Operations Lead', organization: 'Citra Operations', key_responsibilities: 'Recurring coordination sessions, 10-seater boardroom passage optimization & desk ratios', status: 'Active' },
+      { name: 'Jacques Kruger', role: 'Operations Director', organization: 'Citra Operations', key_responsibilities: 'Operational workflow alignment, ground floor logistics & facility space planning', status: 'Active' },
+      { name: 'Joel Baur', role: 'Executive Director / Stakeholder Lead', organization: 'Citra Executive', key_responsibilities: 'Executive sign-off, Stage 3 brief finalization & strategic campus direction', status: 'Active' },
+      { name: 'Realm Chitando', role: 'Commercial & Construction Lead', organization: 'Citra Construction', key_responsibilities: 'Office relocation plans, lift shaft usage decisions & billboard market trend research', status: 'Active' },
+      { name: 'Nonhlanhla Mashego', role: 'Stakeholder & Project Operations', organization: 'Citra Management', key_responsibilities: 'Project administration, stakeholder communication & operational coordination', status: 'Active' },
+      { name: 'Enrica van der Linden', role: 'Design & Space Planning Specialist', organization: 'Kim Williams Design', key_responsibilities: 'Detailed space planning, material selections & design documentation', status: 'Active' },
+      { name: 'Lunell de Blanche', role: '3D Visualization & Design Specialist', organization: 'Kim Williams Design', key_responsibilities: 'Conceptual renderings, presentation materials & 3D layout modeling', status: 'Active' },
+      { name: 'Busisiwe Mgwenya', role: 'Stakeholder Team Member', organization: 'Citra Management', key_responsibilities: 'Departmental requirements gathering & Stage 3 feedback review', status: 'Active' },
+      { name: 'Farai Dhlamini', role: 'Stakeholder Team Member', organization: 'Citra Operations', key_responsibilities: 'Facility feedback & operational requirements alignment', status: 'Active' },
+      { name: 'Lisha', role: 'Marketing Strategy & Collaboration Lead', organization: 'Citra Marketing', key_responsibilities: 'Proposed collaboration wall strategy & brand alignment', status: 'Active' }
+    ];
+
+    for (const s of coreStakeholders) {
+      insertStakeholderStmt.run(s.name, s.role, s.organization, s.key_responsibilities, s.status);
+    }
   })();
 
   console.log('Successfully ingested all meeting minutes into SQLite and Vector Store.');

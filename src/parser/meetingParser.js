@@ -16,8 +16,7 @@ export function parseMeetingMarkdown(filePath) {
 
   // Extract Date
   let date = '2026-06-01';
-  const dateMatch = content.match(/\*\*Date\s*(?:&\s*Time)?:\*\*?\s*([^\n]+)/i) || 
-                    content.match(/Date:\s*([^\n]+)/i);
+  const dateMatch = content.match(/Date[^\n:]*:\s*\*?\*?\s*([^\n\*\#]+)/i);
   if (dateMatch) {
     const rawDateStr = dateMatch[1].trim();
     const parsedDate = parseDateString(rawDateStr);
@@ -134,25 +133,32 @@ export function parseMeetingMarkdown(filePath) {
           if (c0Lower.includes('task') || c0Lower.includes('action') || c0Lower === 'id' || c1Lower.includes('description')) continue;
           if (c0Lower.startsWith('asm-') || c0Lower.startsWith('dep-')) continue;
 
+          let actCode = null;
           let desc = '';
           let assignee = 'Unassigned';
           let dueDate = 'TBD';
           let status = 'Pending';
 
-          if (cols.length >= 5 || c0Lower.startsWith('act-')) {
-            desc = `${cols[0]}: ${cols[1].replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()}`;
+          if (c0Lower.startsWith('act-')) {
+            actCode = cols[0];
+            desc = cols[1].replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim();
             assignee = cols[2] || 'Unassigned';
             dueDate = cols[3] || 'TBD';
             status = cols[4] || 'Pending';
-          } else {
+          } else if (cols.length >= 4) {
             desc = cols[0].replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim();
             assignee = cols[1] || 'Unassigned';
             dueDate = cols[2] || 'TBD';
             status = cols[3] || 'Pending';
+          } else {
+            desc = cols[0].replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim();
+            assignee = cols[1] || 'Unassigned';
+            dueDate = cols[2] || 'TBD';
           }
 
           action_items.push({
             num: itemNum++,
+            action_code: actCode,
             description: desc,
             assignee: assignee.replace(/\*\*/g, ''),
             due_date: dueDate,
