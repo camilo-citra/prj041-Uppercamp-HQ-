@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw, 
-  ExternalLink, Layers, MessageSquare, ChevronRight, User, MapPin, Clock, Info 
+  ExternalLink, Layers, MessageSquare, ChevronRight, User, MapPin, Clock, Copy, Check 
 } from 'lucide-react';
 
 export default function App() {
@@ -15,17 +15,20 @@ export default function App() {
   const [showRawMarkdown, setShowRawMarkdown] = useState(false);
   const [actionStatusFilter, setActionStatusFilter] = useState('All');
 
-  // RAG Chat state
+  // RAG Chat & Consolidated Module state
   const [chatQuery, setChatQuery] = useState('');
   const [chatMessages, setChatMessages] = useState([
     {
       sender: 'ai',
-      text: 'Hello! I am your Uppercamp HQ Project RAG Intelligence Assistant. Ask me anything about meeting decisions, action items, fire strategy, HVAC layouts, or lift upgrade constraints.',
-      citations: []
+      text: 'Hello! I am your Uppercamp HQ RAG Intelligence Assistant. Ask me any question, and I will generate a consolidated executive synthesis combining key decisions, action items, risks, and meeting notes.',
+      citations: [],
+      keyTakeaways: [],
+      sourcesCount: 0
     }
   ]);
   const [chatLoading, setChatLoading] = useState(false);
   const [ingesting, setIngesting] = useState(false);
+  const [copiedIdx, setCopiedIdx] = useState(null);
 
   useEffect(() => {
     fetchMeetings();
@@ -138,8 +141,10 @@ export default function App() {
         ...prev,
         {
           sender: 'ai',
-          text: data.answer,
-          citations: data.citations || []
+          text: data.consolidatedSummary,
+          keyTakeaways: data.keyTakeaways || [],
+          citations: data.citations || [],
+          sourcesCount: data.sourcesCount || 0
         }
       ]);
     } catch (err) {
@@ -151,6 +156,12 @@ export default function App() {
     } finally {
       setChatLoading(false);
     }
+  };
+
+  const copyToClipboard = (text, index) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIdx(index);
+    setTimeout(() => setCopiedIdx(null), 2000);
   };
 
   const filteredActions = actions.filter(a => {
@@ -193,7 +204,7 @@ export default function App() {
             className={`tab-btn ${activeTab === 'rag' ? 'active' : ''}`}
             onClick={() => setActiveTab('rag')}
           >
-            <MessageSquare size={16} /> RAG Assistant
+            <MessageSquare size={16} /> RAG Intelligence
           </button>
         </nav>
 
@@ -208,12 +219,11 @@ export default function App() {
         </button>
       </header>
 
-      {/* Viewport Content */}
+      {/* Main Viewport Content */}
       <main className="main-viewport">
         {/* TAB 1: MEETINGS VIEW */}
         {activeTab === 'meetings' && (
           <div className="meeting-layout">
-            {/* Sidebar Meeting Selector */}
             <div className="meeting-list">
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                 Chronological Sessions ({meetings.length})
@@ -236,7 +246,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* Main Meeting Detail View */}
             {meetingDetail ? (
               <div className="glass-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -267,14 +276,12 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Attendees */}
                 {meetingDetail.attendees && (
                   <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(15, 23, 42, 0.5)', borderRadius: '8px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                     <strong>Attendees:</strong> {meetingDetail.attendees}
                   </div>
                 )}
 
-                {/* Executive Summary */}
                 {meetingDetail.executive_summary && (
                   <div style={{ marginTop: '1.5rem' }}>
                     <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary-cyan)', marginBottom: '0.5rem' }}>Executive Summary</h4>
@@ -284,7 +291,6 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Decisions Taken */}
                 {meetingDetail.decisions && meetingDetail.decisions.length > 0 && (
                   <div style={{ marginTop: '1.5rem' }}>
                     <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary-purple)', marginBottom: '0.5rem' }}>Decisions Made ({meetingDetail.decisions.length})</h4>
@@ -299,7 +305,6 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Action Items */}
                 {meetingDetail.actions && meetingDetail.actions.length > 0 && (
                   <div style={{ marginTop: '1.5rem' }}>
                     <h4 style={{ fontFamily: 'var(--font-heading)', color: '#fbbf24', marginBottom: '0.5rem' }}>Action Items</h4>
@@ -325,7 +330,6 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Toggle Raw Markdown */}
                 <div style={{ marginTop: '2rem' }}>
                   <button 
                     onClick={() => setShowRawMarkdown(!showRawMarkdown)} 
@@ -350,7 +354,6 @@ export default function App() {
         {/* TAB 2: ACTIONS & RISK MATRIX */}
         {activeTab === 'actions-risks' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {/* Filterable Action Items List */}
             <div className="glass-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>Project Action Items Tracker ({filteredActions.length})</h3>
@@ -387,7 +390,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* 3x3 Impact vs Likelihood Risk Matrix */}
             <div className="glass-card">
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', marginBottom: '0.5rem' }}>
                 Risk & Roadblock Matrix (3x3 Impact vs Likelihood)
@@ -397,64 +399,42 @@ export default function App() {
               </p>
 
               <div className="matrix-grid">
-                {/* Headers */}
                 <div className="matrix-header">Impact \ Likelihood</div>
                 <div className="matrix-header">Low Likelihood</div>
                 <div className="matrix-header">Medium Likelihood</div>
                 <div className="matrix-header">High Likelihood</div>
 
-                {/* Row 1: High Impact */}
                 <div className="matrix-header" style={{ color: '#f87171' }}>High Impact</div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Low').map((r, i) => (
-                    <RiskCard key={i} risk={r} />
-                  ))}
+                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Low').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
                 <div className="matrix-cell high-risk">
-                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Medium').map((r, i) => (
-                    <RiskCard key={i} risk={r} />
-                  ))}
+                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'Medium').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
                 <div className="matrix-cell high-risk" style={{ background: 'rgba(244, 63, 94, 0.15)' }}>
-                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'High').map((r, i) => (
-                    <RiskCard key={i} risk={r} />
-                  ))}
+                  {risks.filter(r => r.impact_level === 'High' && r.likelihood === 'High').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
 
-                {/* Row 2: Medium Impact */}
                 <div className="matrix-header" style={{ color: '#fbbf24' }}>Medium Impact</div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Low').map((r, i) => (
-                    <RiskCard key={i} risk={r} />
-                  ))}
+                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Low').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Medium').map((r, i) => (
-                    <RiskCard key={i} risk={r} />
-                  ))}
+                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'Medium').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
                 <div className="matrix-cell high-risk">
-                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'High').map((r, i) => (
-                    <RiskCard key={i} risk={r} />
-                  ))}
+                  {risks.filter(r => r.impact_level === 'Medium' && r.likelihood === 'High').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
 
-                {/* Row 3: Low Impact */}
                 <div className="matrix-header" style={{ color: '#34d399' }}>Low Impact</div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Low').map((r, i) => (
-                    <RiskCard key={i} risk={r} />
-                  ))}
+                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Low').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Medium').map((r, i) => (
-                    <RiskCard key={i} risk={r} />
-                  ))}
+                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'Medium').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
                 <div className="matrix-cell">
-                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'High').map((r, i) => (
-                    <RiskCard key={i} risk={r} />
-                  ))}
+                  {risks.filter(r => r.impact_level === 'Low' && r.likelihood === 'High').map((r, i) => <RiskCard key={i} risk={r} />)}
                 </div>
               </div>
             </div>
@@ -502,11 +482,11 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 4: RAG ASSISTANT CHAT */}
+        {/* TAB 4: RAG INTELLIGENCE & CONSOLIDATED RESPONSE MODULE */}
         {activeTab === 'rag' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Suggested queries:</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Suggested query topics:</span>
               <button onClick={() => handleSendChat("What decisions were made regarding fire safety and staircase?")} className="tab-btn" style={{ fontSize: '0.8rem' }}>
                 🔥 Fire Safety & Staircase
               </button>
@@ -514,35 +494,70 @@ export default function App() {
                 ❄️ HVAC & Roof Condensers
               </button>
               <button onClick={() => handleSendChat("Why was the lift replacement excluded from scope?")} className="tab-btn" style={{ fontSize: '0.8rem' }}>
-                🛗 Lift Replacement Decision
+                🛗 Lift Replacement Scope
               </button>
               <button onClick={() => handleSendChat("What software and collaboration platforms are selected?")} className="tab-btn" style={{ fontSize: '0.8rem' }}>
-                💻 Revit & ACC Platform
+                💻 Revit & ACC Software Protocol
               </button>
             </div>
 
             <div className="chat-container">
               <div className="chat-history">
                 {chatMessages.map((msg, idx) => (
-                  <div key={idx} className={`chat-msg ${msg.sender}`}>
-                    <div style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</div>
-                    {msg.citations && msg.citations.length > 0 && (
-                      <div style={{ marginTop: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.78rem', color: 'var(--primary-cyan)' }}>
-                        <strong>Citations ({msg.citations.length}):</strong>
-                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.3rem' }}>
-                          {msg.citations.map((c, ci) => (
-                            <span key={ci} style={{ background: 'rgba(56, 189, 248, 0.15)', padding: '0.15rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-                              {c.meeting_id} ({c.section})
-                            </span>
-                          ))}
-                        </div>
+                  <div key={idx} className={`chat-msg ${msg.sender}`} style={{ width: '100%' }}>
+                    {msg.sender === 'user' ? (
+                      <div style={{ fontWeight: 600 }}>{msg.text}</div>
+                    ) : (
+                      <div>
+                        {/* Executive Consolidated Response Header */}
+                        {msg.keyTakeaways && msg.keyTakeaways.length > 0 && (
+                          <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '12px', padding: '1rem', marginBottom: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                              <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary-cyan)', fontSize: '0.95rem' }}>
+                                ⚡ Consolidated Intelligence Takeaways ({msg.sourcesCount} sources retrieved)
+                              </h4>
+                              <button 
+                                onClick={() => copyToClipboard(msg.text, idx)}
+                                className="tab-btn" 
+                                style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'rgba(255, 255, 255, 0.08)' }}
+                              >
+                                {copiedIdx === idx ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
+                                {copiedIdx === idx ? 'Copied' : 'Copy Consolidated Report'}
+                              </button>
+                            </div>
+                            <ul style={{ paddingLeft: '1.2rem', fontSize: '0.88rem', color: '#e2e8f0' }}>
+                              {msg.keyTakeaways.map((kt, kti) => (
+                                <li key={kti} style={{ marginBottom: '0.25rem' }}>{kt}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Consolidated Response Narrative */}
+                        <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.65' }}>{msg.text}</div>
+
+                        {/* Source Citations Explorer */}
+                        {msg.citations && msg.citations.length > 0 && (
+                          <div style={{ marginTop: '1.25rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.78rem' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--primary-cyan)', marginBottom: '0.4rem' }}>
+                              Traceable Citations & Evidence ({msg.citations.length}):
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                              {msg.citations.map((c, ci) => (
+                                <span key={ci} title={c.text} style={{ background: 'rgba(129, 140, 248, 0.15)', color: '#c7d2fe', padding: '0.2rem 0.55rem', borderRadius: '6px', border: '1px solid rgba(129, 140, 248, 0.3)', cursor: 'pointer' }}>
+                                  {c.meeting_id} ({c.section})
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 ))}
                 {chatLoading && (
                   <div className="chat-msg ai" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <RefreshCw size={14} className="animate-spin" /> Searching vector index & SQL database...
+                    <RefreshCw size={14} className="animate-spin" /> Synthesizing vector search & relational database context into executive consolidated response...
                   </div>
                 )}
               </div>
@@ -551,13 +566,13 @@ export default function App() {
                 <input 
                   type="text" 
                   className="chat-input"
-                  placeholder="Ask a question about Uppercamp HQ meetings..."
+                  placeholder="Ask any project question to generate a consolidated synthesis..."
                   value={chatQuery}
                   onChange={(e) => setChatQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
                 />
                 <button className="send-btn" onClick={() => handleSendChat()}>
-                  Send Query
+                  Generate Consolidated Response
                 </button>
               </div>
             </div>
