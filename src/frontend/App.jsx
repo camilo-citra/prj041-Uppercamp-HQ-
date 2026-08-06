@@ -108,6 +108,20 @@ export default function App() {
   };
 
   const handleActionStatusChange = async (actionId, newStatus) => {
+    // Instant optimistic update for Kanban state
+    setActions(prevActions => 
+      prevActions.map(act => act.id === actionId ? { ...act, status: newStatus } : act)
+    );
+
+    // Instant optimistic update for Minutes detail view state
+    setMeetingDetail(prevDetail => {
+      if (!prevDetail || !prevDetail.actions) return prevDetail;
+      return {
+        ...prevDetail,
+        actions: prevDetail.actions.map(act => act.id === actionId ? { ...act, status: newStatus } : act)
+      };
+    });
+
     try {
       await fetch(`/api/actions/${actionId}`, {
         method: 'PATCH',
@@ -213,6 +227,20 @@ export default function App() {
   };
 
   const handleSaveAction = async (actionId) => {
+    // Instant optimistic update for Kanban state
+    setActions(prevActions => 
+      prevActions.map(act => act.id === actionId ? { ...act, ...editActionForm } : act)
+    );
+
+    // Instant optimistic update for Minutes detail view state
+    setMeetingDetail(prevDetail => {
+      if (!prevDetail || !prevDetail.actions) return prevDetail;
+      return {
+        ...prevDetail,
+        actions: prevDetail.actions.map(act => act.id === actionId ? { ...act, ...editActionForm } : act)
+      };
+    });
+
     try {
       await fetch(`/api/actions/${actionId}`, {
         method: 'PATCH',
@@ -221,6 +249,7 @@ export default function App() {
       });
       setEditingActionId(null);
       fetchActions();
+      if (selectedMeetingId) fetchMeetingDetail(selectedMeetingId);
     } catch (err) {
       console.error('Action update failed:', err);
     }
