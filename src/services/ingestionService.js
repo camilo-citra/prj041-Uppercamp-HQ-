@@ -49,8 +49,8 @@ export function ingestAllMeetings(rawDirectoryPath) {
   `);
 
   const insertActionStmt = db.prepare(`
-    INSERT INTO action_items (item_num, description, assignee, due_date, status, meeting_id)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO action_items (item_num, action_code, description, assignee, due_date, status, meeting_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
   const insertRiskStmt = db.prepare(`
@@ -69,6 +69,7 @@ export function ingestAllMeetings(rawDirectoryPath) {
   `);
 
   let globalRiskCounter = 1;
+  let globalActionCounter = 1;
 
   db.transaction(() => {
     for (const mtg of parsedMeetings) {
@@ -92,7 +93,8 @@ export function ingestAllMeetings(rawDirectoryPath) {
       }
 
       for (const act of mtg.action_items) {
-        insertActionStmt.run(act.num, act.description, act.assignee, act.due_date, act.status, mtg.id);
+        const actionCode = act.action_code || `ACT-${String(globalActionCounter++).padStart(3, '0')}`;
+        insertActionStmt.run(act.num, actionCode, act.description, act.assignee, act.due_date, act.status, mtg.id);
       }
 
       for (const rsk of mtg.risks) {
