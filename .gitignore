@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Database binaries and WAL logs
+*.db
+*.db-shm
+*.db-wal
+
+# Production build output
+dist/
+build/
+
+# Logs & temp
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & IDE
+.env
+.env.local
+.DS_Store
+.obsidian/
