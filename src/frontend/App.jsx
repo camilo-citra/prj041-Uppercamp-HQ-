@@ -439,8 +439,13 @@ export default function App() {
                       {meetingDetail.actions.map((a, i) => (
                         <div key={i} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 1rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div>
-                            <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{a.description}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Assigned to: {a.assignee} | Due: {a.due_date}</div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                              <span className="badge badge-in-progress" style={{ color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)', borderColor: 'rgba(251, 191, 36, 0.3)', fontWeight: 700 }}>
+                                {a.action_code || `ACT-${String(a.id).padStart(3, '0')}`}
+                              </span>
+                              <span>{a.description}</span>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Assigned to: {a.assignee} | Due: {a.due_date}</div>
                           </div>
                           <select 
                             value={a.status} 
@@ -1170,7 +1175,12 @@ function KanbanColumn({
                 /* READ ONLY ACTION ITEM CARD */
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                    <span className="badge badge-in-progress" style={{ fontSize: '0.7rem' }}>{item.meeting_id}</span>
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                      <span className="badge badge-in-progress" style={{ color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)', borderColor: 'rgba(251, 191, 36, 0.3)', fontWeight: 700, fontSize: '0.72rem' }}>
+                        {item.action_code || `ACT-${String(item.id).padStart(3, '0')}`}
+                      </span>
+                      <span className="badge badge-in-progress" style={{ fontSize: '0.7rem' }}>{item.meeting_id}</span>
+                    </div>
                     <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
                       <select 
                         value={item.status}
