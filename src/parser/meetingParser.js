@@ -107,10 +107,9 @@ export function parseMeetingMarkdown(filePath) {
     }
   }
 
-  // Extract Action Items
+  // Extract Action Items (skip ASM- and DEP- rows)
   const action_items = [];
-  const actSectionMatch = content.match(/#+\s*\*?\*?\s*6[\.\\\s]+Action Items[^\n]*\n([\s\S]*?)(?=#+\s*\*?\*?\s*7|\n#\s*\*?\*?\s*7|$)/i) ||
-                          content.match(/#+\s*\*?\*?\s*Action Items[^\n]*\n([\s\S]*?)(?=#+\s*\*?\*?\s*7|\n#\s*\*?\*?\s*7|$)/i);
+  const actSectionMatch = content.match(/#+\s*\*?\*?\s*(?:6[\.\\\s]+)?Action Items[^\n]*\n([\s\S]*?)(?=#+\s*\*?\*?\s*(?:7|Assumption Register|Dependency Register|Metrics|Tags)|\n#\s*\*?\*?\s*|$)/i);
   if (actSectionMatch) {
     const actText = actSectionMatch[1];
     if (actText.includes('|')) {
@@ -121,17 +120,15 @@ export function parseMeetingMarkdown(filePath) {
         if (cols.length >= 3) {
           const c0Lower = cols[0].toLowerCase();
           const c1Lower = cols[1] ? cols[1].toLowerCase() : '';
-          // Skip header row
-          if (c0Lower.includes('task') || c0Lower.includes('action') || c0Lower === 'id' || c1Lower.includes('description')) {
-            continue;
-          }
+          // Skip header row and non-action items (ASM- / DEP-)
+          if (c0Lower.includes('task') || c0Lower.includes('action') || c0Lower === 'id' || c1Lower.includes('description')) continue;
+          if (c0Lower.startsWith('asm-') || c0Lower.startsWith('dep-')) continue;
 
           let desc = '';
           let assignee = 'Unassigned';
           let dueDate = 'TBD';
           let status = 'Pending';
 
-          // Handle 5-column table format: | ID | Task Description | Assignee | Deadline | Status |
           if (cols.length >= 5 || c0Lower.startsWith('act-')) {
             desc = `${cols[0]}: ${cols[1].replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim()}`;
             assignee = cols[2] || 'Unassigned';
@@ -165,6 +162,30 @@ export function parseMeetingMarkdown(filePath) {
             assignee: 'Team',
             due_date: 'ASAP',
             status: 'Pending'
+          });
+        }
+      }
+    }
+  }
+
+  // Extract Dependencies (strictly from Dependency Register)
+  const dependencies = [];
+  const depMatch = content.match(/#+\s*\*?\*?\s*Dependency Register[^\n]*\n([\s\S]*?)(?=#+\s*\*?\*?\s*(?:Metrics|Tags)|\n#\s*\*?\*?\s*|$)/i);
+  if (depMatch) {
+    const depText = depMatch[1];
+    if (depText.includes('|')) {
+      const rows = depText.split('\n').filter(r => r.includes('|') && !r.includes('---'));
+      for (const row of rows) {
+        const cols = row.split('|').map(c => c.trim()).filter(c => c !== '');
+        if (cols.length >= 3) {
+          const c0Lower = cols[0].toLowerCase();
+          if (c0Lower.includes('id') || c0Lower.includes('description')) continue;
+          dependencies.push({
+            dep_code: cols[0],
+            description: cols[1],
+            predecessor: cols[2] || 'TBD',
+            successor: cols[3] || 'TBD',
+            status: cols[4] || 'Active'
           });
         }
       }
@@ -271,6 +292,7 @@ export function parseMeetingMarkdown(filePath) {
     action_items,
     risks,
     assumptions,
+    dependencies,
     raw_markdown: content
   };
 }
@@ -314,6 +336,24 @@ function inferImpactArea(summaryText) {
 
 function inferAssumptionsFromMeeting(meetingId, content, decisions, risks) {
   const assumptions = [];
+  const asmMatch = content.match(/#+\s*\*?\*?\s*Assumption Register[^\n]*\n([\s\S]*?)(?=#+\s*\*?\*?\s*(?:Dependency Register|Metrics|Tags)|\n#\s*\*?\*?\s*|$)/i);
+  if (asmMatch) {
+    const rows = asmMatch[1].split('\n').filter(r => r.includes('|') && !r.includes('---'));
+    for (const row of rows) {
+      const cols = row.split('|').map(c => c.trim()).filter(c => c !== '');
+      if (cols.length >= 3) {
+        const c0Lower = cols[0].toLowerCase();
+        if (c0Lower.includes('id') || c0Lower.includes('description')) continue;
+        assumptions.push({
+          asm_code: cols[0],
+          description: `${cols[0]}: ${cols[1]}`,
+          category: cols[2] || 'Critical',
+          status: cols[3] || 'Open'
+        });
+      }
+    }
+  }
+
   if (meetingId === 'Minutes00') {
     assumptions.push({
       description: 'Existing stairwell and lift can support high occupancy roof terrace without continuous secondary staircase',

@@ -44,6 +44,8 @@ app.get('/api/meetings/:id', (req, res) => {
   const decisions = db.prepare(`SELECT * FROM decisions_taken WHERE meeting_id = ? ORDER BY decision_num ASC`).all(req.params.id);
   const actions = db.prepare(`SELECT * FROM action_items WHERE meeting_id = ? ORDER BY item_num ASC`).all(req.params.id);
   const risks = db.prepare(`SELECT * FROM risk_raised WHERE meeting_id = ?`).all(req.params.id);
+  const assumptions = db.prepare(`SELECT * FROM assumptions WHERE updated_meeting_id = ?`).all(req.params.id);
+  const dependencies = db.prepare(`SELECT * FROM dependencies WHERE meeting_id = ?`).all(req.params.id);
   const chunks = db.prepare(`SELECT subject, section_type, content FROM vector_chunks WHERE meeting_id = ?`).all(req.params.id);
 
   res.json({
@@ -51,6 +53,8 @@ app.get('/api/meetings/:id', (req, res) => {
     decisions,
     actions,
     risks,
+    assumptions,
+    dependencies,
     chunks
   });
 });

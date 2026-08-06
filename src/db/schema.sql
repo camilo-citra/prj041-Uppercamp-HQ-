@@ -58,11 +58,23 @@ CREATE TABLE IF NOT EXISTS risk_raised (
 
 CREATE TABLE IF NOT EXISTS assumptions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  asm_code TEXT,
   description TEXT NOT NULL,
   category TEXT DEFAULT 'General',
   status TEXT DEFAULT 'Active',
   updated_meeting_id TEXT NOT NULL,
   FOREIGN KEY (updated_meeting_id) REFERENCES meeting_metadata(id)
+);
+
+CREATE TABLE IF NOT EXISTS dependencies (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  dep_code TEXT,
+  description TEXT NOT NULL,
+  predecessor TEXT,
+  successor TEXT,
+  status TEXT DEFAULT 'Active',
+  meeting_id TEXT NOT NULL,
+  FOREIGN KEY (meeting_id) REFERENCES meeting_metadata(id)
 );
 
 CREATE TABLE IF NOT EXISTS vector_chunks (

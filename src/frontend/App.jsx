@@ -408,9 +408,12 @@ export default function App() {
                   </div>
                 )}
 
+                {/* ACTION ITEMS */}
                 {meetingDetail.actions && meetingDetail.actions.length > 0 && (
                   <div style={{ marginTop: '1.5rem' }}>
-                    <h4 style={{ fontFamily: 'var(--font-heading)', color: '#fbbf24', marginBottom: '0.5rem' }}>Action Items</h4>
+                    <h4 style={{ fontFamily: 'var(--font-heading)', color: '#fbbf24', marginBottom: '0.5rem' }}>
+                      Action Items ({meetingDetail.actions.length})
+                    </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       {meetingDetail.actions.map((a, i) => (
                         <div key={i} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 1rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -427,6 +430,60 @@ export default function App() {
                             <option value="In Progress">In Progress</option>
                             <option value="Completed">Completed</option>
                           </select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ASSUMPTION REGISTER */}
+                {meetingDetail.assumptions && meetingDetail.assumptions.length > 0 && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h4 style={{ fontFamily: 'var(--font-heading)', color: '#38bdf8', marginBottom: '0.5rem' }}>
+                      Assumption Register ({meetingDetail.assumptions.length})
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {meetingDetail.assumptions.map((asm, i) => (
+                        <div key={i} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 1rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '3px solid #38bdf8' }}>
+                          <div>
+                            <div style={{ fontSize: '0.88rem', fontWeight: 500, color: '#f3f4f6' }}>
+                              {asm.description}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                              Impact / Category: <strong style={{ color: '#38bdf8' }}>{asm.category || 'Critical'}</strong>
+                            </div>
+                          </div>
+                          <span className={`badge ${asm.status === 'Invalidated' ? 'badge-pending' : 'badge-completed'}`}>
+                            {asm.status || 'Active'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* DEPENDENCY REGISTER */}
+                {meetingDetail.dependencies && meetingDetail.dependencies.length > 0 && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h4 style={{ fontFamily: 'var(--font-heading)', color: '#c084fc', marginBottom: '0.5rem' }}>
+                      Dependency Register ({meetingDetail.dependencies.length})
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {meetingDetail.dependencies.map((dep, i) => (
+                        <div key={i} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 1rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '3px solid #c084fc' }}>
+                          <div>
+                            <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#f3f4f6' }}>
+                              <span style={{ color: '#c084fc', marginRight: '0.4rem' }}>{dep.dep_code}:</span>
+                              {dep.description}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', gap: '1rem' }}>
+                              <span>Predecessor: <strong style={{ color: '#fff' }}>{dep.predecessor}</strong></span>
+                              <span>Successor: <strong style={{ color: '#fff' }}>{dep.successor}</strong></span>
+                            </div>
+                          </div>
+                          <span className="badge badge-in-progress" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                            {dep.status || 'Active'}
+                          </span>
                         </div>
                       ))}
                     </div>

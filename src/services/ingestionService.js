@@ -59,8 +59,13 @@ export function ingestAllMeetings(rawDirectoryPath) {
   `);
 
   const insertAssumptionStmt = db.prepare(`
-    INSERT INTO assumptions (description, category, status, updated_meeting_id)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO assumptions (asm_code, description, category, status, updated_meeting_id)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  const insertDependencyStmt = db.prepare(`
+    INSERT INTO dependencies (dep_code, description, predecessor, successor, status, meeting_id)
+    VALUES (?, ?, ?, ?, ?, ?)
   `);
 
   let globalRiskCounter = 1;
@@ -96,7 +101,13 @@ export function ingestAllMeetings(rawDirectoryPath) {
       }
 
       for (const asmp of mtg.assumptions) {
-        insertAssumptionStmt.run(asmp.description, asmp.category, asmp.status, mtg.id);
+        insertAssumptionStmt.run(asmp.asm_code || null, asmp.description, asmp.category, asmp.status, mtg.id);
+      }
+
+      if (mtg.dependencies) {
+        for (const dep of mtg.dependencies) {
+          insertDependencyStmt.run(dep.dep_code, dep.description, dep.predecessor, dep.successor, dep.status, mtg.id);
+        }
       }
 
       // Build RAG vector chunks for this meeting
