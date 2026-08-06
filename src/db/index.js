@@ -20,6 +20,7 @@ export function initDatabase() {
 
 export function resetDatabase() {
   db.exec(`
+    DROP TABLE IF EXISTS stakeholders;
     DROP TABLE IF EXISTS dependencies;
     DROP TABLE IF EXISTS vector_chunks;
     DROP TABLE IF EXISTS assumptions;

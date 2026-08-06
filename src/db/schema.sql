@@ -86,3 +86,12 @@ CREATE TABLE IF NOT EXISTS vector_chunks (
   content TEXT NOT NULL,
   FOREIGN KEY (meeting_id) REFERENCES meeting_metadata(id)
 );
+
+CREATE TABLE IF NOT EXISTS stakeholders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  role TEXT NOT NULL,
+  organization TEXT NOT NULL,
+  key_responsibilities TEXT,
+  status TEXT DEFAULT 'Active'
+);
