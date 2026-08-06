@@ -95,6 +95,29 @@ app.get('/api/meetings/:id', (req, res) => {
   });
 });
 
+app.delete('/api/meetings/:id', (req, res) => {
+  try {
+    const meeting = db.prepare(`SELECT * FROM meeting_metadata WHERE id = ?`).get(req.params.id);
+    if (!meeting) return res.status(404).json({ error: 'Meeting not found' });
+
+    const rawDir = path.join(__dirname, 'Raw');
+    if (meeting.raw_file_name) {
+      const filePath = path.join(rawDir, meeting.raw_file_name);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    // Re-run ingestion to update DB and vector store
+    ingestAllMeetings(rawDir);
+
+    res.json({ success: true, message: `Meeting ${req.params.id} deleted and database re-synced.` });
+  } catch (error) {
+    console.error('Delete meeting failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Action items endpoints
 app.get('/api/actions', (req, res) => {
   const { status, assignee } = req.query;

@@ -96,7 +96,7 @@ export function parseMeetingMarkdown(filePath) {
 
   // Extract Decisions Made
   const decisions = [];
-  const decSectionMatch = content.match(/#+\s*\*?\*?\s*4[\.\\\s]+Decisions Made\*?\*?\s*([\s\S]*?)(?=#+\s*\*?\*?\s*5|\n#\s*\*?\*?\s*5|$)/i);
+  const decSectionMatch = content.match(/#+\s*\*?\*?\s*(?:\d+[\.\\\s]+)?Decisions Made\*?\*?\s*([\s\S]*?)(?=#+\s*\*?\*?\s*(?:\d+[\.\\\s]+)?(?:Risk|Action|Assumption|Dependency|Metrics|Tags|Issue)|\n#|$)/i);
   if (decSectionMatch) {
     const decText = decSectionMatch[1];
     const lines = decText.split('\n');
@@ -210,7 +210,7 @@ export function parseMeetingMarkdown(filePath) {
 
   // Extract Risks & Issues (strictly from Section 5 / Risk Register)
   const risks = [];
-  const riskSectionMatch = content.match(/#+\s*\*?\*?\s*(?:5[\.\\\s]+Risks, Issues, & Roadblocks|5[\.\\\s]+Risks|Risk Register)\*?\*?\s*([\s\S]*?)(?=#+\s*\*?\*?\s*(?:6|Action Items|Issue Register)|\n#\s*\*?\*?\s*(?:6|Action Items|Issue Register)|$)/i);
+  const riskSectionMatch = content.match(/#+\s*\*?\*?\s*(?:\d+[\.\\\s]+)?(?:Risks, Issues, & Roadblocks|Risks|Risk Register)\*?\*?\s*([\s\S]*?)(?=#+\s*\*?\*?\s*(?:\d+[\.\\\s]+)?(?:Action Items|Issue Register|Assumption Register|Dependency Register|Metrics|Tags)|\n#|$)/i);
   if (riskSectionMatch) {
     const riskText = riskSectionMatch[1];
 

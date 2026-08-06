@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw, 
   ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check,
-  Upload, FilePlus, CheckCircle, X
+  Upload, FilePlus, CheckCircle, X, Trash2
 } from 'lucide-react';
 
 export default function App() {
@@ -182,6 +182,27 @@ export default function App() {
       setUploadStatusMsg(`❌ Error: ${err.message}`);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleDeleteMeeting = async (meetingId) => {
+    if (!window.confirm(`Are you sure you want to delete meeting record ${meetingId}? This will remove its raw file and re-sync database & RAG.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/meetings/${meetingId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        await fetchMeetings();
+        await fetchActions();
+        await fetchRisks();
+        await fetchBrief();
+        await fetchStakeholders();
+        setSelectedMeetingId(null);
+        setMeetingDetail(null);
+      }
+    } catch (err) {
+      console.error('Delete meeting error:', err);
     }
   };
 
@@ -460,17 +481,27 @@ export default function App() {
                       </span>
                     </div>
                   </div>
-                  {meetingDetail.gemini_link && (
-                    <a 
-                      href={meetingDetail.gemini_link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
+                  <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                    {meetingDetail.gemini_link && (
+                      <a 
+                        href={meetingDetail.gemini_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="tab-btn"
+                        style={{ background: 'rgba(129, 140, 248, 0.15)', color: '#a5b4fc' }}
+                      >
+                        <ExternalLink size={14} /> Gemini Transcript
+                      </a>
+                    )}
+                    <button
+                      onClick={() => handleDeleteMeeting(meetingDetail.id)}
                       className="tab-btn"
-                      style={{ background: 'rgba(129, 140, 248, 0.15)', color: '#a5b4fc' }}
+                      title="Delete meeting record"
+                      style={{ background: 'rgba(244, 63, 94, 0.15)', color: '#f87171', borderColor: 'rgba(244, 63, 94, 0.3)' }}
                     >
-                      <ExternalLink size={14} /> Gemini Transcript
-                    </a>
-                  )}
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
                 </div>
 
                 {meetingDetail.attendees && (
@@ -496,6 +527,38 @@ export default function App() {
                         <div key={i} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 1rem', borderRadius: '8px', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                           <span className="badge badge-in-progress">{d.impact_area}</span>
                           <span style={{ fontSize: '0.9rem' }}>{d.summary}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* RISKS & ISSUES LOGGED */}
+                {meetingDetail.risks && meetingDetail.risks.length > 0 && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h4 style={{ fontFamily: 'var(--font-heading)', color: '#f87171', marginBottom: '0.5rem' }}>
+                      Risks & Issues Logged ({meetingDetail.risks.length})
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {meetingDetail.risks.map((r, i) => (
+                        <div key={i} style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 1rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '3px solid #f87171' }}>
+                          <div>
+                            <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#f3f4f6' }}>
+                              <span style={{ color: '#c084fc', marginRight: '0.4rem', fontWeight: 700 }}>{r.risk_code || `RSK-${String(r.id).padStart(3, '0')}`}:</span>
+                              {r.description}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                              <strong>Mitigation:</strong> {r.contingency_measure}
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                            <span className="badge badge-in-progress" style={{ background: 'rgba(244, 63, 94, 0.15)', color: '#f87171', border: '1px solid rgba(244, 63, 94, 0.3)' }}>
+                              Impact: {r.impact_level || 'High'}
+                            </span>
+                            <span className={`badge ${r.status === 'Closed' ? 'badge-completed' : 'badge-pending'}`}>
+                              {r.status || 'Open'}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
