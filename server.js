@@ -241,6 +241,77 @@ app.get('/api/stakeholders', (req, res) => {
   res.json(enriched);
 });
 
+// Update stakeholder details
+app.put('/api/stakeholders/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, role, organization, key_responsibilities, status } = req.body;
+
+    if (!name || !role || !organization) {
+      return res.status(400).json({ error: 'Name, role, and organization are required.' });
+    }
+
+    const stmt = db.prepare(`
+      UPDATE stakeholders
+      SET name = ?, role = ?, organization = ?, key_responsibilities = ?, status = ?
+      WHERE id = ?
+    `);
+
+    const result = stmt.run(name, role, organization, key_responsibilities || '', status || 'Active', id);
+
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Stakeholder not found.' });
+    }
+
+    const updated = db.prepare(`SELECT * FROM stakeholders WHERE id = ?`).get(id);
+    res.json({ success: true, stakeholder: updated });
+  } catch (error) {
+    console.error('Error updating stakeholder:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create new stakeholder
+app.post('/api/stakeholders', (req, res) => {
+  try {
+    const { name, role, organization, key_responsibilities, status } = req.body;
+
+    if (!name || !role || !organization) {
+      return res.status(400).json({ error: 'Name, role, and organization are required.' });
+    }
+
+    const stmt = db.prepare(`
+      INSERT INTO stakeholders (name, role, organization, key_responsibilities, status)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+
+    const result = stmt.run(name, role, organization, key_responsibilities || '', status || 'Active');
+    const created = db.prepare(`SELECT * FROM stakeholders WHERE id = ?`).get(result.lastInsertRowid);
+    res.json({ success: true, stakeholder: created });
+  } catch (error) {
+    console.error('Error creating stakeholder:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete stakeholder
+app.delete('/api/stakeholders/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const stmt = db.prepare(`DELETE FROM stakeholders WHERE id = ?`);
+    const result = stmt.run(id);
+
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Stakeholder not found.' });
+    }
+
+    res.json({ success: true, message: 'Stakeholder deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting stakeholder:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Brief & Assumptions endpoint
 app.get('/api/brief', (req, res) => {
   const brief = db.prepare(`SELECT * FROM brief WHERE id = 1`).get();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw, 
   ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check,
-  Upload, FilePlus, CheckCircle, X, Trash2
+  Upload, FilePlus, CheckCircle, X, Trash2, Edit2, Plus, Save, UserPlus
 } from 'lucide-react';
 
 export default function App() {
@@ -25,6 +25,18 @@ export default function App() {
   const [uploadContent, setUploadContent] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadStatusMsg, setUploadStatusMsg] = useState(null);
+
+  // Stakeholder Edit / Add Modal state
+  const [showStakeholderModal, setShowStakeholderModal] = useState(false);
+  const [editingStakeholder, setEditingStakeholder] = useState(null);
+  const [stakeholderForm, setStakeholderForm] = useState({
+    name: '',
+    role: '',
+    organization: 'Citra',
+    key_responsibilities: '',
+    status: 'Active'
+  });
+  const [savingStakeholder, setSavingStakeholder] = useState(false);
 
   // RAG Chat & Consolidated Module state
   const [chatQuery, setChatQuery] = useState('');
@@ -56,6 +68,81 @@ export default function App() {
       setStakeholders(data);
     } catch (err) {
       console.error('Error fetching stakeholders:', err);
+    }
+  };
+
+  const handleOpenAddStakeholder = () => {
+    setEditingStakeholder(null);
+    setStakeholderForm({
+      name: '',
+      role: '',
+      organization: 'Citra',
+      key_responsibilities: '',
+      status: 'Active'
+    });
+    setShowStakeholderModal(true);
+  };
+
+  const handleOpenEditStakeholder = (person) => {
+    setEditingStakeholder(person);
+    setStakeholderForm({
+      name: person.name || '',
+      role: person.role || '',
+      organization: person.organization || '',
+      key_responsibilities: person.key_responsibilities || '',
+      status: person.status || 'Active'
+    });
+    setShowStakeholderModal(true);
+  };
+
+  const handleSaveStakeholder = async (e) => {
+    e.preventDefault();
+    if (!stakeholderForm.name.trim() || !stakeholderForm.role.trim() || !stakeholderForm.organization.trim()) {
+      alert('Name, Role, and Organization are required.');
+      return;
+    }
+
+    setSavingStakeholder(true);
+    try {
+      const isEdit = Boolean(editingStakeholder?.id);
+      const url = isEdit ? `/api/stakeholders/${editingStakeholder.id}` : '/api/stakeholders';
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(stakeholderForm)
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        alert(`Failed to save: ${data.error || 'Unknown error'}`);
+      } else {
+        setShowStakeholderModal(false);
+        setEditingStakeholder(null);
+        fetchStakeholders();
+      }
+    } catch (err) {
+      console.error('Error saving stakeholder:', err);
+      alert('Error connecting to local server.');
+    } finally {
+      setSavingStakeholder(false);
+    }
+  };
+
+  const handleDeleteStakeholder = async (id, name) => {
+    if (!confirm(`Are you sure you want to delete ${name} from the team directory?`)) return;
+    try {
+      const res = await fetch(`/api/stakeholders/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        alert(`Failed to delete: ${data.error || 'Unknown error'}`);
+      } else {
+        fetchStakeholders();
+      }
+    } catch (err) {
+      console.error('Error deleting stakeholder:', err);
+      alert('Error connecting to local server.');
     }
   };
 
@@ -1021,6 +1108,14 @@ export default function App() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={handleOpenAddStakeholder}
+                    className="tab-btn active"
+                    style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '8px', cursor: 'pointer' }}
+                  >
+                    <UserPlus size={15} /> Add Team Member
+                  </button>
+
                   <div style={{ position: 'relative' }}>
                     <Search size={14} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                     <input 
@@ -1072,8 +1167,28 @@ export default function App() {
                               {initials}
                             </div>
                             <div style={{ flex: 1 }}>
-                              <h4 style={{ fontSize: '1.02rem', fontWeight: 700, color: '#f3f4f6' }}>{person.name}</h4>
-                              <div style={{ fontSize: '0.78rem', color: orgColor, fontWeight: 600 }}>{person.role}</div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div>
+                                  <h4 style={{ fontSize: '1.02rem', fontWeight: 700, color: '#f3f4f6' }}>{person.name}</h4>
+                                  <div style={{ fontSize: '0.78rem', color: orgColor, fontWeight: 600 }}>{person.role}</div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.35rem' }}>
+                                  <button
+                                    onClick={() => handleOpenEditStakeholder(person)}
+                                    title="Edit Team Member Details"
+                                    style={{ background: 'rgba(30, 41, 59, 0.8)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.5rem', color: 'var(--primary-cyan)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.74rem' }}
+                                  >
+                                    <Edit2 size={13} /> Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteStakeholder(person.id, person.name)}
+                                    title="Delete Member"
+                                    style={{ background: 'rgba(244, 63, 94, 0.1)', border: '1px solid rgba(244, 63, 94, 0.3)', borderRadius: '6px', padding: '0.3rem 0.45rem', color: '#f87171', cursor: 'pointer', display: 'flex', alignItems: 'center', fontSize: '0.74rem' }}
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           </div>
 
@@ -1286,7 +1401,115 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* STAKEHOLDER EDIT / ADD MODAL persisting to SQLite DB */}
+      {showStakeholderModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+          <div style={{ background: '#0f172a', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.75rem', width: '100%', maxWidth: '540px', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <UserPlus size={20} style={{ color: 'var(--primary-cyan)' }} />
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f3f4f6', fontFamily: 'var(--font-heading)' }}>
+                  {editingStakeholder ? 'Edit Team Member Details' : 'Add New Team Member'}
+                </h3>
+              </div>
+              <button onClick={() => setShowStakeholderModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveStakeholder} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. John Doe"
+                  value={stakeholderForm.name}
+                  onChange={(e) => setStakeholderForm({ ...stakeholderForm, name: e.target.value })}
+                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                    Role / Designation *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Lead Architect"
+                    value={stakeholderForm.role}
+                    onChange={(e) => setStakeholderForm({ ...stakeholderForm, role: e.target.value })}
+                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                    Organization *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Citra / Kim Williams Design"
+                    value={stakeholderForm.organization}
+                    onChange={(e) => setStakeholderForm({ ...stakeholderForm, organization: e.target.value })}
+                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                  Key Responsibilities
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe main scope of work, sign-off authorities, or deliverables..."
+                  value={stakeholderForm.key_responsibilities}
+                  onChange={(e) => setStakeholderForm({ ...stakeholderForm, key_responsibilities: e.target.value })}
+                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem 0.75rem', color: '#cbd5e1', fontSize: '0.84rem', lineHeight: '1.4' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                  Status
+                </label>
+                <select
+                  value={stakeholderForm.status}
+                  onChange={(e) => setStakeholderForm({ ...stakeholderForm, status: e.target.value })}
+                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.85rem' }}
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <button type="button" onClick={() => setShowStakeholderModal(false)} className="tab-btn">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingStakeholder}
+                  className="tab-btn active"
+                  style={{ padding: '0.5rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}
+                >
+                  {savingStakeholder ? <RefreshCw size={15} className="spin" /> : <Save size={15} />}
+                  {savingStakeholder ? 'Saving to Database...' : 'Save & Update Database'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       </main>
+
     </div>
   );
 }
