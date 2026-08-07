@@ -1767,7 +1767,16 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
     let currentY = 15;
 
     categories.forEach((cat, catIdx) => {
-      const catNodes = data.nodes.filter(n => (n.category === cat) || (!n.category && cat === 'Specs'));
+      const catNodes = data.nodes.filter(n => {
+        const c = (n.category || n.impact_area || 'Process').toLowerCase();
+        if (cat === 'Budget') {
+          return c.includes('budget') || c.includes('cost') || c.includes('fee') || c.includes('financial') || c.includes('exclusion') || c.includes('cash');
+        }
+        if (cat === 'Specs') {
+          return c.includes('spec') || c.includes('fire') || c.includes('stair') || c.includes('lift') || c.includes('structural') || c.includes('scope') || c.includes('brief') || c.includes('hvac') || c.includes('load') || c.includes('pillar') || c.includes('epod');
+        }
+        return c.includes('task') || c.includes('process') || c.includes('protocol') || c.includes('software') || c.includes('aligned') || c.includes('sign-off') || c.includes('general') || c.includes('workflow') || c.includes('delay');
+      });
 
       let maxCellCount = 1;
       meetingCols.forEach(m => {

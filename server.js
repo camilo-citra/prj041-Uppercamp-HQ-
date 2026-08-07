@@ -332,14 +332,26 @@ app.get('/api/dynamics-map', (req, res) => {
 
     // Helper to map any item strictly into 3 Y-Categories: 'Budget', 'Specs', 'Process'
     const normalizeCategory = (text, origCategory) => {
-      const s = `${text || ''} ${origCategory || ''}`.toLowerCase();
-      if (s.includes('budget') || s.includes('cost') || s.includes('financial') || s.includes('expense') || s.includes('r8m') || s.includes('r12m') || s.includes('creep')) {
+      const catStr = (origCategory || '').toLowerCase();
+      const s = `${text || ''} ${catStr}`.toLowerCase();
+
+      // 1. Explicit Category Checks
+      if (catStr.includes('budget') || catStr.includes('cost') || catStr.includes('fee') || catStr.includes('financial') || catStr.includes('exclusion')) {
         return 'Budget';
       }
-      if (s.includes('spec') || s.includes('fire') || s.includes('stair') || s.includes('lift') || s.includes('structural') || s.includes('hvac') || s.includes('facade') || s.includes('epod') || s.includes('load') || s.includes('pillar') || s.includes('corrosion') || s.includes('1200mm') || s.includes('sprinkler') || s.includes('glass') || s.includes('roof')) {
-        return 'Specs';
+      if (catStr.includes('task') || catStr.includes('process') || catStr.includes('protocol') || catStr.includes('software') || catStr.includes('aligned') || catStr.includes('sign-off')) {
+        return 'Process';
       }
-      return 'Process';
+
+      // 2. Keyword Checks
+      if (s.includes('budget') || s.includes('cost') || s.includes('fee') || s.includes('financial') || s.includes('expense') || s.includes('cash flow') || s.includes('r8m') || s.includes('r12m') || s.includes('revenue')) {
+        return 'Budget';
+      }
+      if (s.includes('workflow') || s.includes('protocol') || s.includes('email') || s.includes('meeting') || s.includes('sign-off') || s.includes('approval') || s.includes('decoupled') || s.includes('seloxis') || s.includes('policy') || s.includes('coordination') || s.includes('feedback') || s.includes('assign') || s.includes('review') || s.includes('schedule')) {
+        return 'Process';
+      }
+
+      return 'Specs';
     };
 
     // 1. Build Nodes
