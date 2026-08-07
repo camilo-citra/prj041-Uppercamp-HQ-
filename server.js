@@ -312,7 +312,7 @@ app.delete('/api/stakeholders/:id', (req, res) => {
   }
 });
 
-// Project Dynamics Map Endpoint (Chronological Meeting Matrix)
+// Project Dynamics Map Endpoint (Dynamic Chronological Meeting Matrix)
 app.get('/api/dynamics-map', (req, res) => {
   try {
     const decisions = db.prepare(`SELECT * FROM decisions_taken ORDER BY id ASC`).all();
@@ -320,15 +320,30 @@ app.get('/api/dynamics-map', (req, res) => {
     const actions = db.prepare(`SELECT * FROM action_items ORDER BY id ASC`).all();
     const brief = db.prepare(`SELECT * FROM brief WHERE id = 1`).get();
 
-    // Meeting Timeline Column Mapping (Meeting 1 -> Meeting 5)
-    const meetingMap = {
-      'Minutes00': { col: 0, label: 'MEETING 1', date: 'Stage 1 Init' },
-      'Minutes01': { col: 1, label: 'MEETING 2', date: 'Stage 1 Signoff' },
-      'Minutes02': { col: 2, label: 'MEETING 3', date: 'Stage 2 Design' },
-      'Minutes03': { col: 2, label: 'MEETING 3', date: 'Stage 2 Alignment' },
-      'Minutes04': { col: 3, label: 'MEETING 4', date: 'Stage 3 Freeze' },
-      'Minutes05': { col: 4, label: 'MEETING 5', date: 'Stage 3 Site Work' }
-    };
+    // Dynamic Meeting Timeline Columns Query from DB
+    const dbMeetings = db.prepare(`SELECT id, title, date FROM meeting_metadata ORDER BY date ASC, id ASC`).all();
+    
+    const meetingMap = {};
+    const meetings = [];
+
+    const defaultTimeline = [
+      { id: 'Minutes00', date: 'Stage 1 Init' },
+      { id: 'Minutes01', date: 'Stage 1 Signoff' },
+      { id: 'Minutes02', date: 'Stage 2 Design' },
+      { id: 'Minutes03', date: 'Stage 2 Alignment' },
+      { id: 'Minutes04', date: 'Stage 3 Freeze' },
+      { id: 'Minutes05', date: 'Stage 3 Site Work' }
+    ];
+
+    const sourceMeetings = dbMeetings.length > 0 ? dbMeetings : defaultTimeline;
+
+    sourceMeetings.forEach((m, idx) => {
+      const mtgLabel = `MEETING ${idx + 1}`;
+      const mtgDate = m.date ? (m.date.length > 12 ? m.date.slice(0, 10) : m.date) : `Stage ${idx + 1}`;
+      
+      meetingMap[m.id] = { col: idx, label: mtgLabel, date: mtgDate };
+      meetings.push({ col: idx, key: m.id, label: mtgLabel, date: mtgDate });
+    });
 
     // Helper to map any item strictly into 3 Y-Categories: 'Budget', 'Specs', 'Process'
     const normalizeCategory = (text, origCategory) => {
@@ -501,13 +516,7 @@ app.get('/api/dynamics-map', (req, res) => {
       nodes,
       edges,
       clusterCounts,
-      meetings: [
-        { col: 0, key: 'Minutes00', label: 'MEETING 1', date: 'Stage 1 Init' },
-        { col: 1, key: 'Minutes01', label: 'MEETING 2', date: 'Stage 1 Signoff' },
-        { col: 2, key: 'Minutes02', label: 'MEETING 3', date: 'Stage 2 Design' },
-        { col: 3, key: 'Minutes04', label: 'MEETING 4', date: 'Stage 3 Freeze' },
-        { col: 4, key: 'Minutes05', label: 'MEETING 5', date: 'Stage 3 Site Work' }
-      ],
+      meetings,
       categories: ['Budget', 'Specs', 'Process']
     });
   } catch (error) {

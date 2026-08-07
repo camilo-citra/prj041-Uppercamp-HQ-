@@ -1760,23 +1760,14 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
 
   if (viewMode === 'grid') {
     const categories = ['Budget', 'Specs', 'Process'];
-    const colWidth = 220;
-    const gapX = 40;
-    const startX = 180;
+    const colWidth = 195;
+    const gapX = 20;
+    const startX = 160;
 
     let currentY = 15;
 
     categories.forEach((cat, catIdx) => {
-      const catNodes = data.nodes.filter(n => {
-        const c = (n.category || n.impact_area || 'Process').toLowerCase();
-        if (cat === 'Budget') {
-          return c.includes('budget') || c.includes('cost') || c.includes('fee') || c.includes('financial') || c.includes('exclusion') || c.includes('cash');
-        }
-        if (cat === 'Specs') {
-          return c.includes('spec') || c.includes('fire') || c.includes('stair') || c.includes('lift') || c.includes('structural') || c.includes('scope') || c.includes('brief') || c.includes('hvac') || c.includes('load') || c.includes('pillar') || c.includes('epod');
-        }
-        return c.includes('task') || c.includes('process') || c.includes('protocol') || c.includes('software') || c.includes('aligned') || c.includes('sign-off') || c.includes('general') || c.includes('workflow') || c.includes('delay');
-      });
+      const catNodes = data.nodes.filter(n => (n.category === cat) || (!n.category && cat === 'Specs'));
 
       let maxCellCount = 1;
       meetingCols.forEach(m => {
@@ -1954,8 +1945,8 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                 key={m.label}
                 style={{
                   position: 'absolute',
-                  left: `${180 + m.col * (220 + 40)}px`,
-                  width: '220px',
+                  left: `${160 + m.col * (195 + 20)}px`,
+                  width: '195px',
                   textAlign: 'center',
                   background: 'rgba(30, 41, 59, 0.85)',
                   border: '1px solid var(--primary-cyan)',
