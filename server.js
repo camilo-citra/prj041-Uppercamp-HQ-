@@ -312,103 +312,116 @@ app.delete('/api/stakeholders/:id', (req, res) => {
   }
 });
 
-// Project Dynamics Map Endpoint
+// Project Dynamics Map Endpoint (Chronological Meeting Matrix)
 app.get('/api/dynamics-map', (req, res) => {
   try {
     const decisions = db.prepare(`SELECT * FROM decisions_taken ORDER BY id ASC`).all();
     const risks = db.prepare(`SELECT * FROM risk_raised ORDER BY id ASC`).all();
+    const actions = db.prepare(`SELECT * FROM action_items ORDER BY id ASC`).all();
     const brief = db.prepare(`SELECT * FROM brief WHERE id = 1`).get();
-    const assumptions = db.prepare(`SELECT * FROM assumptions ORDER BY id ASC`).all();
 
-    // Helper function to derive risk impact area
-    const getRiskImpactArea = (r) => {
-      const text = `${r.risk_code || ''} ${r.description || ''} ${r.contingency_measure || ''}`.toLowerCase();
-      if (text.includes('budget') || text.includes('cost') || text.includes('financial') || text.includes('expense') || text.includes('creep')) {
-        return 'Budget';
-      }
-      if (text.includes('fire') || text.includes('escape') || text.includes('sprinkler') || text.includes('egress')) {
-        return 'Fire Strategy';
-      }
-      if (text.includes('delay') || text.includes('alignment') || text.includes('hods') || text.includes('schedule')) {
-        return 'Process';
-      }
-      if (text.includes('lift') || text.includes('stair') || text.includes('structural') || text.includes('corrosion') || text.includes('hvac') || text.includes('load') || text.includes('pillar')) {
-        return 'Specs';
-      }
-      return 'General';
+    // Meeting Timeline Column Mapping (Meeting 1 -> Meeting 5)
+    const meetingMap = {
+      'Minutes00': { col: 0, label: 'MEETING 1', date: 'Stage 1 Init' },
+      'Minutes01': { col: 1, label: 'MEETING 2', date: 'Stage 1 Signoff' },
+      'Minutes02': { col: 2, label: 'MEETING 3', date: 'Stage 2 Design' },
+      'Minutes03': { col: 2, label: 'MEETING 3', date: 'Stage 2 Alignment' },
+      'Minutes04': { col: 3, label: 'MEETING 4', date: 'Stage 3 Freeze' },
+      'Minutes05': { col: 4, label: 'MEETING 5', date: 'Stage 3 Site Work' }
     };
 
-    // Level 0: Risk Nodes (Left Column)
-    const riskNodes = risks.map(r => ({
-      id: `risk_${r.id}`,
-      db_id: r.id,
-      type: 'risk_factor',
-      label: r.risk_code ? `${r.risk_code}: ${r.description.slice(0, 45)}...` : r.description.slice(0, 50),
-      description: r.description,
-      contingency: r.contingency_measure,
-      impact_area: getRiskImpactArea(r),
-      impact_level: r.impact_level || 'Medium',
-      status: r.status || 'Open',
-      meeting_id: r.meeting_id,
-      column: 0
-    }));
+    // Helper to map any item strictly into 3 Y-Categories: 'Budget', 'Specs', 'Process'
+    const normalizeCategory = (text, origCategory) => {
+      const s = `${text || ''} ${origCategory || ''}`.toLowerCase();
+      if (s.includes('budget') || s.includes('cost') || s.includes('financial') || s.includes('expense') || s.includes('r8m') || s.includes('r12m') || s.includes('creep')) {
+        return 'Budget';
+      }
+      if (s.includes('spec') || s.includes('fire') || s.includes('stair') || s.includes('lift') || s.includes('structural') || s.includes('hvac') || s.includes('facade') || s.includes('epod') || s.includes('load') || s.includes('pillar') || s.includes('corrosion') || s.includes('1200mm') || s.includes('sprinkler') || s.includes('glass') || s.includes('roof')) {
+        return 'Specs';
+      }
+      return 'Process';
+    };
 
-    // Level 1: Decision Nodes (Center Column - grouped by impact_area)
-    const decisionNodes = decisions.map(d => ({
-      id: `decision_${d.id}`,
-      db_id: d.id,
-      type: 'decision',
-      label: `DEC-${String(d.decision_num || d.id).padStart(3, '0')}: ${d.summary.slice(0, 45)}...`,
-      summary: d.summary,
-      impact_area: d.impact_area || 'General',
-      meeting_id: d.meeting_id,
-      column: 1
-    }));
+    // 1. Build Nodes
+    // Risks
+    const riskNodes = risks.map(r => {
+      const mtg = meetingMap[r.meeting_id] || { col: 0, label: 'MEETING 1' };
+      return {
+        id: `risk_${r.id}`,
+        db_id: r.id,
+        type: 'risk_factor',
+        label: r.risk_code ? `${r.risk_code}: ${r.description.slice(0, 42)}...` : r.description.slice(0, 45),
+        description: r.description,
+        contingency: r.contingency_measure,
+        category: normalizeCategory(r.description + ' ' + (r.contingency_measure || ''), r.impact_level),
+        status: r.status || 'Open',
+        meeting_id: r.meeting_id,
+        meeting_label: mtg.label,
+        column: mtg.col
+      };
+    });
 
-    // Level 2: Brief & Scope Impact Nodes (Right Column)
-    const briefNodes = [
-      {
-        id: 'brief_core',
-        db_id: brief ? brief.id : 1,
-        type: 'brief_impact',
-        label: brief ? `Brief: ${brief.title}` : 'Core Project Brief',
-        description: brief ? brief.objective : 'Project Objective',
-        impact_area: 'Brief',
-        column: 2
-      },
-      ...assumptions.map(a => ({
-        id: `brief_asm_${a.id}`,
+    // Decisions
+    const decisionNodes = decisions.map(d => {
+      const mtg = meetingMap[d.meeting_id] || { col: 1, label: 'MEETING 2' };
+      return {
+        id: `decision_${d.id}`,
+        db_id: d.id,
+        type: 'decision',
+        label: `DEC-${String(d.decision_num || d.id).padStart(3, '0')}: ${d.summary.slice(0, 42)}...`,
+        summary: d.summary,
+        category: normalizeCategory(d.summary, d.impact_area),
+        meeting_id: d.meeting_id,
+        meeting_label: mtg.label,
+        column: mtg.col
+      };
+    });
+
+    // Action Items
+    const actionNodes = actions.map(a => {
+      const mtg = meetingMap[a.meeting_id] || { col: 2, label: 'MEETING 3' };
+      return {
+        id: `action_${a.id}`,
         db_id: a.id,
-        type: 'brief_impact',
-        label: a.asm_code ? `${a.asm_code}: ${a.description.slice(0, 40)}...` : a.description.slice(0, 45),
+        type: 'action_item',
+        label: a.action_code ? `${a.action_code}: ${a.description.slice(0, 40)}...` : a.description.slice(0, 42),
         description: a.description,
-        impact_area: a.category || 'Specs',
-        status: a.status || 'Active',
-        meeting_id: a.updated_meeting_id,
-        column: 2
-      }))
-    ];
+        assignee: a.assignee,
+        due_date: a.due_date,
+        status: a.status,
+        category: normalizeCategory(a.description + ' ' + a.assignee, 'Process'),
+        meeting_id: a.meeting_id,
+        meeting_label: mtg.label,
+        column: mtg.col
+      };
+    });
 
-    const nodes = [...riskNodes, ...decisionNodes, ...briefNodes];
+    // Brief Baseline Node
+    const briefNode = {
+      id: 'brief_core',
+      db_id: 1,
+      type: 'brief_impact',
+      label: brief ? `Brief: ${brief.title}` : 'Core Project Brief',
+      description: brief ? brief.objective : 'Project Objective',
+      category: 'Specs',
+      meeting_id: 'Minutes00',
+      meeting_label: 'MEETING 1',
+      column: 0
+    };
 
-    // 2. Build Edges
+    const nodes = [...riskNodes, ...decisionNodes, ...actionNodes, briefNode];
+
+    // 2. Build Dependency Edges
     const edges = [];
     const edgeSet = new Set();
 
+    // Link risks to decisions that address them in same or later meetings
     decisionNodes.forEach(d => {
       risks.forEach(r => {
         const dText = d.summary.toLowerCase();
-        const rText = r.description.toLowerCase();
-        const sameMeeting = d.meeting_id === r.meeting_id;
-        
-        let linkType = null;
-        if (r.status === 'Closed' && (sameMeeting || dText.includes('perimeter') || dText.includes('fire') || dText.includes('1200mm'))) {
-          linkType = 'closes_risk';
-        } else if (sameMeeting || (r.risk_code && dText.includes(r.risk_code.toLowerCase()))) {
-          linkType = 'creates_risk';
-        }
+        const rCol = meetingMap[r.meeting_id]?.col || 0;
 
-        if (linkType) {
+        if (d.column >= rCol && (d.category === r.category || dText.includes('fire') || dText.includes('lift') || dText.includes('budget') || dText.includes('1200mm') || dText.includes('stair'))) {
           const edgeId = `edge_risk_${r.id}_dec_${d.id}`;
           if (!edgeSet.has(edgeId)) {
             edgeSet.add(edgeId);
@@ -416,67 +429,74 @@ app.get('/api/dynamics-map', (req, res) => {
               id: edgeId,
               source: `risk_${r.id}`,
               target: `decision_${d.id}`,
-              type: linkType
+              type: r.status === 'Closed' ? 'closes_risk' : 'creates_risk'
             });
           }
         }
       });
-
-      briefNodes.forEach(b => {
-        if (d.impact_area === 'Brief' || d.impact_area === 'Specs' || d.impact_area === 'General' || d.summary.toLowerCase().includes('structure') || d.summary.toLowerCase().includes('design')) {
-          if (b.id === 'brief_core' || b.impact_area === d.impact_area) {
-            const edgeId = `edge_dec_${d.id}_brief_${b.id}`;
-            if (!edgeSet.has(edgeId)) {
-              edgeSet.add(edgeId);
-              edges.push({
-                id: edgeId,
-                source: `decision_${d.id}`,
-                target: b.id,
-                type: 'affects_brief'
-              });
-            }
-          }
-        }
-      });
     });
 
-    // 3. Build Inter-Decision Evolution Edges (evolves_to)
-    const decisionsByArea = {};
+    // Link sequential decisions in same category across meetings
+    const decisionsByCategory = {};
     decisionNodes.forEach(d => {
-      if (!decisionsByArea[d.impact_area]) decisionsByArea[d.impact_area] = [];
-      decisionsByArea[d.impact_area].push(d);
+      if (!decisionsByCategory[d.category]) decisionsByCategory[d.category] = [];
+      decisionsByCategory[d.category].push(d);
     });
 
-    Object.values(decisionsByArea).forEach(group => {
+    Object.values(decisionsByCategory).forEach(group => {
+      group.sort((a, b) => a.column - b.column);
       for (let i = 0; i < group.length - 1; i++) {
         const src = group[i];
         const tgt = group[i + 1];
-        const edgeId = `edge_dec_${src.db_id}_evolves_${tgt.db_id}`;
+        if (src.column < tgt.column) {
+          const edgeId = `edge_dec_${src.db_id}_evolves_${tgt.db_id}`;
+          if (!edgeSet.has(edgeId)) {
+            edgeSet.add(edgeId);
+            edges.push({
+              id: edgeId,
+              source: src.id,
+              target: tgt.id,
+              type: 'dependency'
+            });
+          }
+        }
+      }
+    });
+
+    // Link actions to decisions
+    actionNodes.forEach(a => {
+      const matchDec = decisionNodes.find(d => d.meeting_id === a.meeting_id && d.category === a.category);
+      if (matchDec) {
+        const edgeId = `edge_dec_${matchDec.id}_act_${a.id}`;
         if (!edgeSet.has(edgeId)) {
           edgeSet.add(edgeId);
           edges.push({
             id: edgeId,
-            source: src.id,
-            target: tgt.id,
-            type: 'evolves_to'
+            source: matchDec.id,
+            target: a.id,
+            type: 'dependency'
           });
         }
       }
     });
 
     const clusterCounts = {};
-
     decisionNodes.forEach(d => {
-      clusterCounts[d.impact_area] = (clusterCounts[d.impact_area] || 0) + 1;
+      clusterCounts[d.category] = (clusterCounts[d.category] || 0) + 1;
     });
 
     res.json({
       nodes,
       edges,
       clusterCounts,
-      totalDecisions: decisionNodes.length,
-      totalRisks: riskNodes.length,
-      totalBriefEntities: briefNodes.length
+      meetings: [
+        { col: 0, key: 'Minutes00', label: 'MEETING 1', date: 'Stage 1 Init' },
+        { col: 1, key: 'Minutes01', label: 'MEETING 2', date: 'Stage 1 Signoff' },
+        { col: 2, key: 'Minutes02', label: 'MEETING 3', date: 'Stage 2 Design' },
+        { col: 3, key: 'Minutes04', label: 'MEETING 4', date: 'Stage 3 Freeze' },
+        { col: 4, key: 'Minutes05', label: 'MEETING 5', date: 'Stage 3 Site Work' }
+      ],
+      categories: ['Budget', 'Specs', 'Process']
     });
   } catch (error) {
     console.error('Error fetching dynamics map:', error);
