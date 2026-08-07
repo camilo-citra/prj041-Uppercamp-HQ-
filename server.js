@@ -320,7 +320,24 @@ app.get('/api/dynamics-map', (req, res) => {
     const brief = db.prepare(`SELECT * FROM brief WHERE id = 1`).get();
     const assumptions = db.prepare(`SELECT * FROM assumptions ORDER BY id ASC`).all();
 
-    // 1. Build Nodes
+    // Helper function to derive risk impact area
+    const getRiskImpactArea = (r) => {
+      const text = `${r.risk_code || ''} ${r.description || ''} ${r.contingency_measure || ''}`.toLowerCase();
+      if (text.includes('budget') || text.includes('cost') || text.includes('financial') || text.includes('expense') || text.includes('creep')) {
+        return 'Budget';
+      }
+      if (text.includes('fire') || text.includes('escape') || text.includes('sprinkler') || text.includes('egress')) {
+        return 'Fire Strategy';
+      }
+      if (text.includes('delay') || text.includes('alignment') || text.includes('hods') || text.includes('schedule')) {
+        return 'Process';
+      }
+      if (text.includes('lift') || text.includes('stair') || text.includes('structural') || text.includes('corrosion') || text.includes('hvac') || text.includes('load') || text.includes('pillar')) {
+        return 'Specs';
+      }
+      return 'General';
+    };
+
     // Level 0: Risk Nodes (Left Column)
     const riskNodes = risks.map(r => ({
       id: `risk_${r.id}`,
@@ -329,7 +346,8 @@ app.get('/api/dynamics-map', (req, res) => {
       label: r.risk_code ? `${r.risk_code}: ${r.description.slice(0, 45)}...` : r.description.slice(0, 50),
       description: r.description,
       contingency: r.contingency_measure,
-      impact_area: r.impact_level || 'Medium',
+      impact_area: getRiskImpactArea(r),
+      impact_level: r.impact_level || 'Medium',
       status: r.status || 'Open',
       meeting_id: r.meeting_id,
       column: 0

@@ -1751,10 +1751,20 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
 
   const gridRows = [];
 
+  const isNodeInArea = (node, area) => {
+    if (area === 'Brief & Scope') {
+      return node.impact_area === 'Brief & Scope' || node.impact_area === 'Brief' || node.impact_area === 'Scope' || node.type === 'brief_impact';
+    }
+    if (area === 'General') {
+      return !node.impact_area || node.impact_area === 'General';
+    }
+    return node.impact_area === area;
+  };
+
   if (viewMode === 'grid') {
-    const impactAreas = ['Budget', 'Specs', 'Process', 'Task Allocation', 'Fire Strategy', 'Scope', 'Brief', 'General'];
+    const impactAreas = ['Budget', 'Specs', 'Process', 'Task Allocation', 'Fire Strategy', 'Brief & Scope', 'General'];
     const activeImpactAreas = impactAreas.filter(area => 
-      data.nodes.some(n => (n.impact_area === area) || (area === 'Brief' && n.type === 'brief_impact') || (area === 'General' && !n.impact_area))
+      data.nodes.some(n => isNodeInArea(n, area))
     );
 
     const col0X = 185; // Level 0: Risks
@@ -1764,9 +1774,9 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
     let currentY = 15;
 
     activeImpactAreas.forEach(area => {
-      const rowRisks = data.nodes.filter(n => n.column === 0 && (n.impact_area === area || (area === 'General' && !n.impact_area)));
-      const rowDecisions = data.nodes.filter(n => n.column === 1 && (n.impact_area === area || (area === 'General' && !n.impact_area)));
-      const rowBrief = data.nodes.filter(n => n.column === 2 && ((n.impact_area === area) || (area === 'Brief' && n.type === 'brief_impact') || (area === 'General' && !n.impact_area)));
+      const rowRisks = data.nodes.filter(n => n.column === 0 && isNodeInArea(n, area));
+      const rowDecisions = data.nodes.filter(n => n.column === 1 && isNodeInArea(n, area));
+      const rowBrief = data.nodes.filter(n => n.column === 2 && isNodeInArea(n, area));
 
       const maxCount = Math.max(rowRisks.length, rowDecisions.length, rowBrief.length, 1);
       const rowHeight = 40 + maxCount * (nodeHeight + 15);
@@ -1806,9 +1816,9 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
     nodePositions['root'] = { x: cx - 100, y: cy - 35, width: 200, height: 70 };
 
     // Unique Impact Areas
-    const impactAreas = ['Budget', 'Specs', 'Process', 'Task Allocation', 'Fire Strategy', 'Scope', 'Brief', 'General'];
+    const impactAreas = ['Budget', 'Specs', 'Process', 'Task Allocation', 'Fire Strategy', 'Brief & Scope', 'General'];
     const activeImpactAreas = impactAreas.filter(area => 
-      data.nodes.some(n => n.impact_area === area || (area === 'Brief' && n.type === 'brief_impact'))
+      data.nodes.some(n => isNodeInArea(n, area))
     );
 
     const radius1 = 360;
@@ -1818,7 +1828,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
       const angle = (i * 2 * Math.PI) / numAreas - Math.PI / 2;
       const hx = cx + radius1 * Math.cos(angle);
       const hy = cy + radius1 * Math.sin(angle);
-      const hubId = `hub_${area}`;
+      const hubId = `hub_${area.replace(/\s+/g, '_')}`;
 
       categoryHubs.push({
         id: hubId,
@@ -1828,14 +1838,10 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
         angle
       });
 
-      nodePositions[hubId] = { x: hx - 70, y: hy - 24, width: 140, height: 48 };
+      nodePositions[hubId] = { x: hx - 75, y: hy - 24, width: 150, height: 48 };
 
       // Children of this impact area
-      const children = data.nodes.filter(n => 
-        (n.impact_area === area) || 
-        (area === 'Brief' && n.type === 'brief_impact') || 
-        (area === 'General' && !n.impact_area)
-      );
+      const children = data.nodes.filter(n => isNodeInArea(n, area));
 
       const numChildren = children.length;
       const spreadAngle = Math.PI * 0.88; // Wide 160-degree arc
@@ -2031,7 +2037,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
 
                 {categoryHubs.map(hub => {
                   const hubArea = hub.label;
-                  const children = data.nodes.filter(n => (n.impact_area === hubArea) || (hubArea === 'Brief' && n.type === 'brief_impact') || (hubArea === 'General' && !n.impact_area));
+                  const children = data.nodes.filter(n => isNodeInArea(n, hubArea));
                   return children.map(child => {
                     const childPos = nodePositions[child.id];
                     if (!childPos) return null;
