@@ -312,6 +312,135 @@ app.delete('/api/stakeholders/:id', (req, res) => {
   }
 });
 
+// Project Dynamics Map Endpoint
+app.get('/api/dynamics-map', (req, res) => {
+  try {
+    const decisions = db.prepare(`SELECT * FROM decisions_taken ORDER BY id ASC`).all();
+    const risks = db.prepare(`SELECT * FROM risk_raised ORDER BY id ASC`).all();
+    const brief = db.prepare(`SELECT * FROM brief WHERE id = 1`).get();
+    const assumptions = db.prepare(`SELECT * FROM assumptions ORDER BY id ASC`).all();
+
+    // 1. Build Nodes
+    // Level 0: Risk Nodes (Left Column)
+    const riskNodes = risks.map(r => ({
+      id: `risk_${r.id}`,
+      db_id: r.id,
+      type: 'risk_factor',
+      label: r.risk_code ? `${r.risk_code}: ${r.description.slice(0, 45)}...` : r.description.slice(0, 50),
+      description: r.description,
+      contingency: r.contingency_measure,
+      impact_area: r.impact_level || 'Medium',
+      status: r.status || 'Open',
+      meeting_id: r.meeting_id,
+      column: 0
+    }));
+
+    // Level 1: Decision Nodes (Center Column - grouped by impact_area)
+    const decisionNodes = decisions.map(d => ({
+      id: `decision_${d.id}`,
+      db_id: d.id,
+      type: 'decision',
+      label: `DEC-${String(d.decision_num || d.id).padStart(3, '0')}: ${d.summary.slice(0, 45)}...`,
+      summary: d.summary,
+      impact_area: d.impact_area || 'General',
+      meeting_id: d.meeting_id,
+      column: 1
+    }));
+
+    // Level 2: Brief & Scope Impact Nodes (Right Column)
+    const briefNodes = [
+      {
+        id: 'brief_core',
+        db_id: brief ? brief.id : 1,
+        type: 'brief_impact',
+        label: brief ? `Brief: ${brief.title}` : 'Core Project Brief',
+        description: brief ? brief.objective : 'Project Objective',
+        impact_area: 'Brief',
+        column: 2
+      },
+      ...assumptions.map(a => ({
+        id: `brief_asm_${a.id}`,
+        db_id: a.id,
+        type: 'brief_impact',
+        label: a.asm_code ? `${a.asm_code}: ${a.description.slice(0, 40)}...` : a.description.slice(0, 45),
+        description: a.description,
+        impact_area: a.category || 'Specs',
+        status: a.status || 'Active',
+        meeting_id: a.updated_meeting_id,
+        column: 2
+      }))
+    ];
+
+    const nodes = [...riskNodes, ...decisionNodes, ...briefNodes];
+
+    // 2. Build Edges
+    const edges = [];
+    const edgeSet = new Set();
+
+    decisionNodes.forEach(d => {
+      risks.forEach(r => {
+        const dText = d.summary.toLowerCase();
+        const rText = r.description.toLowerCase();
+        const sameMeeting = d.meeting_id === r.meeting_id;
+        
+        let linkType = null;
+        if (r.status === 'Closed' && (sameMeeting || dText.includes('perimeter') || dText.includes('fire') || dText.includes('1200mm'))) {
+          linkType = 'closes_risk';
+        } else if (sameMeeting || (r.risk_code && dText.includes(r.risk_code.toLowerCase()))) {
+          linkType = 'creates_risk';
+        }
+
+        if (linkType) {
+          const edgeId = `edge_risk_${r.id}_dec_${d.id}`;
+          if (!edgeSet.has(edgeId)) {
+            edgeSet.add(edgeId);
+            edges.push({
+              id: edgeId,
+              source: `risk_${r.id}`,
+              target: `decision_${d.id}`,
+              type: linkType
+            });
+          }
+        }
+      });
+
+      briefNodes.forEach(b => {
+        if (d.impact_area === 'Brief' || d.impact_area === 'Specs' || d.impact_area === 'General' || d.summary.toLowerCase().includes('structure') || d.summary.toLowerCase().includes('design')) {
+          if (b.id === 'brief_core' || b.impact_area === d.impact_area) {
+            const edgeId = `edge_dec_${d.id}_brief_${b.id}`;
+            if (!edgeSet.has(edgeId)) {
+              edgeSet.add(edgeId);
+              edges.push({
+                id: edgeId,
+                source: `decision_${d.id}`,
+                target: b.id,
+                type: 'affects_brief'
+              });
+            }
+          }
+        }
+      });
+    });
+
+    const clusterCounts = {};
+    decisionNodes.forEach(d => {
+      clusterCounts[d.impact_area] = (clusterCounts[d.impact_area] || 0) + 1;
+    });
+
+    res.json({
+      nodes,
+      edges,
+      clusterCounts,
+      totalDecisions: decisionNodes.length,
+      totalRisks: riskNodes.length,
+      totalBriefEntities: briefNodes.length
+    });
+  } catch (error) {
+    console.error('Error fetching dynamics map:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Brief & Assumptions endpoint
 app.get('/api/brief', (req, res) => {
   const brief = db.prepare(`SELECT * FROM brief WHERE id = 1`).get();

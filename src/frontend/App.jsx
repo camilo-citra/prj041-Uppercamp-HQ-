@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw, 
   ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check,
-  Upload, FilePlus, CheckCircle, X, Trash2, Edit2, Plus, Save, UserPlus
+  Upload, FilePlus, CheckCircle, CheckCircle2, X, Trash2, Edit2, Plus, Save, UserPlus, ShieldAlert
 } from 'lucide-react';
 
 export default function App() {
@@ -500,6 +500,12 @@ export default function App() {
             onClick={() => setActiveTab('rag')}
           >
             <MessageSquare size={16} /> RAG Intelligence
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'dynamics' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dynamics')}
+          >
+            <ShieldAlert size={16} /> Project Dynamics Map
           </button>
         </nav>
 
@@ -1312,6 +1318,16 @@ export default function App() {
           </div>
         )}
 
+        {/* TAB 7: PROJECT DYNAMICS MAP */}
+        {activeTab === 'dynamics' && (
+          <ProjectDynamicsMap 
+            onTriggerRAGQuery={(query) => {
+              setActiveTab('rag');
+              handleSendChat(query);
+            }} 
+          />
+        )}
+
       {/* UPLOAD MEETING SUMMARY TO RAW MODAL */}
       {showUploadModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
@@ -1663,3 +1679,342 @@ function KanbanColumn({
     </div>
   );
 }
+
+function ProjectDynamicsMap({ onTriggerRAGQuery }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState(null);
+  const [showRetrospectiveDrawer, setShowRetrospectiveDrawer] = useState(true);
+  const [ragAnswer, setRagAnswer] = useState(null);
+  const [queryingRAG, setQueryingRAG] = useState(false);
+
+  useEffect(() => {
+    fetchDynamicsMap();
+  }, []);
+
+  const fetchDynamicsMap = async () => {
+    try {
+      const res = await fetch('/api/dynamics-map');
+      const result = await res.json();
+      setData(result);
+    } catch (err) {
+      console.error('Failed to fetch dynamics map:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRunRetrospectiveRAG = async (areaName) => {
+    const promptQuery = `What structural bottlenecks caused repetitive changes in ${areaName} across meeting minutes?`;
+    setQueryingRAG(true);
+    setRagAnswer(null);
+    try {
+      const res = await fetch('/api/rag/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: promptQuery })
+      });
+      const result = await res.json();
+      setRagAnswer({ area: areaName, query: promptQuery, response: result.answer || result.response });
+    } catch (err) {
+      console.error('RAG query failed:', err);
+    } finally {
+      setQueryingRAG(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+        <RefreshCw size={24} className="spin" /> Loading Project Dynamics Map...
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  // Grid constants
+  const nodeWidth = 200;
+  const nodeHeight = 110;
+  const gapX = 80;
+  const gapY = 30;
+
+  // Group nodes by column (0: Risks, 1: Decisions, 2: Brief)
+  const col0Nodes = data.nodes.filter(n => n.column === 0);
+  const col1Nodes = data.nodes.filter(n => n.column === 1);
+  const col2Nodes = data.nodes.filter(n => n.column === 2);
+
+  // Compute (x, y) coordinates for each node
+  const nodePositions = {};
+
+  col0Nodes.forEach((node, idx) => {
+    nodePositions[node.id] = {
+      x: 30,
+      y: 40 + idx * (nodeHeight + gapY)
+    };
+  });
+
+  col1Nodes.forEach((node, idx) => {
+    nodePositions[node.id] = {
+      x: 30 + nodeWidth + gapX,
+      y: 40 + idx * (nodeHeight + gapY)
+    };
+  });
+
+  col2Nodes.forEach((node, idx) => {
+    nodePositions[node.id] = {
+      x: 30 + (nodeWidth + gapX) * 2,
+      y: 40 + idx * (nodeHeight + gapY)
+    };
+  });
+
+  const maxNodesInCol = Math.max(col0Nodes.length, col1Nodes.length, col2Nodes.length);
+  const canvasWidth = 30 + (nodeWidth + gapX) * 2 + nodeWidth + 50;
+  const canvasHeight = 60 + maxNodesInCol * (nodeHeight + gapY);
+
+  // High-volume clusters (>4 decisions)
+  const volatileClusters = Object.entries(data.clusterCounts || {})
+    .filter(([_, count]) => count > 4)
+    .map(([area, count]) => ({ area, count }));
+
+  return (
+    <div style={{ display: 'flex', gap: '1.25rem', height: '100%', minHeight: '750px' }}>
+      {/* MAP CANVAS CONTAINER */}
+      <div style={{ flex: 1, background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.25rem', overflow: 'auto', position: 'relative' }}>
+        
+        {/* MAP HEADER */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
+          <div>
+            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', color: 'var(--primary-cyan)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ShieldAlert size={20} /> Project Dynamics Map
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              3-Column Relational Synthesis: Relational Risks → Decision Clusters → Brief Scope Mutations
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.78rem' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#f87171' }}>
+              <span style={{ width: '12px', height: '2px', background: '#f87171', borderStyle: 'dashed' }}></span> Creates Risk
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#4ade80' }}>
+              <span style={{ width: '12px', height: '2px', background: '#4ade80' }}></span> Closes Risk
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#38bdf8' }}>
+              <span style={{ width: '12px', height: '2px', background: '#38bdf8' }}></span> Affects Brief
+            </span>
+
+            <button
+              onClick={() => setShowRetrospectiveDrawer(!showRetrospectiveDrawer)}
+              className="tab-btn active"
+              style={{ fontSize: '0.76rem', padding: '0.3rem 0.65rem' }}
+            >
+              {showRetrospectiveDrawer ? 'Hide Drawer' : 'Show Retrospective Alert'}
+            </button>
+          </div>
+        </div>
+
+        {/* COLUMN HEADERS */}
+        <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '1rem', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: '#f87171' }}>LEVEL 0: RISK FACTORS</div>
+          <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: 'var(--primary-cyan)' }}>LEVEL 1: DECISIONS</div>
+          <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: '#c084fc' }}>LEVEL 2: BRIEF & SCOPE</div>
+        </div>
+
+        {/* SVG DIAGRAM LAYER */}
+        <div style={{ position: 'relative', width: `${canvasWidth}px`, height: `${canvasHeight}px` }}>
+          <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+            <defs>
+              <marker id="arrow-creates" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#f87171" />
+              </marker>
+              <marker id="arrow-closes" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#4ade80" />
+              </marker>
+              <marker id="arrow-affects" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
+              </marker>
+            </defs>
+
+            {data.edges.map(edge => {
+              const srcPos = nodePositions[edge.source];
+              const tgtPos = nodePositions[edge.target];
+              if (!srcPos || !tgtPos) return null;
+
+              const x1 = srcPos.x + nodeWidth;
+              const y1 = srcPos.y + nodeHeight / 2;
+              const x2 = tgtPos.x;
+              const y2 = tgtPos.y + nodeHeight / 2;
+
+              const isHighlighted = hoveredNodeId && (hoveredNodeId === edge.source || hoveredNodeId === edge.target);
+              const color = edge.type === 'creates_risk' ? '#f87171' : edge.type === 'closes_risk' ? '#4ade80' : '#38bdf8';
+              const isDashed = edge.type === 'creates_risk';
+              const markerId = edge.type === 'creates_risk' ? 'url(#arrow-creates)' : edge.type === 'closes_risk' ? 'url(#arrow-closes)' : 'url(#arrow-affects)';
+
+              const pathD = `M ${x1} ${y1} C ${x1 + gapX / 2} ${y1}, ${x2 - gapX / 2} ${y2}, ${x2} ${y2}`;
+
+              return (
+                <g key={edge.id}>
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth={isHighlighted ? 3 : 1.5}
+                    strokeDasharray={isDashed ? '5,5' : 'none'}
+                    strokeOpacity={hoveredNodeId ? (isHighlighted ? 1 : 0.2) : 0.7}
+                    markerEnd={markerId}
+                    style={{ transition: 'stroke-opacity 0.2s, stroke-width 0.2s' }}
+                  />
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* NODES LAYER */}
+          {data.nodes.map(node => {
+            const pos = nodePositions[node.id];
+            if (!pos) return null;
+
+            const isHovered = hoveredNodeId === node.id;
+            const isSelected = selectedNode?.id === node.id;
+
+            const borderColor = node.type === 'risk_factor' ? (node.status === 'Closed' ? '#4ade80' : '#f87171') :
+                                node.type === 'decision' ? 'var(--primary-cyan)' : '#c084fc';
+            
+            const bgColor = node.type === 'risk_factor' ? 'rgba(30, 20, 30, 0.9)' :
+                            node.type === 'decision' ? 'rgba(15, 23, 42, 0.95)' : 'rgba(25, 18, 45, 0.9)';
+
+            return (
+              <div
+                key={node.id}
+                onMouseEnter={() => setHoveredNodeId(node.id)}
+                onMouseLeave={() => setHoveredNodeId(null)}
+                onClick={() => setSelectedNode(node)}
+                style={{
+                  position: 'absolute',
+                  left: `${pos.x}px`,
+                  top: `${pos.y}px`,
+                  width: `${nodeWidth}px`,
+                  height: `${nodeHeight}px`,
+                  background: bgColor,
+                  border: `1.5px solid ${isHovered || isSelected ? '#fff' : borderColor}`,
+                  borderRadius: '12px',
+                  padding: '0.65rem 0.75rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  boxShadow: isHovered ? `0 0 15px ${borderColor}` : '0 4px 12px rgba(0,0,0,0.4)',
+                  transition: 'all 0.2s ease-in-out',
+                  transform: isHovered ? 'scale(1.03)' : 'scale(1)',
+                  zIndex: isHovered ? 10 : 2
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: borderColor, textTransform: 'uppercase' }}>
+                      {node.type === 'risk_factor' ? (node.status === 'Closed' ? 'Closed Risk' : 'Open Risk') : node.type === 'decision' ? node.impact_area : 'Scope Item'}
+                    </span>
+                    {node.type === 'risk_factor' ? (
+                      node.status === 'Closed' ? <CheckCircle2 size={12} color="#4ade80" /> : <AlertTriangle size={12} color="#f87171" />
+                    ) : node.type === 'decision' ? (
+                      <Layers size={12} color="var(--primary-cyan)" />
+                    ) : (
+                      <CheckCircle size={12} color="#c084fc" />
+                    )}
+                  </div>
+
+                  <h5 style={{ fontSize: '0.78rem', fontWeight: 600, color: '#f3f4f6', lineHeight: '1.3', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                    {node.label}
+                  </h5>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.68rem', color: 'var(--text-muted)', paddingTop: '0.3rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span>{node.meeting_id || 'Core'}</span>
+                  <span style={{ color: '#38bdf8', fontWeight: 600 }}>Click details</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* RETROSPECTIVE ALERT SIDE DRAWER */}
+      {showRetrospectiveDrawer && (
+        <div style={{ width: '340px', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
+          <div>
+            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'var(--font-heading)' }}>
+              <AlertTriangle size={16} /> Retrospective & Insights
+            </h4>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              Automated cluster volatility monitoring across meetings.
+            </p>
+          </div>
+
+          {/* VOLATILE CLUSTERS ALERT */}
+          {volatileClusters.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {volatileClusters.map(item => (
+                <div key={item.area} style={{ background: 'rgba(251, 191, 36, 0.08)', border: '1px solid rgba(251, 191, 36, 0.25)', borderRadius: '10px', padding: '0.85rem' }}>
+                  <blockquote style={{ margin: 0, paddingLeft: '0.6rem', borderLeft: '3px solid #fbbf24', color: '#cbd5e1', fontSize: '0.8rem', lineHeight: '1.45' }}>
+                    <strong style={{ color: '#fbbf24' }}>High-volume structural adjustments detected in [{item.area}].</strong>
+                    <br />
+                    Contains <span style={{ color: '#fff', fontWeight: 700 }}>{item.count} decisions</span> in current project state.
+                  </blockquote>
+
+                  <button
+                    onClick={() => handleRunRetrospectiveRAG(item.area)}
+                    disabled={queryingRAG}
+                    className="tab-btn active"
+                    style={{ width: '100%', marginTop: '0.65rem', fontSize: '0.74rem', padding: '0.4rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', background: 'rgba(251, 191, 36, 0.15)', borderColor: 'rgba(251, 191, 36, 0.4)', color: '#fbbf24', fontWeight: 600 }}
+                  >
+                    {queryingRAG ? <RefreshCw size={12} className="spin" /> : <MessageSquare size={12} />}
+                    Query RAG for Bottlenecks
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ padding: '0.85rem', background: 'rgba(56, 189, 248, 0.1)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              No high-volume volatile clusters detected (&gt;4 decisions).
+            </div>
+          )}
+
+          {/* RAG ANALYSIS RESPONSE BLOCK */}
+          {ragAnswer && (
+            <div style={{ background: 'rgba(15, 23, 42, 0.95)', border: '1px solid var(--primary-cyan)', borderRadius: '12px', padding: '0.85rem' }}>
+              <h5 style={{ fontSize: '0.82rem', color: 'var(--primary-cyan)', fontWeight: 700, marginBottom: '0.4rem' }}>
+                RAG Analysis for {ragAnswer.area}:
+              </h5>
+              <div style={{ fontSize: '0.78rem', color: '#e2e8f0', lineHeight: '1.45', maxHeight: '200px', overflowY: 'auto' }}>
+                {ragAnswer.response}
+              </div>
+            </div>
+          )}
+
+          {/* SELECTED NODE DETAILS DRAWER */}
+          {selectedNode && (
+            <div style={{ background: 'rgba(30, 41, 59, 0.8)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '0.85rem', marginTop: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--primary-cyan)', fontWeight: 700, textTransform: 'uppercase' }}>
+                  {selectedNode.type} Details
+                </span>
+                <button onClick={() => setSelectedNode(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              </div>
+              <h5 style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 700, marginBottom: '0.3rem' }}>
+                {selectedNode.label}
+              </h5>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                {selectedNode.summary || selectedNode.description || selectedNode.contingency}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
