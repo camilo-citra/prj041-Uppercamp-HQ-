@@ -1749,26 +1749,49 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
   let canvasWidth = 0;
   let canvasHeight = 0;
 
+  const gridRows = [];
+
   if (viewMode === 'grid') {
-    const gapX = 90;
-    const gapY = 30;
-    const col0Nodes = data.nodes.filter(n => n.column === 0);
-    const col1Nodes = data.nodes.filter(n => n.column === 1);
-    const col2Nodes = data.nodes.filter(n => n.column === 2);
+    const impactAreas = ['Budget', 'Specs', 'Process', 'Task Allocation', 'Fire Strategy', 'Scope', 'Brief', 'General'];
+    const activeImpactAreas = impactAreas.filter(area => 
+      data.nodes.some(n => (n.impact_area === area) || (area === 'Brief' && n.type === 'brief_impact') || (area === 'General' && !n.impact_area))
+    );
 
-    col0Nodes.forEach((node, idx) => {
-      nodePositions[node.id] = { x: 30, y: 40 + idx * (nodeHeight + gapY) };
-    });
-    col1Nodes.forEach((node, idx) => {
-      nodePositions[node.id] = { x: 30 + nodeWidth + gapX, y: 40 + idx * (nodeHeight + gapY) };
-    });
-    col2Nodes.forEach((node, idx) => {
-      nodePositions[node.id] = { x: 30 + (nodeWidth + gapX) * 2, y: 40 + idx * (nodeHeight + gapY) };
+    const col0X = 185; // Level 0: Risks
+    const col1X = 425; // Level 1: Decisions
+    const col2X = 665; // Level 2: Scope & Brief
+
+    let currentY = 15;
+
+    activeImpactAreas.forEach(area => {
+      const rowRisks = data.nodes.filter(n => n.column === 0 && (n.impact_area === area || (area === 'General' && !n.impact_area)));
+      const rowDecisions = data.nodes.filter(n => n.column === 1 && (n.impact_area === area || (area === 'General' && !n.impact_area)));
+      const rowBrief = data.nodes.filter(n => n.column === 2 && ((n.impact_area === area) || (area === 'Brief' && n.type === 'brief_impact') || (area === 'General' && !n.impact_area)));
+
+      const maxCount = Math.max(rowRisks.length, rowDecisions.length, rowBrief.length, 1);
+      const rowHeight = 40 + maxCount * (nodeHeight + 15);
+
+      gridRows.push({
+        area,
+        y: currentY,
+        height: rowHeight
+      });
+
+      rowRisks.forEach((n, idx) => {
+        nodePositions[n.id] = { x: col0X, y: currentY + 35 + idx * (nodeHeight + 15) };
+      });
+      rowDecisions.forEach((n, idx) => {
+        nodePositions[n.id] = { x: col1X, y: currentY + 35 + idx * (nodeHeight + 15) };
+      });
+      rowBrief.forEach((n, idx) => {
+        nodePositions[n.id] = { x: col2X, y: currentY + 35 + idx * (nodeHeight + 15) };
+      });
+
+      currentY += rowHeight + 18;
     });
 
-    const maxNodesInCol = Math.max(col0Nodes.length, col1Nodes.length, col2Nodes.length);
-    canvasWidth = 30 + (nodeWidth + gapX) * 2 + nodeWidth + 50;
-    canvasHeight = 60 + maxNodesInCol * (nodeHeight + gapY);
+    canvasWidth = 910;
+    canvasHeight = currentY + 30;
   } else {
     // MIND MAP / KNOWLEDGE GRAPH RADIAL STAGGERED MULTI-TIER LAYOUT (ZERO OVERLAP)
     const mindMapCanvasWidth = 2000;
@@ -1910,16 +1933,19 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
           </span>
         </div>
 
-        {/* COLUMN HEADERS FOR GRID MODE */}
+        {/* COLUMN & Y-AXIS HEADERS FOR GRID MODE */}
         {viewMode === 'grid' && (
           <div style={{ position: 'relative', width: `${canvasWidth}px`, height: '35px', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.85rem' }}>
-            <div style={{ position: 'absolute', left: '30px', width: `${nodeWidth}px`, textAlign: 'center', color: '#f87171' }}>
+            <div style={{ position: 'absolute', left: '15px', width: '150px', textAlign: 'left', color: '#fbbf24' }}>
+              Y-AXIS: IMPACT AREA
+            </div>
+            <div style={{ position: 'absolute', left: '185px', width: `${nodeWidth}px`, textAlign: 'center', color: '#f87171' }}>
               LEVEL 0: RISK FACTORS
             </div>
-            <div style={{ position: 'absolute', left: `${30 + nodeWidth + 90}px`, width: `${nodeWidth}px`, textAlign: 'center', color: 'var(--primary-cyan)' }}>
+            <div style={{ position: 'absolute', left: '425px', width: `${nodeWidth}px`, textAlign: 'center', color: 'var(--primary-cyan)' }}>
               LEVEL 1: DECISIONS
             </div>
-            <div style={{ position: 'absolute', left: `${30 + (nodeWidth + 90) * 2}px`, width: `${nodeWidth}px`, textAlign: 'center', color: '#c084fc' }}>
+            <div style={{ position: 'absolute', left: '665px', width: `${nodeWidth}px`, textAlign: 'center', color: '#c084fc' }}>
               LEVEL 2: BRIEF & SCOPE
             </div>
           </div>
@@ -1927,6 +1953,46 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
 
         {/* SVG GRAPH CANVAS LAYER */}
         <div style={{ position: 'relative', width: `${canvasWidth}px`, height: `${canvasHeight}px` }}>
+          {/* GRID SWIMLANE BACKGROUND ROWS (Y-AXIS IMPACT AREAS) */}
+          {viewMode === 'grid' && gridRows.map(row => (
+            <div
+              key={`row_${row.area}`}
+              style={{
+                position: 'absolute',
+                left: '10px',
+                top: `${row.y}px`,
+                width: `${canvasWidth - 20}px`,
+                height: `${row.height}px`,
+                background: 'rgba(30, 41, 59, 0.45)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '14px',
+                zIndex: 1,
+                pointerEvents: 'none'
+              }}
+            >
+              {/* Y-AXIS ROW LABEL BADGE */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '14px',
+                  width: '140px',
+                  padding: '0.4rem 0.6rem',
+                  background: 'rgba(15, 23, 42, 0.85)',
+                  border: '1px solid #fbbf24',
+                  borderRadius: '8px',
+                  color: '#fbbf24',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  textAlign: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {row.area}
+              </div>
+            </div>
+          ))}
           <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
             <defs>
               <marker id="arrow-creates" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
