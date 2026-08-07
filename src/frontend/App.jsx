@@ -1770,7 +1770,12 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
     canvasWidth = 30 + (nodeWidth + gapX) * 2 + nodeWidth + 50;
     canvasHeight = 60 + maxNodesInCol * (nodeHeight + gapY);
   } else {
-    // MIND MAP / KNOWLEDGE GRAPH RADIAL MULTI-RING LAYOUT (ZERO OVERLAP)
+    // MIND MAP / KNOWLEDGE GRAPH RADIAL STAGGERED MULTI-TIER LAYOUT (ZERO OVERLAP)
+    const mindMapCanvasWidth = 2000;
+    const mindMapCanvasHeight = 1500;
+    const cx = mindMapCanvasWidth / 2;
+    const cy = mindMapCanvasHeight / 2;
+
     canvasWidth = mindMapCanvasWidth;
     canvasHeight = mindMapCanvasHeight;
 
@@ -1783,7 +1788,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
       data.nodes.some(n => n.impact_area === area || (area === 'Brief' && n.type === 'brief_impact'))
     );
 
-    const radius1 = 330;
+    const radius1 = 360;
     const numAreas = activeImpactAreas.length;
 
     activeImpactAreas.forEach((area, i) => {
@@ -1809,20 +1814,17 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
         (area === 'General' && !n.impact_area)
       );
 
-      const maxPerRing = 4;
-      const spreadAngle = Math.PI / 1.7;
+      const numChildren = children.length;
+      const spreadAngle = Math.PI * 0.88; // Wide 160-degree arc
 
       children.forEach((child, j) => {
-        const ringIndex = Math.floor(j / maxPerRing);
-        const posInRing = j % maxPerRing;
-        const totalInRing = Math.min(maxPerRing, children.length - ringIndex * maxPerRing);
+        // Alternating tier radius (230px, 390px, 550px) to guarantee zero overlapping cards
+        const tier = j % 3;
+        const radius2 = 230 + tier * 160;
 
-        const radius2 = 210 + ringIndex * 150;
-        const ringAngleOffset = (ringIndex % 2 === 1 ? 0.12 : 0);
-
-        const subAngle = totalInRing === 1 
-          ? angle + ringAngleOffset 
-          : angle - spreadAngle / 2 + (posInRing * spreadAngle) / (totalInRing - 1) + ringAngleOffset;
+        const subAngle = numChildren === 1 
+          ? angle 
+          : angle - spreadAngle / 2 + (j * spreadAngle) / (numChildren - 1);
 
         const lx = hx + radius2 * Math.cos(subAngle);
         const ly = hy + radius2 * Math.sin(subAngle);
