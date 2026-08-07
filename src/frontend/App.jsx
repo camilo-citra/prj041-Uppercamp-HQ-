@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw, 
   ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check,
-  Upload, FilePlus, CheckCircle, CheckCircle2, X, Trash2, Edit2, Plus, Save, UserPlus, ShieldAlert
+  Upload, FilePlus, CheckCircle, CheckCircle2, X, Trash2, Edit2, Plus, Save, UserPlus, ShieldAlert, Network, Grid
 } from 'lucide-react';
 
 export default function App() {
@@ -1688,6 +1688,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
   const [showRetrospectiveDrawer, setShowRetrospectiveDrawer] = useState(true);
   const [ragAnswer, setRagAnswer] = useState(null);
   const [queryingRAG, setQueryingRAG] = useState(false);
+  const [viewMode, setViewMode] = useState('mindmap'); // 'mindmap' | 'grid'
 
   useEffect(() => {
     fetchDynamicsMap();
@@ -1734,95 +1735,157 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
 
   if (!data) return null;
 
-  // Grid constants
+  // Layout Constants
   const nodeWidth = 200;
-  const nodeHeight = 110;
-  const gapX = 80;
-  const gapY = 30;
+  const nodeHeight = 100;
 
-  // Group nodes by column (0: Risks, 1: Decisions, 2: Brief)
-  const col0Nodes = data.nodes.filter(n => n.column === 0);
-  const col1Nodes = data.nodes.filter(n => n.column === 1);
-  const col2Nodes = data.nodes.filter(n => n.column === 2);
-
-  // Compute (x, y) coordinates for each node
   const nodePositions = {};
+  const categoryHubs = [];
+  const mindMapCanvasWidth = 1400;
+  const mindMapCanvasHeight = 1000;
+  const cx = mindMapCanvasWidth / 2;
+  const cy = mindMapCanvasHeight / 2;
 
-  col0Nodes.forEach((node, idx) => {
-    nodePositions[node.id] = {
-      x: 30,
-      y: 40 + idx * (nodeHeight + gapY)
-    };
-  });
+  let canvasWidth = 0;
+  let canvasHeight = 0;
 
-  col1Nodes.forEach((node, idx) => {
-    nodePositions[node.id] = {
-      x: 30 + nodeWidth + gapX,
-      y: 40 + idx * (nodeHeight + gapY)
-    };
-  });
+  if (viewMode === 'grid') {
+    const gapX = 90;
+    const gapY = 30;
+    const col0Nodes = data.nodes.filter(n => n.column === 0);
+    const col1Nodes = data.nodes.filter(n => n.column === 1);
+    const col2Nodes = data.nodes.filter(n => n.column === 2);
 
-  col2Nodes.forEach((node, idx) => {
-    nodePositions[node.id] = {
-      x: 30 + (nodeWidth + gapX) * 2,
-      y: 40 + idx * (nodeHeight + gapY)
-    };
-  });
+    col0Nodes.forEach((node, idx) => {
+      nodePositions[node.id] = { x: 30, y: 40 + idx * (nodeHeight + gapY) };
+    });
+    col1Nodes.forEach((node, idx) => {
+      nodePositions[node.id] = { x: 30 + nodeWidth + gapX, y: 40 + idx * (nodeHeight + gapY) };
+    });
+    col2Nodes.forEach((node, idx) => {
+      nodePositions[node.id] = { x: 30 + (nodeWidth + gapX) * 2, y: 40 + idx * (nodeHeight + gapY) };
+    });
 
-  const maxNodesInCol = Math.max(col0Nodes.length, col1Nodes.length, col2Nodes.length);
-  const canvasWidth = 30 + (nodeWidth + gapX) * 2 + nodeWidth + 50;
-  const canvasHeight = 60 + maxNodesInCol * (nodeHeight + gapY);
+    const maxNodesInCol = Math.max(col0Nodes.length, col1Nodes.length, col2Nodes.length);
+    canvasWidth = 30 + (nodeWidth + gapX) * 2 + nodeWidth + 50;
+    canvasHeight = 60 + maxNodesInCol * (nodeHeight + gapY);
+  } else {
+    // MIND MAP / KNOWLEDGE GRAPH RADIAL LAYOUT
+    canvasWidth = mindMapCanvasWidth;
+    canvasHeight = mindMapCanvasHeight;
 
-  // High-volume clusters (>4 decisions)
+    // Root Center Node
+    nodePositions['root'] = { x: cx - 90, y: cy - 35, width: 180, height: 70 };
+
+    // Unique Impact Areas
+    const impactAreas = ['Budget', 'Specs', 'Process', 'Task Allocation', 'Fire Strategy', 'Scope', 'Brief', 'General'];
+    const activeImpactAreas = impactAreas.filter(area => 
+      data.nodes.some(n => n.impact_area === area || (area === 'Brief' && n.column === 2))
+    );
+
+    const radius1 = 280;
+    const numAreas = activeImpactAreas.length;
+
+    activeImpactAreas.forEach((area, i) => {
+      const angle = (i * 2 * Math.PI) / numAreas - Math.PI / 2;
+      const hx = cx + radius1 * Math.cos(angle);
+      const hy = cy + radius1 * Math.sin(angle);
+      const hubId = `hub_${area}`;
+
+      categoryHubs.push({
+        id: hubId,
+        label: area,
+        x: hx,
+        y: hy,
+        angle
+      });
+
+      nodePositions[hubId] = { x: hx - 65, y: hy - 22, width: 130, height: 44 };
+
+      // Children of this impact area
+      const children = data.nodes.filter(n => 
+        (n.impact_area === area) || 
+        (area === 'Brief' && n.type === 'brief_impact') || 
+        (area === 'General' && !n.impact_area)
+      );
+
+      const radius2 = 185;
+      const numChildren = children.length;
+      const spreadAngle = Math.PI / 2.3;
+
+      children.forEach((child, j) => {
+        const subAngle = numChildren === 1 ? angle : angle - spreadAngle / 2 + (j * spreadAngle) / (numChildren - 1);
+        const lx = hx + radius2 * Math.cos(subAngle);
+        const ly = hy + radius2 * Math.sin(subAngle);
+
+        nodePositions[child.id] = {
+          x: lx - nodeWidth / 2,
+          y: ly - nodeHeight / 2
+        };
+      });
+    });
+  }
+
+  // Volatile Clusters Alert
   const volatileClusters = Object.entries(data.clusterCounts || {})
     .filter(([_, count]) => count > 4)
     .map(([area, count]) => ({ area, count }));
 
   return (
-    <div style={{ display: 'flex', gap: '1.25rem', height: '100%', minHeight: '750px' }}>
-      {/* MAP CANVAS CONTAINER */}
-      <div style={{ flex: 1, background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.25rem', overflow: 'auto', position: 'relative' }}>
+    <div style={{ display: 'flex', gap: '1.25rem', height: '100%', minHeight: '800px' }}>
+      {/* CANVAS CONTAINER */}
+      <div style={{ flex: 1, background: 'rgba(15, 23, 42, 0.85)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.25rem', overflow: 'auto', position: 'relative' }}>
         
-        {/* MAP HEADER */}
+        {/* MAP HEADER & VIEW SWITCHER */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
           <div>
             <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', color: 'var(--primary-cyan)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldAlert size={20} /> Project Dynamics Map
+              <ShieldAlert size={20} /> Project Dynamics Map & Knowledge Graph
             </h3>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              3-Column Relational Synthesis: Relational Risks → Decision Clusters → Brief Scope Mutations
+              {viewMode === 'mindmap' ? 'Radial Mind Map View: Central Project Root → Impact Area Hubs → Dynamic Nodes' : '3-Column Grid View: Relational Risks → Decision Clusters → Brief Scope'}
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.78rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#f87171' }}>
-              <span style={{ width: '12px', height: '2px', background: '#f87171', borderStyle: 'dashed' }}></span> Creates Risk
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#4ade80' }}>
-              <span style={{ width: '12px', height: '2px', background: '#4ade80' }}></span> Closes Risk
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#38bdf8' }}>
-              <span style={{ width: '12px', height: '2px', background: '#38bdf8' }}></span> Affects Brief
-            </span>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            {/* VIEW MODE TOGGLE BUTTONS */}
+            <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(30, 41, 59, 0.9)', padding: '0.25rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <button
+                className={`tab-btn ${viewMode === 'mindmap' ? 'active' : ''}`}
+                onClick={() => setViewMode('mindmap')}
+                style={{ fontSize: '0.76rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+              >
+                <Network size={14} /> Mind Map / Knowledge Graph
+              </button>
+              <button
+                className={`tab-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                style={{ fontSize: '0.76rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+              >
+                <Grid size={14} /> 3-Column Grid
+              </button>
+            </div>
 
             <button
               onClick={() => setShowRetrospectiveDrawer(!showRetrospectiveDrawer)}
               className="tab-btn active"
-              style={{ fontSize: '0.76rem', padding: '0.3rem 0.65rem' }}
+              style={{ fontSize: '0.76rem', padding: '0.35rem 0.7rem' }}
             >
               {showRetrospectiveDrawer ? 'Hide Drawer' : 'Show Retrospective Alert'}
             </button>
           </div>
         </div>
 
-        {/* COLUMN HEADERS */}
-        <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '1rem', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: '#f87171' }}>LEVEL 0: RISK FACTORS</div>
-          <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: 'var(--primary-cyan)' }}>LEVEL 1: DECISIONS</div>
-          <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: '#c084fc' }}>LEVEL 2: BRIEF & SCOPE</div>
-        </div>
+        {/* COLUMN HEADERS FOR GRID MODE */}
+        {viewMode === 'grid' && (
+          <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '1rem', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: '#f87171' }}>LEVEL 0: RISK FACTORS</div>
+            <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: 'var(--primary-cyan)' }}>LEVEL 1: DECISIONS</div>
+            <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: '#c084fc' }}>LEVEL 2: BRIEF & SCOPE</div>
+          </div>
+        )}
 
-        {/* SVG DIAGRAM LAYER */}
+        {/* SVG GRAPH CANVAS LAYER */}
         <div style={{ position: 'relative', width: `${canvasWidth}px`, height: `${canvasHeight}px` }}>
           <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
             <defs>
@@ -1837,14 +1900,57 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
               </marker>
             </defs>
 
+            {/* MIND MAP RADIAL BRANCHES (Root -> Hub -> Children) */}
+            {viewMode === 'mindmap' && (
+              <>
+                {categoryHubs.map(hub => {
+                  const rootPos = nodePositions['root'];
+                  if (!rootPos) return null;
+                  return (
+                    <line
+                      key={`branch_root_${hub.id}`}
+                      x1={rootPos.x + rootPos.width / 2}
+                      y1={rootPos.y + rootPos.height / 2}
+                      x2={hub.x}
+                      y2={hub.y}
+                      stroke="rgba(56, 189, 248, 0.4)"
+                      strokeWidth="2.5"
+                      strokeDasharray="4,4"
+                    />
+                  );
+                })}
+
+                {categoryHubs.map(hub => {
+                  const hubArea = hub.label;
+                  const children = data.nodes.filter(n => (n.impact_area === hubArea) || (hubArea === 'Brief' && n.type === 'brief_impact') || (hubArea === 'General' && !n.impact_area));
+                  return children.map(child => {
+                    const childPos = nodePositions[child.id];
+                    if (!childPos) return null;
+                    return (
+                      <line
+                        key={`branch_hub_${hub.id}_${child.id}`}
+                        x1={hub.x}
+                        y1={hub.y}
+                        x2={childPos.x + nodeWidth / 2}
+                        y2={childPos.y + nodeHeight / 2}
+                        stroke="rgba(148, 163, 184, 0.3)"
+                        strokeWidth="1.5"
+                      />
+                    );
+                  });
+                })}
+              </>
+            )}
+
+            {/* CROSS-ENTITY KNOWLEDGE GRAPH EDGES (Creates Risk, Closes Risk, Affects Brief) */}
             {data.edges.map(edge => {
               const srcPos = nodePositions[edge.source];
               const tgtPos = nodePositions[edge.target];
               if (!srcPos || !tgtPos) return null;
 
-              const x1 = srcPos.x + nodeWidth;
+              const x1 = viewMode === 'grid' ? srcPos.x + nodeWidth : srcPos.x + nodeWidth / 2;
               const y1 = srcPos.y + nodeHeight / 2;
-              const x2 = tgtPos.x;
+              const x2 = viewMode === 'grid' ? tgtPos.x : tgtPos.x + nodeWidth / 2;
               const y2 = tgtPos.y + nodeHeight / 2;
 
               const isHighlighted = hoveredNodeId && (hoveredNodeId === edge.source || hoveredNodeId === edge.target);
@@ -1852,24 +1958,83 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
               const isDashed = edge.type === 'creates_risk';
               const markerId = edge.type === 'creates_risk' ? 'url(#arrow-creates)' : edge.type === 'closes_risk' ? 'url(#arrow-closes)' : 'url(#arrow-affects)';
 
-              const pathD = `M ${x1} ${y1} C ${x1 + gapX / 2} ${y1}, ${x2 - gapX / 2} ${y2}, ${x2} ${y2}`;
+              const pathD = viewMode === 'grid' 
+                ? `M ${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 40} ${y2}, ${x2} ${y2}`
+                : `M ${x1} ${y1} Q ${(x1 + x2) / 2 + 20} ${(y1 + y2) / 2 - 20} ${x2} ${y2}`;
 
               return (
-                <g key={edge.id}>
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke={color}
-                    strokeWidth={isHighlighted ? 3 : 1.5}
-                    strokeDasharray={isDashed ? '5,5' : 'none'}
-                    strokeOpacity={hoveredNodeId ? (isHighlighted ? 1 : 0.2) : 0.7}
-                    markerEnd={markerId}
-                    style={{ transition: 'stroke-opacity 0.2s, stroke-width 0.2s' }}
-                  />
-                </g>
+                <path
+                  key={edge.id}
+                  d={pathD}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={isHighlighted ? 3 : 1.5}
+                  strokeDasharray={isDashed ? '5,5' : 'none'}
+                  strokeOpacity={hoveredNodeId ? (isHighlighted ? 1 : 0.15) : 0.6}
+                  markerEnd={markerId}
+                  style={{ transition: 'stroke-opacity 0.2s, stroke-width 0.2s' }}
+                />
               );
             })}
           </svg>
+
+          {/* MIND MAP ROOT CENTER NODE */}
+          {viewMode === 'mindmap' && nodePositions['root'] && (
+            <div
+              style={{
+                position: 'absolute',
+                left: `${nodePositions['root'].x}px`,
+                top: `${nodePositions['root'].y}px`,
+                width: `${nodePositions['root'].width}px`,
+                height: `${nodePositions['root'].height}px`,
+                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(99, 102, 241, 0.4))',
+                border: '2px solid var(--primary-cyan)',
+                borderRadius: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 25px rgba(56, 189, 248, 0.5)',
+                zIndex: 20
+              }}
+            >
+              <ShieldAlert size={22} color="var(--primary-cyan)" />
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)', marginTop: '0.2rem' }}>
+                prj041 Uppercamp HQ
+              </h4>
+            </div>
+          )}
+
+          {/* MIND MAP CATEGORY HUBS */}
+          {viewMode === 'mindmap' && categoryHubs.map(hub => {
+            const pos = nodePositions[hub.id];
+            if (!pos) return null;
+            return (
+              <div
+                key={hub.id}
+                style={{
+                  position: 'absolute',
+                  left: `${pos.x}px`,
+                  top: `${pos.y}px`,
+                  width: `${pos.width}px`,
+                  height: `${pos.height}px`,
+                  background: 'rgba(30, 41, 59, 0.95)',
+                  border: '1.5px solid #fbbf24',
+                  borderRadius: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  color: '#fbbf24',
+                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)',
+                  zIndex: 15
+                }}
+              >
+                {hub.label}
+              </div>
+            );
+          })}
 
           {/* NODES LAYER */}
           {data.nodes.map(node => {
@@ -1900,20 +2065,20 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                   background: bgColor,
                   border: `1.5px solid ${isHovered || isSelected ? '#fff' : borderColor}`,
                   borderRadius: '12px',
-                  padding: '0.65rem 0.75rem',
+                  padding: '0.6rem 0.7rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justify: 'space-between',
                   cursor: 'pointer',
                   boxShadow: isHovered ? `0 0 15px ${borderColor}` : '0 4px 12px rgba(0,0,0,0.4)',
                   transition: 'all 0.2s ease-in-out',
-                  transform: isHovered ? 'scale(1.03)' : 'scale(1)',
-                  zIndex: isHovered ? 10 : 2
+                  transform: isHovered ? 'scale(1.04)' : 'scale(1)',
+                  zIndex: isHovered ? 12 : 5
                 }}
               >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: borderColor, textTransform: 'uppercase' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 700, color: borderColor, textTransform: 'uppercase' }}>
                       {node.type === 'risk_factor' ? (node.status === 'Closed' ? 'Closed Risk' : 'Open Risk') : node.type === 'decision' ? node.impact_area : 'Scope Item'}
                     </span>
                     {node.type === 'risk_factor' ? (
@@ -1925,12 +2090,12 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                     )}
                   </div>
 
-                  <h5 style={{ fontSize: '0.78rem', fontWeight: 600, color: '#f3f4f6', lineHeight: '1.3', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                  <h5 style={{ fontSize: '0.76rem', fontWeight: 600, color: '#f3f4f6', lineHeight: '1.25', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                     {node.label}
                   </h5>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.68rem', color: 'var(--text-muted)', paddingTop: '0.3rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.66rem', color: 'var(--text-muted)', paddingTop: '0.25rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                   <span>{node.meeting_id || 'Core'}</span>
                   <span style={{ color: '#38bdf8', fontWeight: 600 }}>Click details</span>
                 </div>
