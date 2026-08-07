@@ -1728,7 +1728,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
   if (loading) {
     return (
       <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        <RefreshCw size={24} className="spin" /> Loading Project Dynamics Map...
+        <RefreshCw size={24} className="spin" /> Loading Project Dynamics Map & Knowledge Graph...
       </div>
     );
   }
@@ -1736,13 +1736,13 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
   if (!data) return null;
 
   // Layout Constants
-  const nodeWidth = 200;
-  const nodeHeight = 100;
+  const nodeWidth = 210;
+  const nodeHeight = 105;
 
   const nodePositions = {};
   const categoryHubs = [];
-  const mindMapCanvasWidth = 1400;
-  const mindMapCanvasHeight = 1000;
+  const mindMapCanvasWidth = 1750;
+  const mindMapCanvasHeight = 1250;
   const cx = mindMapCanvasWidth / 2;
   const cy = mindMapCanvasHeight / 2;
 
@@ -1770,20 +1770,20 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
     canvasWidth = 30 + (nodeWidth + gapX) * 2 + nodeWidth + 50;
     canvasHeight = 60 + maxNodesInCol * (nodeHeight + gapY);
   } else {
-    // MIND MAP / KNOWLEDGE GRAPH RADIAL LAYOUT
+    // MIND MAP / KNOWLEDGE GRAPH RADIAL MULTI-RING LAYOUT (ZERO OVERLAP)
     canvasWidth = mindMapCanvasWidth;
     canvasHeight = mindMapCanvasHeight;
 
     // Root Center Node
-    nodePositions['root'] = { x: cx - 90, y: cy - 35, width: 180, height: 70 };
+    nodePositions['root'] = { x: cx - 100, y: cy - 35, width: 200, height: 70 };
 
     // Unique Impact Areas
     const impactAreas = ['Budget', 'Specs', 'Process', 'Task Allocation', 'Fire Strategy', 'Scope', 'Brief', 'General'];
     const activeImpactAreas = impactAreas.filter(area => 
-      data.nodes.some(n => n.impact_area === area || (area === 'Brief' && n.column === 2))
+      data.nodes.some(n => n.impact_area === area || (area === 'Brief' && n.type === 'brief_impact'))
     );
 
-    const radius1 = 280;
+    const radius1 = 330;
     const numAreas = activeImpactAreas.length;
 
     activeImpactAreas.forEach((area, i) => {
@@ -1800,7 +1800,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
         angle
       });
 
-      nodePositions[hubId] = { x: hx - 65, y: hy - 22, width: 130, height: 44 };
+      nodePositions[hubId] = { x: hx - 70, y: hy - 24, width: 140, height: 48 };
 
       // Children of this impact area
       const children = data.nodes.filter(n => 
@@ -1809,12 +1809,21 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
         (area === 'General' && !n.impact_area)
       );
 
-      const radius2 = 185;
-      const numChildren = children.length;
-      const spreadAngle = Math.PI / 2.3;
+      const maxPerRing = 4;
+      const spreadAngle = Math.PI / 1.7;
 
       children.forEach((child, j) => {
-        const subAngle = numChildren === 1 ? angle : angle - spreadAngle / 2 + (j * spreadAngle) / (numChildren - 1);
+        const ringIndex = Math.floor(j / maxPerRing);
+        const posInRing = j % maxPerRing;
+        const totalInRing = Math.min(maxPerRing, children.length - ringIndex * maxPerRing);
+
+        const radius2 = 210 + ringIndex * 150;
+        const ringAngleOffset = (ringIndex % 2 === 1 ? 0.12 : 0);
+
+        const subAngle = totalInRing === 1 
+          ? angle + ringAngleOffset 
+          : angle - spreadAngle / 2 + (posInRing * spreadAngle) / (totalInRing - 1) + ringAngleOffset;
+
         const lx = hx + radius2 * Math.cos(subAngle);
         const ly = hy + radius2 * Math.sin(subAngle);
 
@@ -1831,10 +1840,16 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
     .filter(([_, count]) => count > 4)
     .map(([area, count]) => ({ area, count }));
 
+  // Compute connected neighbors for selected or hovered node
+  const getConnectedEdges = (nodeId) => {
+    if (!nodeId) return [];
+    return data.edges.filter(e => e.source === nodeId || e.target === nodeId);
+  };
+
   return (
-    <div style={{ display: 'flex', gap: '1.25rem', height: '100%', minHeight: '800px' }}>
+    <div style={{ display: 'flex', gap: '1.25rem', height: '100%', minHeight: '850px' }}>
       {/* CANVAS CONTAINER */}
-      <div style={{ flex: 1, background: 'rgba(15, 23, 42, 0.85)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.25rem', overflow: 'auto', position: 'relative' }}>
+      <div style={{ flex: 1, background: 'rgba(15, 23, 42, 0.88)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.25rem', overflow: 'auto', position: 'relative' }}>
         
         {/* MAP HEADER & VIEW SWITCHER */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
@@ -1843,7 +1858,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
               <ShieldAlert size={20} /> Project Dynamics Map & Knowledge Graph
             </h3>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              {viewMode === 'mindmap' ? 'Radial Mind Map View: Central Project Root → Impact Area Hubs → Dynamic Nodes' : '3-Column Grid View: Relational Risks → Decision Clusters → Brief Scope'}
+              {viewMode === 'mindmap' ? 'Multi-Tier Radial Knowledge Graph: Root → Category Hubs → Multi-level Decision & Risk Chains' : '3-Column Grid View: Relational Risks → Decision Clusters → Brief Scope'}
             </p>
           </div>
 
@@ -1876,12 +1891,35 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
           </div>
         </div>
 
+        {/* LEGEND BAR */}
+        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', fontSize: '0.78rem', marginBottom: '1rem', background: 'rgba(15, 23, 42, 0.6)', padding: '0.5rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Relationships Legend:</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#f87171' }}>
+            <span style={{ width: '14px', height: '2px', background: '#f87171', borderStyle: 'dashed' }}></span> Creates Risk
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#4ade80' }}>
+            <span style={{ width: '14px', height: '2px', background: '#4ade80' }}></span> Closes Risk
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#38bdf8' }}>
+            <span style={{ width: '14px', height: '2px', background: '#38bdf8' }}></span> Affects Brief Scope
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#f59e0b' }}>
+            <span style={{ width: '14px', height: '2px', background: '#f59e0b' }}></span> Decision Evolution (Inter-linked)
+          </span>
+        </div>
+
         {/* COLUMN HEADERS FOR GRID MODE */}
         {viewMode === 'grid' && (
-          <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '1rem', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: '#f87171' }}>LEVEL 0: RISK FACTORS</div>
-            <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: 'var(--primary-cyan)' }}>LEVEL 1: DECISIONS</div>
-            <div style={{ width: `${nodeWidth}px`, textAlign: 'center', color: '#c084fc' }}>LEVEL 2: BRIEF & SCOPE</div>
+          <div style={{ position: 'relative', width: `${canvasWidth}px`, height: '35px', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.85rem' }}>
+            <div style={{ position: 'absolute', left: '30px', width: `${nodeWidth}px`, textAlign: 'center', color: '#f87171' }}>
+              LEVEL 0: RISK FACTORS
+            </div>
+            <div style={{ position: 'absolute', left: `${30 + nodeWidth + 90}px`, width: `${nodeWidth}px`, textAlign: 'center', color: 'var(--primary-cyan)' }}>
+              LEVEL 1: DECISIONS
+            </div>
+            <div style={{ position: 'absolute', left: `${30 + (nodeWidth + 90) * 2}px`, width: `${nodeWidth}px`, textAlign: 'center', color: '#c084fc' }}>
+              LEVEL 2: BRIEF & SCOPE
+            </div>
           </div>
         )}
 
@@ -1898,6 +1936,9 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
               <marker id="arrow-affects" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
               </marker>
+              <marker id="arrow-evolves" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b" />
+              </marker>
             </defs>
 
             {/* MIND MAP RADIAL BRANCHES (Root -> Hub -> Children) */}
@@ -1913,7 +1954,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                       y1={rootPos.y + rootPos.height / 2}
                       x2={hub.x}
                       y2={hub.y}
-                      stroke="rgba(56, 189, 248, 0.4)"
+                      stroke="rgba(56, 189, 248, 0.35)"
                       strokeWidth="2.5"
                       strokeDasharray="4,4"
                     />
@@ -1933,8 +1974,8 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                         y1={hub.y}
                         x2={childPos.x + nodeWidth / 2}
                         y2={childPos.y + nodeHeight / 2}
-                        stroke="rgba(148, 163, 184, 0.3)"
-                        strokeWidth="1.5"
+                        stroke="rgba(148, 163, 184, 0.25)"
+                        strokeWidth="1.2"
                       />
                     );
                   });
@@ -1942,7 +1983,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
               </>
             )}
 
-            {/* CROSS-ENTITY KNOWLEDGE GRAPH EDGES (Creates Risk, Closes Risk, Affects Brief) */}
+            {/* KNOWLEDGE GRAPH EDGES (Creates, Closes, Affects Brief, Decision Evolution) */}
             {data.edges.map(edge => {
               const srcPos = nodePositions[edge.source];
               const tgtPos = nodePositions[edge.target];
@@ -1954,13 +1995,20 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
               const y2 = tgtPos.y + nodeHeight / 2;
 
               const isHighlighted = hoveredNodeId && (hoveredNodeId === edge.source || hoveredNodeId === edge.target);
-              const color = edge.type === 'creates_risk' ? '#f87171' : edge.type === 'closes_risk' ? '#4ade80' : '#38bdf8';
-              const isDashed = edge.type === 'creates_risk';
-              const markerId = edge.type === 'creates_risk' ? 'url(#arrow-creates)' : edge.type === 'closes_risk' ? 'url(#arrow-closes)' : 'url(#arrow-affects)';
+              
+              const color = edge.type === 'creates_risk' ? '#f87171' : 
+                            edge.type === 'closes_risk' ? '#4ade80' : 
+                            edge.type === 'evolves_to' ? '#f59e0b' : '#38bdf8';
+              
+              const isDashed = edge.type === 'creates_risk' || edge.type === 'evolves_to';
+              
+              const markerId = edge.type === 'creates_risk' ? 'url(#arrow-creates)' : 
+                               edge.type === 'closes_risk' ? 'url(#arrow-closes)' : 
+                               edge.type === 'evolves_to' ? 'url(#arrow-evolves)' : 'url(#arrow-affects)';
 
               const pathD = viewMode === 'grid' 
                 ? `M ${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 40} ${y2}, ${x2} ${y2}`
-                : `M ${x1} ${y1} Q ${(x1 + x2) / 2 + 20} ${(y1 + y2) / 2 - 20} ${x2} ${y2}`;
+                : `M ${x1} ${y1} Q ${(x1 + x2) / 2 + 25} ${(y1 + y2) / 2 - 25} ${x2} ${y2}`;
 
               return (
                 <path
@@ -1968,9 +2016,9 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                   d={pathD}
                   fill="none"
                   stroke={color}
-                  strokeWidth={isHighlighted ? 3 : 1.5}
+                  strokeWidth={isHighlighted ? 3.5 : (edge.type === 'evolves_to' ? 2 : 1.5)}
                   strokeDasharray={isDashed ? '5,5' : 'none'}
-                  strokeOpacity={hoveredNodeId ? (isHighlighted ? 1 : 0.15) : 0.6}
+                  strokeOpacity={hoveredNodeId ? (isHighlighted ? 1 : 0.12) : 0.65}
                   markerEnd={markerId}
                   style={{ transition: 'stroke-opacity 0.2s, stroke-width 0.2s' }}
                 />
@@ -1987,19 +2035,19 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                 top: `${nodePositions['root'].y}px`,
                 width: `${nodePositions['root'].width}px`,
                 height: `${nodePositions['root'].height}px`,
-                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(99, 102, 241, 0.4))',
-                border: '2px solid var(--primary-cyan)',
-                borderRadius: '20px',
+                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.35), rgba(99, 102, 241, 0.45))',
+                border: '2.5px solid var(--primary-cyan)',
+                borderRadius: '22px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 0 25px rgba(56, 189, 248, 0.5)',
+                boxShadow: '0 0 30px rgba(56, 189, 248, 0.6)',
                 zIndex: 20
               }}
             >
-              <ShieldAlert size={22} color="var(--primary-cyan)" />
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)', marginTop: '0.2rem' }}>
+              <ShieldAlert size={24} color="var(--primary-cyan)" />
+              <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)', marginTop: '0.25rem' }}>
                 prj041 Uppercamp HQ
               </h4>
             </div>
@@ -2019,15 +2067,15 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                   width: `${pos.width}px`,
                   height: `${pos.height}px`,
                   background: 'rgba(30, 41, 59, 0.95)',
-                  border: '1.5px solid #fbbf24',
-                  borderRadius: '24px',
+                  border: '2px solid #fbbf24',
+                  borderRadius: '26px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontWeight: 700,
-                  fontSize: '0.82rem',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
                   color: '#fbbf24',
-                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)',
+                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.6)',
                   zIndex: 15
                 }}
               >
@@ -2047,8 +2095,8 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
             const borderColor = node.type === 'risk_factor' ? (node.status === 'Closed' ? '#4ade80' : '#f87171') :
                                 node.type === 'decision' ? 'var(--primary-cyan)' : '#c084fc';
             
-            const bgColor = node.type === 'risk_factor' ? 'rgba(30, 20, 30, 0.9)' :
-                            node.type === 'decision' ? 'rgba(15, 23, 42, 0.95)' : 'rgba(25, 18, 45, 0.9)';
+            const bgColor = node.type === 'risk_factor' ? 'rgba(30, 20, 30, 0.95)' :
+                            node.type === 'decision' ? 'rgba(15, 23, 42, 0.96)' : 'rgba(25, 18, 45, 0.95)';
 
             return (
               <div
@@ -2070,9 +2118,9 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                   flexDirection: 'column',
                   justify: 'space-between',
                   cursor: 'pointer',
-                  boxShadow: isHovered ? `0 0 15px ${borderColor}` : '0 4px 12px rgba(0,0,0,0.4)',
+                  boxShadow: isHovered ? `0 0 20px ${borderColor}` : '0 4px 12px rgba(0,0,0,0.5)',
                   transition: 'all 0.2s ease-in-out',
-                  transform: isHovered ? 'scale(1.04)' : 'scale(1)',
+                  transform: isHovered ? 'scale(1.05)' : 'scale(1)',
                   zIndex: isHovered ? 12 : 5
                 }}
               >
@@ -2097,7 +2145,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.66rem', color: 'var(--text-muted)', paddingTop: '0.25rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                   <span>{node.meeting_id || 'Core'}</span>
-                  <span style={{ color: '#38bdf8', fontWeight: 600 }}>Click details</span>
+                  <span style={{ color: '#38bdf8', fontWeight: 600 }}>Inspect details</span>
                 </div>
               </div>
             );
@@ -2157,29 +2205,88 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
               </div>
             </div>
           )}
+        </div>
+      )}
 
-          {/* SELECTED NODE DETAILS DRAWER */}
-          {selectedNode && (
-            <div style={{ background: 'rgba(30, 41, 59, 0.8)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '0.85rem', marginTop: 'auto' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--primary-cyan)', fontWeight: 700, textTransform: 'uppercase' }}>
-                  {selectedNode.type} Details
-                </span>
-                <button onClick={() => setSelectedNode(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                  <X size={14} />
-                </button>
+      {/* DEDICATED CENTERED FLOATING NODE DETAILS MODAL */}
+      {selectedNode && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '1rem' }}>
+          <div style={{ background: '#0f172a', border: '1px solid var(--primary-cyan)', borderRadius: '18px', padding: '1.75rem', width: '100%', maxWidth: '620px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            
+            {/* MODAL HEADER */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.85rem' }}>
+              <div>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.35rem' }}>
+                  <span className="badge badge-in-progress" style={{ background: 'rgba(56, 189, 248, 0.15)', color: 'var(--primary-cyan)', fontSize: '0.75rem', fontWeight: 700 }}>
+                    {selectedNode.type === 'risk_factor' ? 'Risk Factor' : selectedNode.type === 'decision' ? `Decision (${selectedNode.impact_area})` : 'Scope Item'}
+                  </span>
+                  {selectedNode.meeting_id && (
+                    <span className="badge badge-in-progress" style={{ fontSize: '0.72rem' }}>
+                      Linked to {selectedNode.meeting_id}
+                    </span>
+                  )}
+                </div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f3f4f6', fontFamily: 'var(--font-heading)', lineHeight: '1.35' }}>
+                  {selectedNode.label}
+                </h3>
               </div>
-              <h5 style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 700, marginBottom: '0.3rem' }}>
-                {selectedNode.label}
-              </h5>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                {selectedNode.summary || selectedNode.description || selectedNode.contingency}
-              </p>
+
+              <button onClick={() => setSelectedNode(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}>
+                <X size={22} />
+              </button>
             </div>
-          )}
+
+            {/* MODAL BODY */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.86rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+              <div>
+                <strong style={{ color: '#fff', display: 'block', marginBottom: '0.25rem' }}>Summary / Description:</strong>
+                <p style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.06)', margin: 0 }}>
+                  {selectedNode.summary || selectedNode.description}
+                </p>
+              </div>
+
+              {selectedNode.contingency && (
+                <div>
+                  <strong style={{ color: '#f87171', display: 'block', marginBottom: '0.25rem' }}>Contingency / Mitigation Measure:</strong>
+                  <p style={{ background: 'rgba(248, 113, 113, 0.08)', borderLeft: '3px solid #f87171', padding: '0.65rem 0.85rem', borderRadius: '8px', margin: 0, fontSize: '0.84rem' }}>
+                    {selectedNode.contingency}
+                  </p>
+                </div>
+              )}
+
+              {/* CONNECTED NEIGHBORS */}
+              <div>
+                <strong style={{ color: '#38bdf8', display: 'block', marginBottom: '0.4rem' }}>Connected Relationships ({getConnectedEdges(selectedNode.id).length}):</strong>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '160px', overflowY: 'auto' }}>
+                  {getConnectedEdges(selectedNode.id).map(edge => {
+                    const otherId = edge.source === selectedNode.id ? edge.target : edge.source;
+                    const otherNode = data.nodes.find(n => n.id === otherId);
+                    if (!otherNode) return null;
+
+                    const color = edge.type === 'creates_risk' ? '#f87171' : edge.type === 'closes_risk' ? '#4ade80' : edge.type === 'evolves_to' ? '#f59e0b' : '#38bdf8';
+
+                    return (
+                      <div key={edge.id} onClick={() => setSelectedNode(otherNode)} style={{ background: 'rgba(30, 41, 59, 0.7)', border: `1px solid ${color}`, borderRadius: '8px', padding: '0.45rem 0.65rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', fontSize: '0.78rem' }}>
+                        <span style={{ color: '#f3f4f6', fontWeight: 500 }}>{otherNode.label}</span>
+                        <span style={{ color, fontWeight: 700, textTransform: 'capitalize' }}>{edge.type.replace('_', ' ')}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* MODAL FOOTER */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '0.85rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              <button onClick={() => setSelectedNode(null)} className="tab-btn active" style={{ padding: '0.45rem 1.2rem', fontWeight: 600 }}>
+                Close Details
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
 }
+
 

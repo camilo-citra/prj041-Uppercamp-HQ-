@@ -422,7 +422,32 @@ app.get('/api/dynamics-map', (req, res) => {
       });
     });
 
+    // 3. Build Inter-Decision Evolution Edges (evolves_to)
+    const decisionsByArea = {};
+    decisionNodes.forEach(d => {
+      if (!decisionsByArea[d.impact_area]) decisionsByArea[d.impact_area] = [];
+      decisionsByArea[d.impact_area].push(d);
+    });
+
+    Object.values(decisionsByArea).forEach(group => {
+      for (let i = 0; i < group.length - 1; i++) {
+        const src = group[i];
+        const tgt = group[i + 1];
+        const edgeId = `edge_dec_${src.db_id}_evolves_${tgt.db_id}`;
+        if (!edgeSet.has(edgeId)) {
+          edgeSet.add(edgeId);
+          edges.push({
+            id: edgeId,
+            source: src.id,
+            target: tgt.id,
+            type: 'evolves_to'
+          });
+        }
+      }
+    });
+
     const clusterCounts = {};
+
     decisionNodes.forEach(d => {
       clusterCounts[d.impact_area] = (clusterCounts[d.impact_area] || 0) + 1;
     });
