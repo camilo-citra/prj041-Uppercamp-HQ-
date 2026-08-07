@@ -223,11 +223,11 @@ app.get('/api/stakeholders', (req, res) => {
   const actionList = db.prepare(`SELECT assignee FROM action_items`).all();
 
   const enriched = stakeholders.map(s => {
-    const meetingsAttended = meetingList.filter(m => 
+    const meetingsAttended = meetingList.filter(m =>
       m.attendees && m.attendees.toLowerCase().includes(s.name.toLowerCase())
     ).length;
 
-    const actionsAssigned = actionList.filter(a => 
+    const actionsAssigned = actionList.filter(a =>
       a.assignee && a.assignee.toLowerCase().includes(s.name.toLowerCase().split(' ')[0])
     ).length;
 
@@ -322,7 +322,7 @@ app.get('/api/dynamics-map', (req, res) => {
 
     // Dynamic Meeting Timeline Columns Query from DB
     const dbMeetings = db.prepare(`SELECT id, title, date FROM meeting_metadata ORDER BY date ASC, id ASC`).all();
-    
+
     const meetingMap = {};
     const meetings = [];
 
@@ -340,7 +340,7 @@ app.get('/api/dynamics-map', (req, res) => {
     sourceMeetings.forEach((m, idx) => {
       const mtgLabel = `MEETING ${idx + 1}`;
       const mtgDate = m.date ? (m.date.length > 12 ? m.date.slice(0, 10) : m.date) : `Stage ${idx + 1}`;
-      
+
       meetingMap[m.id] = { col: idx, label: mtgLabel, date: mtgDate };
       meetings.push({ col: idx, key: m.id, label: mtgLabel, date: mtgDate });
     });

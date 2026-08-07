@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw, 
+import {
+  Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw,
   ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check,
   Upload, FilePlus, CheckCircle, CheckCircle2, X, Trash2, Edit2, Plus, Save, UserPlus, ShieldAlert, Network, Grid
 } from 'lucide-react';
@@ -295,7 +295,7 @@ export default function App() {
 
   const handleActionStatusChange = async (actionId, newStatus) => {
     // Instant optimistic update for Kanban state
-    setActions(prevActions => 
+    setActions(prevActions =>
       prevActions.map(act => act.id === actionId ? { ...act, status: newStatus } : act)
     );
 
@@ -414,7 +414,7 @@ export default function App() {
 
   const handleSaveAction = async (actionId) => {
     // Instant optimistic update for Kanban state
-    setActions(prevActions => 
+    setActions(prevActions =>
       prevActions.map(act => act.id === actionId ? { ...act, ...editActionForm } : act)
     );
 
@@ -465,43 +465,43 @@ export default function App() {
         </div>
 
         <nav className="nav-tabs">
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'meetings' ? 'active' : ''}`}
             onClick={() => setActiveTab('meetings')}
           >
             <Calendar size={16} /> Meeting Minutes
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'risks' ? 'active' : ''}`}
             onClick={() => setActiveTab('risks')}
           >
             <AlertTriangle size={16} /> Risk Matrix
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'actions' ? 'active' : ''}`}
             onClick={() => setActiveTab('actions')}
           >
             <CheckSquare size={16} /> Action Items
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'brief' ? 'active' : ''}`}
             onClick={() => setActiveTab('brief')}
           >
             <Layers size={16} /> Brief & Assumptions
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'team' ? 'active' : ''}`}
             onClick={() => setActiveTab('team')}
           >
             <Users size={16} /> Project Team ({stakeholders.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'rag' ? 'active' : ''}`}
             onClick={() => setActiveTab('rag')}
           >
             <MessageSquare size={16} /> RAG Intelligence
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'dynamics' ? 'active' : ''}`}
             onClick={() => setActiveTab('dynamics')}
           >
@@ -510,17 +510,17 @@ export default function App() {
         </nav>
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button 
-            className="tab-btn active" 
+          <button
+            className="tab-btn active"
             onClick={() => setShowUploadModal(true)}
             style={{ background: 'var(--primary-cyan)', color: '#090d16', fontWeight: 700 }}
           >
             <Upload size={16} /> Upload Summary to RAW
           </button>
 
-          <button 
-            className="tab-btn" 
-            onClick={handleIngest} 
+          <button
+            className="tab-btn"
+            onClick={handleIngest}
             disabled={ingesting}
             style={{ background: 'rgba(56, 189, 248, 0.1)', borderColor: 'var(--border-highlight)' }}
           >
@@ -540,7 +540,7 @@ export default function App() {
                 Chronological Sessions ({meetings.length})
               </h3>
               {meetings.map((m) => (
-                <div 
+                <div
                   key={m.id}
                   className={`meeting-item ${selectedMeetingId === m.id ? 'active' : ''}`}
                   onClick={() => {
@@ -576,9 +576,9 @@ export default function App() {
                   </div>
                   <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
                     {meetingDetail.gemini_link && (
-                      <a 
-                        href={meetingDetail.gemini_link} 
-                        target="_blank" 
+                      <a
+                        href={meetingDetail.gemini_link}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="tab-btn"
                         style={{ background: 'rgba(129, 140, 248, 0.15)', color: '#a5b4fc' }}
@@ -676,8 +676,8 @@ export default function App() {
                             </div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Assigned to: {a.assignee} | Due: {a.due_date}</div>
                           </div>
-                          <select 
-                            value={a.status} 
+                          <select
+                            value={a.status}
                             onChange={(e) => handleActionStatusChange(a.id, e.target.value)}
                             style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', padding: '0.3rem 0.6rem', borderRadius: '6px', fontSize: '0.8rem' }}
                           >
@@ -746,9 +746,9 @@ export default function App() {
                 )}
 
                 <div style={{ marginTop: '2rem' }}>
-                  <button 
-                    onClick={() => setShowRawMarkdown(!showRawMarkdown)} 
-                    className="tab-btn" 
+                  <button
+                    onClick={() => setShowRawMarkdown(!showRawMarkdown)}
+                    className="tab-btn"
                     style={{ fontSize: '0.8rem' }}
                   >
                     <FileText size={14} /> {showRawMarkdown ? 'Hide Raw Markdown' : 'Show Raw Markdown Document'}
@@ -855,7 +855,7 @@ export default function App() {
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   {['All', 'Open', 'Closed'].map((status) => (
-                    <button 
+                    <button
                       key={status}
                       className={`tab-btn ${riskStatusFilter === status ? 'active' : ''}`}
                       onClick={() => setRiskStatusFilter(status)}
@@ -878,18 +878,18 @@ export default function App() {
                         </div>
                         <div>
                           <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Description:</label>
-                          <textarea 
+                          <textarea
                             value={editRiskForm.description}
-                            onChange={(e) => setEditRiskForm({...editRiskForm, description: e.target.value})}
+                            onChange={(e) => setEditRiskForm({ ...editRiskForm, description: e.target.value })}
                             style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem', fontSize: '0.88rem', marginTop: '0.2rem' }}
                             rows={2}
                           />
                         </div>
                         <div>
                           <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Mitigation / Contingency Measure:</label>
-                          <textarea 
+                          <textarea
                             value={editRiskForm.contingency_measure}
-                            onChange={(e) => setEditRiskForm({...editRiskForm, contingency_measure: e.target.value})}
+                            onChange={(e) => setEditRiskForm({ ...editRiskForm, contingency_measure: e.target.value })}
                             style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem', fontSize: '0.88rem', marginTop: '0.2rem' }}
                             rows={2}
                           />
@@ -897,9 +897,9 @@ export default function App() {
                         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                           <div>
                             <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block' }}>Impact Level:</label>
-                            <select 
+                            <select
                               value={editRiskForm.impact_level}
-                              onChange={(e) => setEditRiskForm({...editRiskForm, impact_level: e.target.value})}
+                              onChange={(e) => setEditRiskForm({ ...editRiskForm, impact_level: e.target.value })}
                               style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
                             >
                               <option value="High">High Impact</option>
@@ -909,9 +909,9 @@ export default function App() {
                           </div>
                           <div>
                             <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block' }}>Likelihood:</label>
-                            <select 
+                            <select
                               value={editRiskForm.likelihood}
-                              onChange={(e) => setEditRiskForm({...editRiskForm, likelihood: e.target.value})}
+                              onChange={(e) => setEditRiskForm({ ...editRiskForm, likelihood: e.target.value })}
                               style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
                             >
                               <option value="High">High Likelihood</option>
@@ -921,9 +921,9 @@ export default function App() {
                           </div>
                           <div>
                             <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block' }}>Status:</label>
-                            <select 
+                            <select
                               value={editRiskForm.status}
-                              onChange={(e) => setEditRiskForm({...editRiskForm, status: e.target.value})}
+                              onChange={(e) => setEditRiskForm({ ...editRiskForm, status: e.target.value })}
                               style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
                             >
                               <option value="Open">Open</option>
@@ -996,7 +996,7 @@ export default function App() {
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                   <div style={{ position: 'relative' }}>
                     <Search size={14} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input 
+                    <input
                       type="text"
                       placeholder="Search task or assignee..."
                       value={actionSearchTerm}
@@ -1010,7 +1010,7 @@ export default function App() {
               {/* 3 VERTICAL KANBAN COLUMNS */}
               <div className="kanban-board">
                 {/* COLUMN 1: PENDING */}
-                <KanbanColumn 
+                <KanbanColumn
                   title="Pending"
                   color="#fbbf24"
                   badgeClass="badge-pending"
@@ -1025,7 +1025,7 @@ export default function App() {
                 />
 
                 {/* COLUMN 2: IN PROGRESS */}
-                <KanbanColumn 
+                <KanbanColumn
                   title="In Progress"
                   color="#60a5fa"
                   badgeClass="badge-in-progress"
@@ -1040,7 +1040,7 @@ export default function App() {
                 />
 
                 {/* COLUMN 3: COMPLETED */}
-                <KanbanColumn 
+                <KanbanColumn
                   title="Completed"
                   color="#34d399"
                   badgeClass="badge-completed"
@@ -1124,7 +1124,7 @@ export default function App() {
 
                   <div style={{ position: 'relative' }}>
                     <Search size={14} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input 
+                    <input
                       type="text"
                       placeholder="Search name, role, or org..."
                       value={stakeholderSearch}
@@ -1152,18 +1152,18 @@ export default function App() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
                 {stakeholders
                   .filter(s => {
-                    const matchSearch = !stakeholderSearch || 
-                      s.name.toLowerCase().includes(stakeholderSearch.toLowerCase()) || 
-                      s.role.toLowerCase().includes(stakeholderSearch.toLowerCase()) || 
+                    const matchSearch = !stakeholderSearch ||
+                      s.name.toLowerCase().includes(stakeholderSearch.toLowerCase()) ||
+                      s.role.toLowerCase().includes(stakeholderSearch.toLowerCase()) ||
                       s.organization.toLowerCase().includes(stakeholderSearch.toLowerCase());
                     const matchOrg = stakeholderOrgFilter === 'All' || s.organization.toLowerCase().includes(stakeholderOrgFilter.toLowerCase());
                     return matchSearch && matchOrg;
                   })
                   .map((person) => {
                     const initials = person.name.split(' ').map(n => n[0]).join('').slice(0, 2);
-                    const orgColor = person.organization.includes('Kim Williams') ? '#c084fc' : 
-                                     person.organization.includes('Engineering') ? '#f87171' : 
-                                     person.organization.includes('Executive') ? '#fbbf24' : '#38bdf8';
+                    const orgColor = person.organization.includes('Kim Williams') ? '#c084fc' :
+                      person.organization.includes('Engineering') ? '#f87171' :
+                        person.organization.includes('Executive') ? '#fbbf24' : '#38bdf8';
 
                     return (
                       <div key={person.id} style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1rem' }}>
@@ -1255,9 +1255,9 @@ export default function App() {
                               <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary-cyan)', fontSize: '0.95rem' }}>
                                 ⚡ Consolidated Intelligence Takeaways ({msg.sourcesCount} sources retrieved)
                               </h4>
-                              <button 
+                              <button
                                 onClick={() => copyToClipboard(msg.text, idx)}
-                                className="tab-btn" 
+                                className="tab-btn"
                                 style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'rgba(255, 255, 255, 0.08)' }}
                               >
                                 {copiedIdx === idx ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
@@ -1302,8 +1302,8 @@ export default function App() {
               </div>
 
               <div className="chat-input-row">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="chat-input"
                   placeholder="Ask any project question to generate a consolidated synthesis..."
                   value={chatQuery}
@@ -1320,210 +1320,210 @@ export default function App() {
 
         {/* TAB 7: PROJECT DYNAMICS MAP */}
         {activeTab === 'dynamics' && (
-          <ProjectDynamicsMap 
+          <ProjectDynamicsMap
             onTriggerRAGQuery={(query) => {
               setActiveTab('rag');
               handleSendChat(query);
-            }} 
+            }}
           />
         )}
 
-      {/* UPLOAD MEETING SUMMARY TO RAW MODAL */}
-      {showUploadModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
-          <div style={{ background: '#0b1120', border: '1px solid var(--border-color)', borderRadius: '16px', width: '100%', maxWidth: '680px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-                <Upload color="var(--primary-cyan)" size={22} />
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: 'var(--primary-cyan)' }}>
-                  Upload Meeting Summary to RAW & Index into RAG
-                </h3>
-              </div>
-              <button onClick={() => setShowUploadModal(false)} className="tab-btn" style={{ padding: '0.3rem 0.6rem' }}>
-                <X size={16} />
-              </button>
-            </div>
-
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.45' }}>
-              Add a new meeting markdown summary. It will be saved directly to the <code style={{ color: '#38bdf8' }}>Raw/</code> directory, parsed into SQLite, and indexed into the RAG vector store.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
-                  Target Filename in <code style={{ color: '#38bdf8' }}>Raw/</code>:
-                </label>
-                <input 
-                  type="text" 
-                  value={uploadFilename}
-                  onChange={(e) => setUploadFilename(e.target.value)}
-                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
-                />
+        {/* UPLOAD MEETING SUMMARY TO RAW MODAL */}
+        {showUploadModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+            <div style={{ background: '#0b1120', border: '1px solid var(--border-color)', borderRadius: '16px', width: '100%', maxWidth: '680px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                  <Upload color="var(--primary-cyan)" size={22} />
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: 'var(--primary-cyan)' }}>
+                    Upload Meeting Summary to RAW & Index into RAG
+                  </h3>
+                </div>
+                <button onClick={() => setShowUploadModal(false)} className="tab-btn" style={{ padding: '0.3rem 0.6rem' }}>
+                  <X size={16} />
+                </button>
               </div>
 
-              <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '0.85rem', borderRadius: '10px', border: '1px border-color' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>
-                  Option A: Select Markdown File (.md / .txt):
-                </label>
-                <input 
-                  type="file" 
-                  accept=".md,.txt"
-                  onChange={handleFileUpload}
-                  style={{ fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}
-                />
-              </div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.45' }}>
+                Add a new meeting markdown summary. It will be saved directly to the <code style={{ color: '#38bdf8' }}>Raw/</code> directory, parsed into SQLite, and indexed into the RAG vector store.
+              </p>
 
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
-                  Option B: Paste Raw Markdown Content:
-                </label>
-                <textarea 
-                  rows={9}
-                  placeholder="# prj041 - UC 6A Design: Uppercamp Offices&#10;&#10;## Meeting Details...&#10;* **Date**: 2026-08-05&#10;* **Location**: Google Meet&#10;..."
-                  value={uploadContent}
-                  onChange={(e) => setUploadContent(e.target.value)}
-                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.75rem', color: '#cbd5e1', fontSize: '0.82rem', fontFamily: 'monospace', lineHeight: '1.4' }}
-                />
-              </div>
-            </div>
-
-            {uploadStatusMsg && (
-              <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: uploadStatusMsg.includes('❌') ? 'rgba(244, 63, 94, 0.15)' : 'rgba(56, 189, 248, 0.15)', border: uploadStatusMsg.includes('❌') ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid var(--border-highlight)', fontSize: '0.85rem', color: uploadStatusMsg.includes('❌') ? '#f87171' : '#38bdf8', fontWeight: 600 }}>
-                {uploadStatusMsg}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
-              <button onClick={() => setShowUploadModal(false)} className="tab-btn">
-                Cancel
-              </button>
-              <button 
-                onClick={handleSaveAndProcessMeeting} 
-                disabled={uploading || !uploadContent} 
-                className="tab-btn active"
-                style={{ background: 'var(--primary-cyan)', color: '#090d16', fontWeight: 700, padding: '0.45rem 1rem' }}
-              >
-                {uploading ? (
-                  <>
-                    <RefreshCw size={16} className="animate-spin" /> Processing into RAG...
-                  </>
-                ) : (
-                  <>
-                    <Upload size={16} /> Save to RAW & Index into RAG
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* STAKEHOLDER EDIT / ADD MODAL persisting to SQLite DB */}
-      {showStakeholderModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
-          <div style={{ background: '#0f172a', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.75rem', width: '100%', maxWidth: '540px', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <UserPlus size={20} style={{ color: 'var(--primary-cyan)' }} />
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f3f4f6', fontFamily: 'var(--font-heading)' }}>
-                  {editingStakeholder ? 'Edit Team Member Details' : 'Add New Team Member'}
-                </h3>
-              </div>
-              <button onClick={() => setShowStakeholderModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveStakeholder} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. John Doe"
-                  value={stakeholderForm.name}
-                  onChange={(e) => setStakeholderForm({ ...stakeholderForm, name: e.target.value })}
-                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
                   <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
-                    Role / Designation *
+                    Target Filename in <code style={{ color: '#38bdf8' }}>Raw/</code>:
                   </label>
                   <input
                     type="text"
-                    required
-                    placeholder="e.g. Lead Architect"
-                    value={stakeholderForm.role}
-                    onChange={(e) => setStakeholderForm({ ...stakeholderForm, role: e.target.value })}
-                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                    value={uploadFilename}
+                    onChange={(e) => setUploadFilename(e.target.value)}
+                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                  />
+                </div>
+
+                <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '0.85rem', borderRadius: '10px', border: '1px border-color' }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>
+                    Option A: Select Markdown File (.md / .txt):
+                  </label>
+                  <input
+                    type="file"
+                    accept=".md,.txt"
+                    onChange={handleFileUpload}
+                    style={{ fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}
                   />
                 </div>
 
                 <div>
                   <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
-                    Organization *
+                    Option B: Paste Raw Markdown Content:
                   </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Citra / Kim Williams Design"
-                    value={stakeholderForm.organization}
-                    onChange={(e) => setStakeholderForm({ ...stakeholderForm, organization: e.target.value })}
-                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                  <textarea
+                    rows={9}
+                    placeholder="# prj041 - UC 6A Design: Uppercamp Offices&#10;&#10;## Meeting Details...&#10;* **Date**: 2026-08-05&#10;* **Location**: Google Meet&#10;..."
+                    value={uploadContent}
+                    onChange={(e) => setUploadContent(e.target.value)}
+                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.75rem', color: '#cbd5e1', fontSize: '0.82rem', fontFamily: 'monospace', lineHeight: '1.4' }}
                   />
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
-                  Key Responsibilities
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Describe main scope of work, sign-off authorities, or deliverables..."
-                  value={stakeholderForm.key_responsibilities}
-                  onChange={(e) => setStakeholderForm({ ...stakeholderForm, key_responsibilities: e.target.value })}
-                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem 0.75rem', color: '#cbd5e1', fontSize: '0.84rem', lineHeight: '1.4' }}
-                />
-              </div>
+              {uploadStatusMsg && (
+                <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: uploadStatusMsg.includes('❌') ? 'rgba(244, 63, 94, 0.15)' : 'rgba(56, 189, 248, 0.15)', border: uploadStatusMsg.includes('❌') ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid var(--border-highlight)', fontSize: '0.85rem', color: uploadStatusMsg.includes('❌') ? '#f87171' : '#38bdf8', fontWeight: 600 }}>
+                  {uploadStatusMsg}
+                </div>
+              )}
 
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
-                  Status
-                </label>
-                <select
-                  value={stakeholderForm.status}
-                  onChange={(e) => setStakeholderForm({ ...stakeholderForm, status: e.target.value })}
-                  style={{ width: '100%', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.85rem' }}
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                <button type="button" onClick={() => setShowStakeholderModal(false)} className="tab-btn">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button onClick={() => setShowUploadModal(false)} className="tab-btn">
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  disabled={savingStakeholder}
+                  onClick={handleSaveAndProcessMeeting}
+                  disabled={uploading || !uploadContent}
                   className="tab-btn active"
-                  style={{ padding: '0.5rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}
+                  style={{ background: 'var(--primary-cyan)', color: '#090d16', fontWeight: 700, padding: '0.45rem 1rem' }}
                 >
-                  {savingStakeholder ? <RefreshCw size={15} className="spin" /> : <Save size={15} />}
-                  {savingStakeholder ? 'Saving to Database...' : 'Save & Update Database'}
+                  {uploading ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" /> Processing into RAG...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={16} /> Save to RAW & Index into RAG
+                    </>
+                  )}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* STAKEHOLDER EDIT / ADD MODAL persisting to SQLite DB */}
+        {showStakeholderModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+            <div style={{ background: '#0f172a', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.75rem', width: '100%', maxWidth: '540px', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <UserPlus size={20} style={{ color: 'var(--primary-cyan)' }} />
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f3f4f6', fontFamily: 'var(--font-heading)' }}>
+                    {editingStakeholder ? 'Edit Team Member Details' : 'Add New Team Member'}
+                  </h3>
+                </div>
+                <button onClick={() => setShowStakeholderModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveStakeholder} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. John Doe"
+                    value={stakeholderForm.name}
+                    onChange={(e) => setStakeholderForm({ ...stakeholderForm, name: e.target.value })}
+                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                      Role / Designation *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Lead Architect"
+                      value={stakeholderForm.role}
+                      onChange={(e) => setStakeholderForm({ ...stakeholderForm, role: e.target.value })}
+                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                      Organization *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Citra / Kim Williams Design"
+                      value={stakeholderForm.organization}
+                      onChange={(e) => setStakeholderForm({ ...stakeholderForm, organization: e.target.value })}
+                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.88rem' }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                    Key Responsibilities
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Describe main scope of work, sign-off authorities, or deliverables..."
+                    value={stakeholderForm.key_responsibilities}
+                    onChange={(e) => setStakeholderForm({ ...stakeholderForm, key_responsibilities: e.target.value })}
+                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.6rem 0.75rem', color: '#cbd5e1', fontSize: '0.84rem', lineHeight: '1.4' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}>
+                    Status
+                  </label>
+                  <select
+                    value={stakeholderForm.status}
+                    onChange={(e) => setStakeholderForm({ ...stakeholderForm, status: e.target.value })}
+                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.55rem 0.75rem', color: '#fff', fontSize: '0.85rem' }}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <button type="button" onClick={() => setShowStakeholderModal(false)} className="tab-btn">
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingStakeholder}
+                    className="tab-btn active"
+                    style={{ padding: '0.5rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}
+                  >
+                    {savingStakeholder ? <RefreshCw size={15} className="spin" /> : <Save size={15} />}
+                    {savingStakeholder ? 'Saving to Database...' : 'Save & Update Database'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
 
     </div>
@@ -1558,10 +1558,10 @@ function RiskCard({ risk, onEdit }) {
   );
 }
 
-function KanbanColumn({ 
-  title, color, badgeClass, items, 
-  editingActionId, editActionForm, setEditActionForm, 
-  onStartEdit, onSaveEdit, onCancelEdit, onStatusChange 
+function KanbanColumn({
+  title, color, badgeClass, items,
+  editingActionId, editActionForm, setEditActionForm,
+  onStartEdit, onSaveEdit, onCancelEdit, onStatusChange
 }) {
   return (
     <div className={`kanban-column ${title.toLowerCase().replace(' ', '-')}`}>
@@ -1580,8 +1580,8 @@ function KanbanColumn({
           </div>
         ) : (
           items.map((item) => (
-            <div 
-              key={item.id} 
+            <div
+              key={item.id}
               style={{ background: 'rgba(15, 23, 42, 0.85)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}
             >
               {editingActionId === item.id ? (
@@ -1592,37 +1592,37 @@ function KanbanColumn({
                   </div>
                   <div>
                     <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Description:</label>
-                    <textarea 
+                    <textarea
                       value={editActionForm.description}
-                      onChange={(e) => setEditActionForm({...editActionForm, description: e.target.value})}
+                      onChange={(e) => setEditActionForm({ ...editActionForm, description: e.target.value })}
                       style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
                       rows={2}
                     />
                   </div>
                   <div>
                     <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Assignee:</label>
-                    <input 
+                    <input
                       type="text"
                       value={editActionForm.assignee}
-                      onChange={(e) => setEditActionForm({...editActionForm, assignee: e.target.value})}
+                      onChange={(e) => setEditActionForm({ ...editActionForm, assignee: e.target.value })}
                       style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.35rem 0.5rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
                     />
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <div style={{ flex: 1 }}>
                       <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Due Date:</label>
-                      <input 
+                      <input
                         type="text"
                         value={editActionForm.due_date}
-                        onChange={(e) => setEditActionForm({...editActionForm, due_date: e.target.value})}
+                        onChange={(e) => setEditActionForm({ ...editActionForm, due_date: e.target.value })}
                         style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.5rem', fontSize: '0.8rem', marginTop: '0.2rem' }}
                       />
                     </div>
                     <div style={{ flex: 1 }}>
                       <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Status:</label>
-                      <select 
+                      <select
                         value={editActionForm.status}
-                        onChange={(e) => setEditActionForm({...editActionForm, status: e.target.value})}
+                        onChange={(e) => setEditActionForm({ ...editActionForm, status: e.target.value })}
                         style={{ width: '100%', background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.3rem 0.4rem', fontSize: '0.8rem', marginTop: '0.2rem' }}
                       >
                         <option value="Pending">Pending</option>
@@ -1647,7 +1647,7 @@ function KanbanColumn({
                       <span className="badge badge-in-progress" style={{ fontSize: '0.7rem' }}>{item.meeting_id}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
-                      <select 
+                      <select
                         value={item.status}
                         onChange={(e) => onStatusChange(item.id, e.target.value)}
                         style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#fff', border: '1px solid var(--border-color)', padding: '0.15rem 0.35rem', borderRadius: '4px', fontSize: '0.72rem' }}
@@ -1760,8 +1760,8 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
 
   if (viewMode === 'grid') {
     const categories = ['Budget', 'Specs', 'Process'];
-    const colWidth = 195;
-    const gapX = 20;
+    const colWidth = 370; // 2 sub-columns of cards (175px each + 12px gap)
+    const gapX = 25;
     const startX = 160;
 
     let currentY = 15;
@@ -1769,13 +1769,14 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
     categories.forEach((cat, catIdx) => {
       const catNodes = data.nodes.filter(n => (n.category === cat) || (!n.category && cat === 'Specs'));
 
-      let maxCellCount = 1;
+      let maxSubRowsInRow = 1;
       meetingCols.forEach(m => {
         const cellCount = catNodes.filter(n => n.column === m.col).length;
-        if (cellCount > maxCellCount) maxCellCount = cellCount;
+        const subRows = Math.ceil(cellCount / 2);
+        if (subRows > maxSubRowsInRow) maxSubRowsInRow = subRows;
       });
 
-      const rowHeight = 45 + maxCellCount * (nodeHeight + 15);
+      const rowHeight = 45 + maxSubRowsInRow * 110;
 
       gridRows.push({
         catNum: catIdx + 1,
@@ -1790,9 +1791,14 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
         const cellX = startX + m.col * (colWidth + gapX);
 
         cellNodes.forEach((n, idx) => {
+          const subCol = idx % 2;
+          const subRow = Math.floor(idx / 2);
+
           nodePositions[n.id] = {
-            x: cellX,
-            y: currentY + 40 + idx * (nodeHeight + 15)
+            x: cellX + subCol * 182,
+            y: currentY + 40 + subRow * 105,
+            width: 175,
+            height: 95
           };
         });
       });
@@ -1848,8 +1854,8 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
         const tier = j % 3;
         const radius2 = 230 + tier * 160;
 
-        const subAngle = numChildren === 1 
-          ? angle 
+        const subAngle = numChildren === 1
+          ? angle
           : angle - spreadAngle / 2 + (j * spreadAngle) / (numChildren - 1);
 
         const lx = hx + radius2 * Math.cos(subAngle);
@@ -1878,37 +1884,19 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
     <div style={{ display: 'flex', gap: '1.25rem', height: '100%', minHeight: '850px' }}>
       {/* CANVAS CONTAINER */}
       <div style={{ flex: 1, background: 'rgba(15, 23, 42, 0.88)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.25rem', overflow: 'auto', position: 'relative' }}>
-        
-        {/* MAP HEADER & VIEW SWITCHER */}
+
+        {/* MAP HEADER */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
           <div>
             <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', color: 'var(--primary-cyan)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldAlert size={20} /> Project Dynamics Map & Knowledge Graph
+              <ShieldAlert size={20} /> Project Dynamics Map
             </h3>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              {viewMode === 'mindmap' ? 'Multi-Tier Radial Knowledge Graph: Root → Category Hubs → Multi-level Decision & Risk Chains' : '3-Column Grid View: Relational Risks → Decision Clusters → Brief Scope'}
+              Chronological Decision Matrix: Meeting Timeline (X-Axis) vs Impact Category (Y-Axis)
             </p>
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            {/* VIEW MODE TOGGLE BUTTONS */}
-            <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(30, 41, 59, 0.9)', padding: '0.25rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-              <button
-                className={`tab-btn ${viewMode === 'mindmap' ? 'active' : ''}`}
-                onClick={() => setViewMode('mindmap')}
-                style={{ fontSize: '0.76rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-              >
-                <Network size={14} /> Mind Map / Knowledge Graph
-              </button>
-              <button
-                className={`tab-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
-                style={{ fontSize: '0.76rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-              >
-                <Grid size={14} /> 3-Column Grid
-              </button>
-            </div>
-
             <button
               onClick={() => setShowRetrospectiveDrawer(!showRetrospectiveDrawer)}
               className="tab-btn active"
@@ -1945,8 +1933,8 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                 key={m.label}
                 style={{
                   position: 'absolute',
-                  left: `${160 + m.col * (195 + 20)}px`,
-                  width: '195px',
+                  left: `${160 + m.col * (370 + 25)}px`,
+                  width: '370px',
                   textAlign: 'center',
                   background: 'rgba(30, 41, 59, 0.85)',
                   border: '1px solid var(--primary-cyan)',
@@ -2064,22 +2052,27 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
               const tgtPos = nodePositions[edge.target];
               if (!srcPos || !tgtPos) return null;
 
-              const x1 = viewMode === 'grid' ? srcPos.x + nodeWidth : srcPos.x + nodeWidth / 2;
-              const y1 = srcPos.y + nodeHeight / 2;
-              const x2 = viewMode === 'grid' ? tgtPos.x : tgtPos.x + nodeWidth / 2;
-              const y2 = tgtPos.y + nodeHeight / 2;
+              const srcW = srcPos.width || nodeWidth;
+              const srcH = srcPos.height || nodeHeight;
+              const tgtW = tgtPos.width || nodeWidth;
+              const tgtH = tgtPos.height || nodeHeight;
+
+              const x1 = viewMode === 'grid' ? srcPos.x + srcW : srcPos.x + srcW / 2;
+              const y1 = srcPos.y + srcH / 2;
+              const x2 = viewMode === 'grid' ? tgtPos.x : tgtPos.x + tgtW / 2;
+              const y2 = tgtPos.y + tgtH / 2;
 
               const isHighlighted = hoveredNodeId && (hoveredNodeId === edge.source || hoveredNodeId === edge.target);
-              
-              const color = edge.type === 'dependency' ? '#22c55e' : 
-                            edge.type === 'creates_risk' ? '#f87171' : '#4ade80';
-              
-              const isDashed = edge.type === 'creates_risk';
-              
-              const markerId = edge.type === 'dependency' ? 'url(#arrow-dependency)' : 
-                               edge.type === 'creates_risk' ? 'url(#arrow-creates)' : 'url(#arrow-closes)';
 
-              const pathD = viewMode === 'grid' 
+              const color = edge.type === 'dependency' ? '#22c55e' :
+                edge.type === 'creates_risk' ? '#f87171' : '#4ade80';
+
+              const isDashed = edge.type === 'creates_risk';
+
+              const markerId = edge.type === 'dependency' ? 'url(#arrow-dependency)' :
+                edge.type === 'creates_risk' ? 'url(#arrow-creates)' : 'url(#arrow-closes)';
+
+              const pathD = viewMode === 'grid'
                 ? `M ${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 40} ${y2}, ${x2} ${y2}`
                 : `M ${x1} ${y1} Q ${(x1 + x2) / 2 + 25} ${(y1 + y2) / 2 - 25} ${x2} ${y2}`;
 
@@ -2165,11 +2158,16 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
             const isHovered = hoveredNodeId === node.id;
             const isSelected = selectedNode?.id === node.id;
 
-            const borderColor = node.type === 'risk_factor' ? (node.status === 'Closed' ? '#4ade80' : '#f87171') :
-                                node.type === 'decision' ? 'var(--primary-cyan)' : '#c084fc';
-            
-            const bgColor = node.type === 'risk_factor' ? 'rgba(30, 20, 30, 0.95)' :
-                            node.type === 'decision' ? 'rgba(15, 23, 42, 0.96)' : 'rgba(25, 18, 45, 0.95)';
+            const levelInfo = node.type === 'risk_factor'
+              ? { badge: node.status === 'Closed' ? 'LVL 0: RISK (CLOSED)' : 'LVL 0: RISK', color: node.status === 'Closed' ? '#4ade80' : '#f87171', bg: node.status === 'Closed' ? 'rgba(74, 222, 128, 0.15)' : 'rgba(248, 113, 113, 0.15)', icon: node.status === 'Closed' ? <CheckCircle2 size={11} color="#4ade80" /> : <AlertTriangle size={11} color="#f87171" /> }
+              : node.type === 'decision'
+                ? { badge: 'LVL 1: DECISION', color: 'var(--primary-cyan)', bg: 'rgba(56, 189, 248, 0.15)', icon: <Layers size={11} color="var(--primary-cyan)" /> }
+                : node.type === 'action_item'
+                  ? { badge: 'LVL 2: ACTION', color: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)', icon: <CheckCircle2 size={11} color="#4ade80" /> }
+                  : { badge: 'LVL 3: BRIEF CHANGE', color: '#c084fc', bg: 'rgba(192, 132, 252, 0.15)', icon: <CheckCircle size={11} color="#c084fc" /> };
+
+            const borderColor = levelInfo.color;
+            const bgColor = 'rgba(15, 23, 42, 0.96)';
 
             return (
               <div
@@ -2181,15 +2179,15 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                   position: 'absolute',
                   left: `${pos.x}px`,
                   top: `${pos.y}px`,
-                  width: `${nodeWidth}px`,
-                  height: `${nodeHeight}px`,
+                  width: `${pos.width || nodeWidth}px`,
+                  height: `${pos.height || nodeHeight}px`,
                   background: bgColor,
                   border: `1.5px solid ${isHovered || isSelected ? '#fff' : borderColor}`,
-                  borderRadius: '12px',
-                  padding: '0.6rem 0.7rem',
+                  borderRadius: '10px',
+                  padding: '0.45rem 0.55rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  justify: 'space-between',
+                  justifyContent: 'space-between',
                   cursor: 'pointer',
                   boxShadow: isHovered ? `0 0 20px ${borderColor}` : '0 4px 12px rgba(0,0,0,0.5)',
                   transition: 'all 0.2s ease-in-out',
@@ -2198,27 +2196,21 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
                 }}
               >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                    <span style={{ fontSize: '0.66rem', fontWeight: 700, color: borderColor, textTransform: 'uppercase' }}>
-                      {node.type === 'risk_factor' ? (node.status === 'Closed' ? 'Closed Risk' : 'Open Risk') : node.type === 'decision' ? node.impact_area : 'Scope Item'}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, color: levelInfo.color, background: levelInfo.bg, padding: '0.1rem 0.35rem', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                      {levelInfo.badge}
                     </span>
-                    {node.type === 'risk_factor' ? (
-                      node.status === 'Closed' ? <CheckCircle2 size={12} color="#4ade80" /> : <AlertTriangle size={12} color="#f87171" />
-                    ) : node.type === 'decision' ? (
-                      <Layers size={12} color="var(--primary-cyan)" />
-                    ) : (
-                      <CheckCircle size={12} color="#c084fc" />
-                    )}
+                    {levelInfo.icon}
                   </div>
 
-                  <h5 style={{ fontSize: '0.76rem', fontWeight: 600, color: '#f3f4f6', lineHeight: '1.25', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                  <h5 style={{ fontSize: '0.72rem', fontWeight: 600, color: '#f3f4f6', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                     {node.label}
                   </h5>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.66rem', color: 'var(--text-muted)', paddingTop: '0.25rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <span>{node.meeting_id || 'Core'}</span>
-                  <span style={{ color: '#38bdf8', fontWeight: 600 }}>Inspect details</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.62rem', color: 'var(--text-muted)', paddingTop: '0.2rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span>{node.meeting_label || node.meeting_id || 'Core'}</span>
+                  <span style={{ color: '#38bdf8', fontWeight: 600 }}>Details →</span>
                 </div>
               </div>
             );
@@ -2285,7 +2277,7 @@ function ProjectDynamicsMap({ onTriggerRAGQuery }) {
       {selectedNode && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '1rem' }}>
           <div style={{ background: '#0f172a', border: '1px solid var(--primary-cyan)', borderRadius: '18px', padding: '1.75rem', width: '100%', maxWidth: '620px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            
+
             {/* MODAL HEADER */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.85rem' }}>
               <div>
