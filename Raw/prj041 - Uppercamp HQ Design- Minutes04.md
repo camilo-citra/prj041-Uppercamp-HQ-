@@ -102,14 +102,14 @@ The meeting focused on the architectural design strategy for the new campus head
 
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
-| ACT-001 | Review latest building regulations regarding disabled access and fire safety. Awaiting feedback from the fire consultant. | Kim Williams | 2026-07-30 | Pending |
+| ACT-001 | Review latest building regulations regarding disabled access and fire safety. Awaiting feedback from the fire consultant. | Kim Williams | 2026-07-30 | In Progress |
 | ACT-002 | Confirm fire safety requirements, stairwell compliance, and required passage dimensions with Peter | Kim Williams | 2026-07-30 | Completed |
 | ACT-003 | Forward updated PDF layout documents and presentation to all meeting participants | Kim Williams | ASAP | Completed |
-| ACT-004 | Confirm office relocation plans for commercial and construction departments with team leads | Realm | 2026-07-30 | Pending |
+| ACT-004 | Confirm office relocation plans for commercial and construction departments with team leads | Realm | 2026-07-30 | Completed |
 | ACT-005 | Consult Lisha regarding proposed collaboration wall to ensure alignment with marketing strategy | Kim Williams | 2026-07-30 | Pending |
-| ACT-006 | Organize separate logistics meeting to review delivery process and storage implications | Kim Williams | 2026-07-29 | Pending |
-| ACT-007 | Provide update and decision regarding future usage and retrofit options for the lift / lift shaft | Realm | 2026-08-05 | Pending |
-| ACT-008 | Schedule follow-up alignment session with Ralph, Joel, and team to finalize design brief requirements | Kim Williams | 2026-07-29 | Pending |
+| ACT-006 | Organize separate logistics meeting to review delivery process and storage implications | Kim Williams | 2026-07-29 | Completed |
+| ACT-007 | Provide update and decision regarding future usage and retrofit options for the lift / lift shaft | Realm | 2026-08-05 | In Progress |
+| ACT-008 | Schedule follow-up alignment session with Ralph, Joel, and team to finalize design brief requirements | Kim Williams | 2026-07-29 | Completed |
 | ACT-009 | Research billboard dimension market trends (1m vs 3m width) for roof EPOD signage | Realm | 2026-08-05 | Pending |
 | ACT-010 | Confirm necessity, structural treatment, and beam spans for existing structural pillars | Camilo | 2026-08-05 | Pending |
 | ACT-011 | Share detailed development documentation for section and mezzanine concepts once available | Nicole Vivier | 2026-08-05 | Pending |

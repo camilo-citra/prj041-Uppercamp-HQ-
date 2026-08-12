@@ -272,6 +272,8 @@
   },
   "active": "8b6d01c49e6c64c5",
   "lastOpenFiles": [
+    "scripts/sync_db_to_raw.js",
+    "scripts/check_action_items.js",
     "dist/assets/index-DriLtMgi.js",
     "dist/assets/index-D5JH-ofG.js",
     "dist/assets/index-CAmqBBZd.js",
@@ -294,7 +296,6 @@
     "image11.md",
     "image2.md",
     "Raw/prj041 - Uppercamp HQ Design- Minutes03.md",
-    "RAG",
     "Raw/prj041 - Uppercamp HQ Design- Minutes00.md"
   ]
 }
