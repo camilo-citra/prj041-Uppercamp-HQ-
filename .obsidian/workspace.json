@@ -97,12 +97,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Skills/Decision map.md",
+                "file": "Raw/prj041 - Uppercamp HQ Design- Minutes05.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Decision map"
+              "title": "prj041 - Uppercamp HQ Design- Minutes05"
             }
           }
         ],
@@ -272,6 +272,7 @@
   },
   "active": "8b6d01c49e6c64c5",
   "lastOpenFiles": [
+    "Skills/Decision map.md",
     "scripts/sync_db_to_raw.js",
     "scripts/check_action_items.js",
     "dist/assets/index-DriLtMgi.js",
@@ -282,14 +283,12 @@
     "dist/assets/index-dXsNpZBA.js",
     "dist/assets/index-DyjxFnuH.js",
     "Skills/Project Team Skill Definitions.md",
-    "Skills/Decision map.md",
     "RAG/RAG Set up.md",
     "RAG/Minutes analisys.md",
     "Project Brief/Project Plan.md",
     "Project Brief/Preliminary Development Plan.md",
     "Project Brief/Architecture.md",
     "Project Brief",
-    "Skills",
     "Raw/prj041 - Uppercamp HQ Design- Minutes04.md",
     "Raw/prj041 - Uppercamp HQ Design- Minutes02.md",
     "Raw/prj041 - Uppercamp HQ Design- Minutes01.md",
