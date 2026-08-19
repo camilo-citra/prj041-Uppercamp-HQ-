@@ -51,6 +51,31 @@ export function indexMeetingChunks(meeting) {
   }
 }
 
+export function updateDecisionVectorChunk(meetingId, decisionNum, impactArea, summary, theme) {
+  const contentStr = `Decision ${decisionNum || ''} (${impactArea}) [Theme: ${theme || 'General'}]: ${summary}`;
+  
+  // Find existing chunk or insert new
+  const existing = db.prepare(`
+    SELECT id FROM vector_chunks 
+    WHERE meeting_id = ? AND section_type = 'Decision Taken' AND (content LIKE ? OR subject = ?)
+  `).get(meetingId, `%Decision ${decisionNum}%`, impactArea);
+
+  if (existing) {
+    db.prepare(`
+      UPDATE vector_chunks
+      SET subject = ?, content = ?
+      WHERE id = ?
+    `).run(impactArea, contentStr, existing.id);
+  } else {
+    const meetingMeta = db.prepare('SELECT date FROM meeting_metadata WHERE id = ?').get(meetingId);
+    const dateStr = meetingMeta ? meetingMeta.date : '2026-06-01';
+    db.prepare(`
+      INSERT INTO vector_chunks (meeting_id, date, subject, section_type, content)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(meetingId, dateStr, impactArea, 'Decision Taken', contentStr);
+  }
+}
+
 export function searchVectorChunks(query, filters = {}, limit = 5) {
   const chunks = db.prepare(`SELECT * FROM vector_chunks`).all();
   if (!chunks.length) return [];

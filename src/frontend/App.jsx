@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw,
   ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check,
-  Upload, FilePlus, CheckCircle, CheckCircle2, X, Trash2, Edit2, Plus, Save, UserPlus, ShieldAlert, Network, Grid
+  Upload, FilePlus, CheckCircle, CheckCircle2, X, Trash2, Edit2, Plus, Save, UserPlus, ShieldAlert, Network, Grid,
+  GitCommit, Sparkles, Link2, Compass, BrainCircuit
 } from 'lucide-react';
 
 export default function App() {
@@ -18,6 +19,21 @@ export default function App() {
   const [stakeholderOrgFilter, setStakeholderOrgFilter] = useState('All');
   const [showRawMarkdown, setShowRawMarkdown] = useState(false);
   const [actionStatusFilter, setActionStatusFilter] = useState('All');
+
+  // Decision Intelligence & Timeline state
+  const [decisions, setDecisions] = useState([]);
+  const [decisionsNarrative, setDecisionsNarrative] = useState(null);
+  const [selectedThemeFilter, setSelectedThemeFilter] = useState('All');
+  const [selectedDecisionForEdit, setSelectedDecisionForEdit] = useState(null);
+  const [editDecisionForm, setEditDecisionForm] = useState({
+    impact_area: '',
+    summary: '',
+    theme: 'General',
+    rationale: ''
+  });
+  const [savingDecision, setSavingDecision] = useState(false);
+  const [analyzingDecisions, setAnalyzingDecisions] = useState(false);
+  const [selectedCorrelationId, setSelectedCorrelationId] = useState(null);
 
   // Upload Meeting Summary to RAW state
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -59,7 +75,19 @@ export default function App() {
     fetchRisks();
     fetchBrief();
     fetchStakeholders();
+    fetchDecisions();
   }, []);
+
+  const fetchDecisions = async () => {
+    try {
+      const res = await fetch('/api/decisions');
+      const data = await res.json();
+      setDecisions(data.decisions || []);
+      setDecisionsNarrative(data.narrative || null);
+    } catch (err) {
+      console.error('Error fetching decisions:', err);
+    }
+  };
 
   const fetchStakeholders = async () => {
     try {
@@ -200,6 +228,57 @@ export default function App() {
     }
   };
 
+  const handleStartEditDecision = (dec) => {
+    setSelectedDecisionForEdit(dec);
+    setEditDecisionForm({
+      impact_area: dec.impact_area || '',
+      summary: dec.summary || '',
+      theme: dec.theme || 'General',
+      rationale: dec.rationale || ''
+    });
+  };
+
+  const handleSaveDecision = async (e) => {
+    e.preventDefault();
+    if (!selectedDecisionForEdit) return;
+    setSavingDecision(true);
+    try {
+      const res = await fetch(`/api/decisions/${selectedDecisionForEdit.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editDecisionForm)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSelectedDecisionForEdit(null);
+        await fetchDecisions();
+      } else {
+        alert(`Save failed: ${data.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Error saving decision:', err);
+      alert('Error connecting to local server.');
+    } finally {
+      setSavingDecision(false);
+    }
+  };
+
+  const handleRunDecisionAnalysis = async () => {
+    setAnalyzingDecisions(true);
+    try {
+      const res = await fetch('/api/decisions/analyze', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setDecisions(data.decisions || []);
+        setDecisionsNarrative(data.narrative || null);
+      }
+    } catch (err) {
+      console.error('Error running decision analysis:', err);
+    } finally {
+      setAnalyzingDecisions(false);
+    }
+  };
+
   const handleIngest = async () => {
     setIngesting(true);
     try {
@@ -209,6 +288,7 @@ export default function App() {
       await fetchRisks();
       await fetchBrief();
       await fetchStakeholders();
+      await fetchDecisions();
       if (selectedMeetingId) fetchMeetingDetail(selectedMeetingId);
     } catch (err) {
       console.error('Ingestion error:', err);
@@ -494,6 +574,12 @@ export default function App() {
             onClick={() => setActiveTab('team')}
           >
             <Users size={16} /> Project Team ({stakeholders.length})
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'decisions' ? 'active' : ''}`}
+            onClick={() => setActiveTab('decisions')}
+          >
+            <GitCommit size={16} /> Decision Timeline & Map ({decisions.length})
           </button>
           <button
             className={`tab-btn ${activeTab === 'rag' ? 'active' : ''}`}
@@ -1312,6 +1398,251 @@ export default function App() {
           </div>
         )}
 
+
+        {/* TAB 5: DECISION TIMELINE & LOGIC MAP */}
+        {activeTab === 'decisions' && (
+          <div className="timeline-viewport">
+            {/* Top Narrative Banner */}
+            <div className="timeline-narrative-banner">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary-cyan)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <BrainCircuit size={20} /> Decision Intelligence & Interactive Timeline
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: '#e2e8f0', marginTop: '0.2rem', maxWidth: '900px' }}>
+                    {decisionsNarrative?.executiveNarrative || 'Interactive decision evolution map across meeting events, grouped by auto-discovered themes.'}
+                  </p>
+                </div>
+                <button
+                  onClick={handleRunDecisionAnalysis}
+                  disabled={analyzingDecisions}
+                  className="tab-btn active"
+                  style={{ background: 'linear-gradient(135deg, var(--primary-cyan), var(--primary-indigo))', color: '#fff', border: 'none', fontWeight: 700, padding: '0.5rem 1rem' }}
+                >
+                  <Sparkles size={16} className={analyzingDecisions ? 'animate-spin' : ''} />
+                  {analyzingDecisions ? 'Analyzing Themes...' : 'Re-Discover Themes & Correlations'}
+                </button>
+              </div>
+
+              {/* Theme Breakdown Chips & Metrics */}
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap', alignItems: 'center', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '0.75rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Filter Theme:</span>
+                <button
+                  className={`tab-btn ${selectedThemeFilter === 'All' ? 'active' : ''}`}
+                  onClick={() => setSelectedThemeFilter('All')}
+                  style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                >
+                  All Themes ({decisions.length})
+                </button>
+                {decisionsNarrative?.themeBreakdown && Object.entries(decisionsNarrative.themeBreakdown).map(([theme, count]) => (
+                  <button
+                    key={theme}
+                    className={`tab-btn ${selectedThemeFilter === theme ? 'active' : ''}`}
+                    onClick={() => setSelectedThemeFilter(theme)}
+                    style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                  >
+                    {theme} ({count})
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* X-Axis Timeline Matrix View */}
+            <div className="timeline-grid-wrapper">
+              {(() => {
+                // Collect unique meeting milestones sorted chronologically
+                const uniqueMeetings = Array.from(
+                  new Set(decisions.map(d => d.meeting_id))
+                ).sort();
+
+                // Collect unique themes
+                const uniqueThemes = Array.from(
+                  new Set(decisions.map(d => d.theme || 'General'))
+                );
+
+                const filteredThemes = selectedThemeFilter === 'All'
+                  ? uniqueThemes
+                  : uniqueThemes.filter(t => t === selectedThemeFilter);
+
+                // Get selected correlation target IDs if any decision is highlighted
+                const selectedDec = decisions.find(d => d.id === selectedCorrelationId);
+                const linkedTargetIds = selectedDec && selectedDec.correlations
+                  ? selectedDec.correlations.map(c => c.target_id)
+                  : [];
+
+                return (
+                  <div>
+                    {/* X-Axis Header Row (Meeting Events Timeline) */}
+                    <div className="timeline-x-header">
+                      <div className="timeline-theme-label-col">
+                        Discovered Themes
+                      </div>
+                      {uniqueMeetings.map(mtgId => {
+                        const sampleMtg = decisions.find(d => d.meeting_id === mtgId);
+                        return (
+                          <div key={mtgId} className="timeline-milestone-cell">
+                            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-cyan)' }}>
+                              {mtgId}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              {sampleMtg?.meeting_date || ''}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Y-Axis Theme Rows */}
+                    {filteredThemes.map(theme => (
+                      <div key={theme} className="timeline-lane-row">
+                        {/* Theme Label Column */}
+                        <div className="timeline-theme-label-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }}>
+                          <span>{theme}</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 400 }}>
+                            {decisions.filter(d => (d.theme || 'General') === theme).length} decision(s)
+                          </span>
+                        </div>
+
+                        {/* Meeting Milestone Cells for this Theme */}
+                        {uniqueMeetings.map(mtgId => {
+                          const cellDecisions = decisions.filter(d => d.meeting_id === mtgId && (d.theme || 'General') === theme);
+
+                          return (
+                            <div key={mtgId} className="timeline-card-cell">
+                              {cellDecisions.map(dec => {
+                                const isSelected = selectedCorrelationId === dec.id;
+                                const cardClass = `decision-timeline-card ${isSelected ? 'selected-correlation' : linkedTargetIds.includes(dec.id) ? 'linked-correlation' : ''}`;
+
+                                return (
+                                  <div key={dec.id} className={cardClass}>
+                                    <div className="decision-card-header">
+                                      <span className="decision-num-tag">
+                                        Decision #{dec.decision_num || dec.id}
+                                      </span>
+                                      <span className="decision-impact-badge">
+                                        {dec.impact_area}
+                                      </span>
+                                    </div>
+
+                                    <div className="decision-summary-text">
+                                      {dec.summary}
+                                    </div>
+
+                                    {dec.rationale && (
+                                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '0.4rem' }}>
+                                        "{dec.rationale}"
+                                      </div>
+                                    )}
+
+                                    <div className="decision-card-footer">
+                                      <button
+                                        onClick={() => setSelectedCorrelationId(isSelected ? null : dec.id)}
+                                        className="correlation-btn"
+                                      >
+                                        <Link2 size={12} />
+                                        {dec.correlations ? dec.correlations.length : 0} links
+                                      </button>
+                                      <button
+                                        onClick={() => handleStartEditDecision(dec)}
+                                        className="edit-decision-btn"
+                                      >
+                                        <Edit2 size={12} /> Edit & Sync
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        )}
+
+        {/* EDIT DECISION MODAL WITH RAG & DB SYNC */}
+        {selectedDecisionForEdit && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+            <div style={{ background: '#0b1120', border: '1px solid var(--border-highlight)', borderRadius: '16px', width: '100%', maxWidth: '620px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                  <Edit2 color="var(--primary-cyan)" size={22} />
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', color: 'var(--primary-cyan)' }}>
+                    Edit Decision #{selectedDecisionForEdit.decision_num || selectedDecisionForEdit.id} ({selectedDecisionForEdit.meeting_id})
+                  </h3>
+                </div>
+                <button onClick={() => setSelectedDecisionForEdit(null)} className="tab-btn" style={{ padding: '0.3rem 0.6rem' }}>
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.2)', borderRadius: '8px', padding: '0.6rem 0.8rem', fontSize: '0.78rem', color: 'var(--primary-cyan)' }}>
+                ⚡ Editing this decision will sync directly to the SQLite database, update the RAG vector store chunks, and re-calculate decision correlations.
+              </div>
+
+              <form onSubmit={handleSaveDecision} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Impact Area:</label>
+                    <input
+                      type="text"
+                      value={editDecisionForm.impact_area}
+                      onChange={(e) => setEditDecisionForm({ ...editDecisionForm, impact_area: e.target.value })}
+                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.45rem 0.75rem', color: '#fff', fontSize: '0.85rem' }}
+                      required
+                    />
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Theme:</label>
+                    <input
+                      type="text"
+                      value={editDecisionForm.theme}
+                      onChange={(e) => setEditDecisionForm({ ...editDecisionForm, theme: e.target.value })}
+                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.45rem 0.75rem', color: '#fff', fontSize: '0.85rem' }}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Decision Summary:</label>
+                  <textarea
+                    value={editDecisionForm.summary}
+                    onChange={(e) => setEditDecisionForm({ ...editDecisionForm, summary: e.target.value })}
+                    rows={3}
+                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#fff', fontSize: '0.85rem', lineHeight: '1.4' }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Strategic Rationale / Notes:</label>
+                  <textarea
+                    value={editDecisionForm.rationale}
+                    onChange={(e) => setEditDecisionForm({ ...editDecisionForm, rationale: e.target.value })}
+                    rows={2}
+                    placeholder="Optional rationale or context..."
+                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#fff', fontSize: '0.85rem' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+                  <button type="button" onClick={() => setSelectedDecisionForEdit(null)} className="tab-btn" style={{ padding: '0.5rem 1rem' }}>
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={savingDecision} className="tab-btn active" style={{ background: 'var(--primary-cyan)', color: '#090d16', fontWeight: 700, padding: '0.5rem 1.25rem' }}>
+                    {savingDecision ? 'Syncing to DB & RAG...' : 'Save & Sync Decision'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* UPLOAD MEETING SUMMARY TO RAW MODAL */}
         {showUploadModal && (

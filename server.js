@@ -7,6 +7,8 @@ import db from './src/db/index.js';
 import { ingestAllMeetings } from './src/services/ingestionService.js';
 import { answerRAGQuery } from './src/rag/ragOrchestrator.js';
 import { syncDbToRaw } from './scripts/sync_db_to_raw.js';
+import { analyzeAndMapDecisions, buildDecisionTimelineNarrative } from './src/services/decisionIntelligenceService.js';
+import { updateDecisionVectorChunk } from './src/rag/vectorStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -339,6 +341,94 @@ app.post('/api/rag/query', (req, res) => {
 
   const result = answerRAGQuery(query, filters || {});
   res.json(result);
+});
+
+// Decisions Intelligence & Timeline endpoints
+app.get('/api/decisions', (req, res) => {
+  try {
+    const decisions = db.prepare(`
+      SELECT d.*, m.date as meeting_date, m.title as meeting_title, m.pm as meeting_pm
+      FROM decisions_taken d
+      JOIN meeting_metadata m ON d.meeting_id = m.id
+      ORDER BY m.date ASC, d.id ASC
+    `).all();
+
+    const parsedDecisions = decisions.map(d => ({
+      ...d,
+      correlations: d.correlations ? JSON.parse(d.correlations) : []
+    }));
+
+    const narrative = buildDecisionTimelineNarrative();
+
+    res.json({
+      decisions: parsedDecisions,
+      narrative
+    });
+  } catch (error) {
+    console.error('Error fetching decisions:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.patch('/api/decisions/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { impact_area, summary, theme, rationale, correlations } = req.body;
+
+    const current = db.prepare('SELECT * FROM decisions_taken WHERE id = ?').get(id);
+    if (!current) return res.status(404).json({ error: 'Decision not found.' });
+
+    const updatedArea = impact_area !== undefined ? impact_area : current.impact_area;
+    const updatedSummary = summary !== undefined ? summary : current.summary;
+    const updatedTheme = theme !== undefined ? theme : (current.theme || 'General');
+    const updatedRationale = rationale !== undefined ? rationale : (current.rationale || '');
+    const updatedCorrelations = correlations !== undefined ? JSON.stringify(correlations) : (current.correlations || '[]');
+
+    db.prepare(`
+      UPDATE decisions_taken
+      SET impact_area = ?, summary = ?, theme = ?, rationale = ?, correlations = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(updatedArea, updatedSummary, updatedTheme, updatedRationale, updatedCorrelations, id);
+
+    // Sync edit directly to RAG Vector Store
+    updateDecisionVectorChunk(current.meeting_id, current.decision_num, updatedArea, updatedSummary, updatedTheme);
+
+    // Re-run correlation analysis across all decisions to reflect edits
+    analyzeAndMapDecisions();
+
+    const updatedRow = db.prepare(`
+      SELECT d.*, m.date as meeting_date, m.title as meeting_title
+      FROM decisions_taken d
+      JOIN meeting_metadata m ON d.meeting_id = m.id
+      WHERE d.id = ?
+    `).get(id);
+
+    res.json({
+      success: true,
+      decision: {
+        ...updatedRow,
+        correlations: updatedRow.correlations ? JSON.parse(updatedRow.correlations) : []
+      }
+    });
+  } catch (error) {
+    console.error('Error updating decision:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/decisions/analyze', (req, res) => {
+  try {
+    const updatedDecisions = analyzeAndMapDecisions();
+    const narrative = buildDecisionTimelineNarrative();
+    res.json({
+      success: true,
+      decisions: updatedDecisions,
+      narrative
+    });
+  } catch (error) {
+    console.error('Error running decision analysis:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.listen(PORT, () => {

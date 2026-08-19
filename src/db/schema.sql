@@ -29,6 +29,10 @@ CREATE TABLE IF NOT EXISTS decisions_taken (
   decision_num INTEGER,
   impact_area TEXT NOT NULL DEFAULT 'General',
   summary TEXT NOT NULL,
+  theme TEXT DEFAULT 'General',
+  correlations TEXT DEFAULT '[]',
+  rationale TEXT DEFAULT '',
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   meeting_id TEXT NOT NULL,
   FOREIGN KEY (meeting_id) REFERENCES meeting_metadata(id)
 );

@@ -410,3 +410,191 @@ body {
 .send-btn:hover {
   opacity: 0.9;
 }
+
+/* Decision Intelligence Timeline & Map Styles */
+.timeline-viewport {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  width: 100%;
+}
+
+.timeline-narrative-banner {
+  background: rgba(17, 24, 39, 0.85);
+  border: 1px solid var(--border-highlight);
+  border-radius: 12px;
+  padding: 1.25rem 1.75rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.timeline-grid-wrapper {
+  overflow-x: auto;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.timeline-x-header {
+  display: flex;
+  border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+  padding-bottom: 0.75rem;
+  min-width: max-content;
+}
+
+.timeline-theme-label-col {
+  width: 220px;
+  min-width: 220px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  padding-left: 0.5rem;
+}
+
+.timeline-milestone-cell {
+  width: 320px;
+  min-width: 320px;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  border-left: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.timeline-lane-row {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  min-width: max-content;
+  padding: 0.75rem 0;
+  transition: background 0.2s ease;
+}
+
+.timeline-lane-row:hover {
+  background: rgba(30, 41, 59, 0.3);
+}
+
+.timeline-card-cell {
+  width: 320px;
+  min-width: 320px;
+  padding: 0.5rem;
+  border-left: 1px dashed rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.decision-timeline-card {
+  background: rgba(17, 24, 39, 0.9);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.85rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.decision-timeline-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-cyan);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.2);
+}
+
+.decision-timeline-card.selected-correlation {
+  border-color: #f59e0b;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+  background: rgba(45, 30, 10, 0.95);
+}
+
+.decision-timeline-card.linked-correlation {
+  border-color: var(--primary-indigo);
+  box-shadow: 0 0 15px rgba(129, 140, 248, 0.35);
+  background: rgba(20, 25, 50, 0.9);
+}
+
+.decision-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.decision-num-tag {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--primary-cyan);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.decision-impact-badge {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.decision-summary-text {
+  font-size: 0.85rem;
+  color: var(--text-main);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.decision-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+.correlation-btn {
+  background: rgba(129, 140, 248, 0.1);
+  color: var(--primary-indigo);
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.2s ease;
+}
+
+.correlation-btn:hover {
+  background: rgba(129, 140, 248, 0.25);
+}
+
+.edit-decision-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.edit-decision-btn:hover {
+  color: #fff;
+  border-color: var(--primary-cyan);
+  background: rgba(56, 189, 248, 0.1);
+}

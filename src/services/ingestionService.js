@@ -3,6 +3,7 @@ import path from 'path';
 import db, { resetDatabase } from '../db/index.js';
 import { parseMeetingMarkdown } from '../parser/meetingParser.js';
 import { indexMeetingChunks } from '../rag/vectorStore.js';
+import { analyzeAndMapDecisions } from './decisionIntelligenceService.js';
 
 export function ingestAllMeetings(rawDirectoryPath) {
   resetDatabase();
@@ -143,6 +144,13 @@ export function ingestAllMeetings(rawDirectoryPath) {
       insertStakeholderStmt.run(s.name, s.role, s.organization, s.key_responsibilities, s.status);
     }
   })();
+
+  // Run automated theme discovery and correlation mapping across decisions
+  try {
+    analyzeAndMapDecisions();
+  } catch (err) {
+    console.error('Decision analysis during ingestion warning:', err.message);
+  }
 
   console.log('Successfully ingested all meeting minutes into SQLite and Vector Store.');
 }
