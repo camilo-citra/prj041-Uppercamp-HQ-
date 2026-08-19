@@ -9,6 +9,7 @@ import { answerRAGQuery } from './src/rag/ragOrchestrator.js';
 import { syncDbToRaw } from './scripts/sync_db_to_raw.js';
 import { analyzeAndMapDecisions, buildDecisionTimelineNarrative } from './src/services/decisionIntelligenceService.js';
 import { updateDecisionVectorChunk } from './src/rag/vectorStore.js';
+import { runIngestionPipeline } from './src/agent/meetingIngestionAgent.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,8 +23,7 @@ app.use(express.json({ limit: '10mb' }));
 // Ingest trigger endpoint
 app.post('/api/ingest', (req, res) => {
   try {
-    const rawDir = path.join(__dirname, 'Raw');
-    ingestAllMeetings(rawDir);
+    runIngestionPipeline('HTTP REST API Trigger');
     res.json({ success: true, message: 'Ingestion completed successfully.' });
   } catch (error) {
     console.error('Ingestion failed:', error);
@@ -48,15 +48,15 @@ app.post('/api/meetings/upload', (req, res) => {
     // Save markdown file directly into Raw/ folder
     fs.writeFileSync(targetPath, content, 'utf8');
 
-    // Trigger full ingestion pipeline (Parses markdown, updates DB & indexes RAG vector chunks)
-    ingestAllMeetings(rawDir);
+    // Trigger agent ingestion pipeline (Parses markdown, updates DB across all 6 modules & syncs raw)
+    runIngestionPipeline(`File Upload: ${safeFilename}`);
 
     const idMatch = safeFilename.match(/Minutes\d+/i);
     const meetingId = idMatch ? idMatch[0] : safeFilename.replace(/\.md$/, '');
 
     res.json({
       success: true,
-      message: `Successfully saved ${safeFilename} to Raw/ and ingested into RAG vector store & database.`,
+      message: `Successfully saved ${safeFilename} to Raw/ and deployed full database update across all 6 modules.`,
       filename: safeFilename,
       meeting_id: meetingId
     });

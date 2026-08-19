@@ -24,6 +24,13 @@ export function ingestAllMeetings(rawDirectoryPath) {
   // Sort chronologically by date
   parsedMeetings.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+  // Determine latest meeting for dynamic Brief update
+  const latestMtg = parsedMeetings.length > 0 ? parsedMeetings[parsedMeetings.length - 1] : null;
+  const latestMtgId = latestMtg ? latestMtg.id : 'Minutes00';
+  const dynamicObjective = (latestMtg && latestMtg.executive_summary)
+    ? `[Updated from ${latestMtg.id}] ${latestMtg.executive_summary.slice(0, 220).replace(/\n/g, ' ')}...`
+    : 'Deliver multi-floor phased renovation, exterior facade modernization, and roof terrace development for Uppercamp HQ within budget and compliance standards.';
+
   // Initialize living Project Brief table
   const insertBriefStmt = db.prepare(`
     INSERT INTO brief (id, title, objective, core_requirements, last_updated_meeting_id)
@@ -33,9 +40,9 @@ export function ingestAllMeetings(rawDirectoryPath) {
   insertBriefStmt.run(
     1,
     'prj041 - Uppercamp HQ (UC 6A Renovation & Roof Terrace)',
-    'Deliver multi-floor phased renovation, exterior facade modernization, and roof terrace development for Uppercamp HQ within budget and compliance standards.',
+    dynamicObjective,
     'Scope: Council submission covering 3 floors + facade + roof. Interior fit-out restricted to Floors 1 & 2. Governance via Revit + ACC platform. Stage 3 sign-offs required to lock budget.',
-    'Minutes04'
+    latestMtgId
   );
 
   const insertMeetingMetaStmt = db.prepare(`
@@ -143,6 +150,20 @@ export function ingestAllMeetings(rawDirectoryPath) {
     for (const s of coreStakeholders) {
       insertStakeholderStmt.run(s.name, s.role, s.organization, s.key_responsibilities, s.status);
     }
+
+    // Auto-discover and register any new attendees found in parsed meetings
+    const existingNames = new Set(coreStakeholders.map(s => s.name.toLowerCase()));
+    for (const mtg of parsedMeetings) {
+      if (!mtg.attendees) continue;
+      const parsedNames = mtg.attendees.split(/[,;\n]/).map(n => n.trim()).filter(n => n.length > 2);
+      for (const name of parsedNames) {
+        const cleanName = name.replace(/\([^)]*\)/g, '').replace(/\[[^\]]*\]/g, '').trim();
+        if (cleanName && !existingNames.has(cleanName.toLowerCase())) {
+          insertStakeholderStmt.run(cleanName, 'Project Team Member', 'Uppercamp Project Team', `Discovered as meeting participant in ${mtg.id}`, 'Active');
+          existingNames.add(cleanName.toLowerCase());
+        }
+      }
+    }
   })();
 
   // Run automated theme discovery and correlation mapping across decisions
@@ -154,3 +175,4 @@ export function ingestAllMeetings(rawDirectoryPath) {
 
   console.log('Successfully ingested all meeting minutes into SQLite and Vector Store.');
 }
+

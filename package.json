@@ -7,7 +7,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "node server.js",
-    "ingest": "node scripts/ingest_raw_minutes.js"
+    "ingest": "node scripts/ingest_raw_minutes.js",
+    "agent": "node scripts/start_ingestion_agent.js",
+    "agent:once": "node scripts/start_ingestion_agent.js --once"
   },
   "dependencies": {
     "better-sqlite3": "^11.8.1",
