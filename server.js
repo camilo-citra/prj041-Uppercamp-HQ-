@@ -10,6 +10,7 @@ import { syncDbToRaw } from './scripts/sync_db_to_raw.js';
 import { analyzeAndMapDecisions, buildDecisionTimelineNarrative } from './src/services/decisionIntelligenceService.js';
 import { updateDecisionVectorChunk } from './src/rag/vectorStore.js';
 import { runIngestionPipeline } from './src/agent/meetingIngestionAgent.js';
+import { getDomainFocusSpectrum, getActionVelocityAndCapacity, getRiskLifecycleTrajectory, getCausalDecisionGraph, getProjectRetrospective } from './src/services/projectIntelligenceService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -427,6 +428,50 @@ app.post('/api/decisions/analyze', (req, res) => {
     });
   } catch (error) {
     console.error('Error running decision analysis:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Project Intelligence & Analytics Endpoints
+app.get('/api/analytics/intelligence', (req, res) => {
+  try {
+    const domainSpectrum = getDomainFocusSpectrum();
+    const actionVelocity = getActionVelocityAndCapacity();
+    const riskTrajectory = getRiskLifecycleTrajectory();
+    res.json({
+      success: true,
+      domainSpectrum,
+      actionVelocity,
+      riskTrajectory
+    });
+  } catch (error) {
+    console.error('Error fetching intelligence analytics:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/analytics/decision-graph', (req, res) => {
+  try {
+    const graphData = getCausalDecisionGraph();
+    res.json({
+      success: true,
+      graph: graphData
+    });
+  } catch (error) {
+    console.error('Error fetching causal decision graph:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/analytics/retrospective', (req, res) => {
+  try {
+    const retrospective = getProjectRetrospective();
+    res.json({
+      success: true,
+      retrospective
+    });
+  } catch (error) {
+    console.error('Error fetching retrospective knowledge:', error);
     res.status(500).json({ error: error.message });
   }
 });

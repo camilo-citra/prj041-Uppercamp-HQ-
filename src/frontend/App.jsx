@@ -5,6 +5,7 @@ import {
   Upload, FilePlus, CheckCircle, CheckCircle2, X, Trash2, Edit2, Plus, Save, UserPlus, ShieldAlert, Network, Grid,
   GitCommit, Sparkles, Link2, Compass, BrainCircuit
 } from 'lucide-react';
+import ProjectIntelligenceHub from './ProjectIntelligenceHub.jsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('meetings');
@@ -586,6 +587,13 @@ export default function App() {
             onClick={() => setActiveTab('rag')}
           >
             <MessageSquare size={16} /> RAG Intelligence
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'intelligence' ? 'active' : ''}`}
+            onClick={() => setActiveTab('intelligence')}
+            style={{ background: activeTab === 'intelligence' ? 'rgba(56, 189, 248, 0.2)' : undefined, borderColor: activeTab === 'intelligence' ? 'var(--primary-cyan)' : undefined }}
+          >
+            <BrainCircuit size={16} style={{ color: 'var(--primary-cyan)' }} /> Project Intelligence
           </button>
         </nav>
 
@@ -1301,7 +1309,7 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 4: RAG INTELLIGENCE & CONSOLIDATED RESPONSE MODULE */}
+        {/* TAB 4: RAG INTELLIGENCE MODULE */}
         {activeTab === 'rag' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -1323,62 +1331,51 @@ export default function App() {
             <div className="chat-container">
               <div className="chat-history">
                 {chatMessages.map((msg, idx) => (
-                  <div key={idx} className={`chat-msg ${msg.sender}`} style={{ width: '100%' }}>
-                    {msg.sender === 'user' ? (
-                      <div style={{ fontWeight: 600 }}>{msg.text}</div>
-                    ) : (
-                      <div>
-                        {/* Executive Consolidated Response Header */}
-                        {msg.keyTakeaways && msg.keyTakeaways.length > 0 && (
-                          <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '12px', padding: '1rem', marginBottom: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                              <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary-cyan)', fontSize: '0.95rem' }}>
-                                ⚡ Consolidated Intelligence Takeaways ({msg.sourcesCount} sources retrieved)
-                              </h4>
-                              <button
-                                onClick={() => copyToClipboard(msg.text, idx)}
-                                className="tab-btn"
-                                style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'rgba(255, 255, 255, 0.08)' }}
-                              >
-                                {copiedIdx === idx ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
-                                {copiedIdx === idx ? 'Copied' : 'Copy Consolidated Report'}
-                              </button>
-                            </div>
-                            <ul style={{ paddingLeft: '1.2rem', fontSize: '0.88rem', color: '#e2e8f0' }}>
-                              {msg.keyTakeaways.map((kt, kti) => (
-                                <li key={kti} style={{ marginBottom: '0.25rem' }}>{kt}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                  <div key={idx} className={`chat-bubble ${msg.sender}`}>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.4rem', color: msg.sender === 'user' ? '#38bdf8' : '#a78bfa' }}>
+                      {msg.sender === 'user' ? '👤 User Query' : '🤖 Uppercamp RAG Engine'}
+                    </div>
 
-                        {/* Consolidated Response Narrative */}
-                        <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.65' }}>{msg.text}</div>
+                    {msg.keyTakeaways && msg.keyTakeaways.length > 0 && (
+                      <div style={{ background: 'rgba(56, 189, 248, 0.1)', padding: '0.75rem 1rem', borderRadius: '8px', borderLeft: '4px solid var(--primary-cyan)', marginBottom: '0.75rem' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--primary-cyan)', marginBottom: '0.3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>KEY TAKEAWAYS SUMMARY:</span>
+                          <button
+                            onClick={() => handleCopyResponse(msg.text, idx)}
+                            style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}
+                          >
+                            {copiedIdx === idx ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
+                            {copiedIdx === idx ? 'Copied' : 'Copy Consolidated Report'}
+                          </button>
+                        </div>
+                        <ul style={{ paddingLeft: '1.2rem', fontSize: '0.88rem', color: '#e2e8f0' }}>
+                          {msg.keyTakeaways.map((kt, kti) => (
+                            <li key={kti} style={{ marginBottom: '0.25rem' }}>{kt}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                        {/* Source Citations Explorer */}
-                        {msg.citations && msg.citations.length > 0 && (
-                          <div style={{ marginTop: '1.25rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.78rem' }}>
-                            <div style={{ fontWeight: 600, color: 'var(--primary-cyan)', marginBottom: '0.4rem' }}>
-                              Traceable Citations & Evidence ({msg.citations.length}):
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                              {msg.citations.map((c, ci) => (
-                                <span key={ci} title={c.text} style={{ background: 'rgba(129, 140, 248, 0.15)', color: '#c7d2fe', padding: '0.2rem 0.55rem', borderRadius: '6px', border: '1px solid rgba(129, 140, 248, 0.3)', cursor: 'pointer' }}>
-                                  {c.meeting_id} ({c.section})
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                    {/* Consolidated Response Narrative */}
+                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.65' }}>{msg.text}</div>
+
+                    {/* Source Citations Explorer */}
+                    {msg.citations && msg.citations.length > 0 && (
+                      <div style={{ marginTop: '1.25rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.78rem' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--primary-cyan)', marginBottom: '0.4rem' }}>
+                          Traceable Citations & Evidence ({msg.citations.length}):
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          {msg.citations.map((c, ci) => (
+                            <span key={ci} title={c.text} style={{ background: 'rgba(129, 140, 248, 0.15)', color: '#c7d2fe', padding: '0.2rem 0.55rem', borderRadius: '6px', border: '1px solid rgba(129, 140, 248, 0.3)', cursor: 'pointer' }}>
+                              {c.meeting_id} ({c.section})
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
                 ))}
-                {chatLoading && (
-                  <div className="chat-msg ai" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <RefreshCw size={14} className="animate-spin" /> Synthesizing vector search & relational database context into executive consolidated response...
-                  </div>
-                )}
               </div>
 
               <div className="chat-input-row">
@@ -1398,6 +1395,10 @@ export default function App() {
           </div>
         )}
 
+        {/* TAB 8: PROJECT INTELLIGENCE & EXPERIENCE HUB */}
+        {activeTab === 'intelligence' && (
+          <ProjectIntelligenceHub />
+        )}
 
         {/* TAB 5: DECISION TIMELINE & LOGIC MAP */}
         {activeTab === 'decisions' && (
