@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import db from './src/db/index.js';
 import { ingestAllMeetings } from './src/services/ingestionService.js';
 import { answerRAGQuery } from './src/rag/ragOrchestrator.js';
+import { syncDbToRaw } from './scripts/sync_db_to_raw.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -163,6 +164,8 @@ app.patch('/api/actions/:id', (req, res) => {
     WHERE id = ?
   `).run(updatedDesc, updatedAssignee, updatedDue, updatedStatus, req.params.id);
 
+  try { syncDbToRaw(); } catch (err) { console.error('Sync to Raw failed:', err); }
+
   res.json({
     success: true,
     id: req.params.id,
@@ -203,6 +206,8 @@ app.patch('/api/risks/:id', (req, res) => {
     SET risk_code = ?, description = ?, contingency_measure = ?, impact_level = ?, likelihood = ?, status = ?
     WHERE id = ?
   `).run(updatedCode, updatedDesc, updatedCont, updatedImpact, updatedLikelihood, updatedStatus, req.params.id);
+
+  try { syncDbToRaw(); } catch (err) { console.error('Sync to Raw failed:', err); }
 
   res.json({
     success: true,

@@ -49,9 +49,9 @@ Foundation testing confirmed that internal column bases are insufficient to supp
 
 ## **Risk Register**
 
-| Risk Name | Description | Mitigation |
+| Risk Name | Description | Mitigation | Status |
 | :---- | :---- | :---- |
-| Corrosion Protection Delays (High) | Delays in selecting and applying the corrosion methodology could bottleneck ground and first-floor site work. | Daniel to urgently secure revised quotes and technical methodologies from Sovore and schedule a Zipex site visit. |
+| Corrosion Protection Delays (High) | Delays in selecting and applying the corrosion methodology could bottleneck ground and first-floor site work. | Daniel to urgently secure revised quotes and technical methodologies from Sovore and schedule a Zipex site visit. | Open |
 
 ## **Issue Register**
 

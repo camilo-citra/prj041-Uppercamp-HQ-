@@ -53,23 +53,23 @@ The session successfully established the critical design constraints dictated by
 
 ## **5\. Risks, Issues, & Roadblocks**
 
-* **Risk/Issue:** Lift installation and associated structural excavation (1.5m down) poses significant cost and waterproofing challenges.  
+* **Risk/Issue:** Lift installation and associated structural excavation (1.5m down) poses significant cost and waterproofing challenges. (Status: Open)
   * **Mitigation/Next Step:** The design team must verify with the council if full accessibility compliance is mandatory for the second and third floors before committing to the lift installation.  
-* **Risk/Issue:** High occupancy calculations for the roof terrace could mandate a 1.8m wide staircase, consuming valuable floor space on lower levels.  
+* **Risk/Issue:** High occupancy calculations for the roof terrace could mandate a 1.8m wide staircase, consuming valuable floor space on lower levels. (Status: Open)
   * **Mitigation/Next Step:** Pieter to draft a conceptual layout plotting the longest escape routes, which will be tested with the Fire Chief for alternative compliance paths.  
-* **Risk/Issue:** Structural capacity for the new roof terrace and condenser loads is currently unknown.  
+* **Risk/Issue:** Structural capacity for the new roof terrace and condenser loads is currently unknown. (Status: Open)
   * **Mitigation/Next Step:** Await the structural engineering report (expected Friday) to determine if existing columns require reinforcement.
 
 ## **6\. Action Items (Task List)**
 
 | **Task / Action Item** | **Assignee(s)** | **Deadline** | **Status** | 
 
-1. **Provide CAD Layouts:** Send current CAD layouts of the EOT and accessible roof space. | Design Team | ASAP | Pending |   
+1. **Provide CAD Layouts:** Send current CAD layouts of the EOT and accessible roof space. | Design Team | ASAP | Completed |   
 2. **Draft Fire & HVAC Concept:** Create a high-level fire/AC concept design based on the provided CAD layouts, determining condenser space and escape distances. | Pieter | Next Week | Pending |   
-3. **Verify Accessibility Compliance:** Determine if the upper floors require strict disability compliance (impacts lift and refuge areas). | Design Team / John | ASAP | Pending |   
-4. **Consult Fire Chief:** Present the preliminary fire design concept to Benjamin Ellis for feedback/approval. | Pieter | Following Concept Draft | Pending |   
+3. **Verify Accessibility Compliance:** Determine if the upper floors require strict disability compliance (impacts lift and refuge areas). | Design Team / John | ASAP | In Progress |   
+4. **Consult Fire Chief:** Present the preliminary fire design concept to Benjamin Ellis for feedback/approval. | Pieter | Following Concept Draft | In Progress |   
 5. **Distribute Structural Report:** Share the structural engineering report with the wider team upon receipt. | John Walter Shaidi | May 29, 2026 | Pending |   
-6. **Schedule Weekly Meetings:** Consult with Cheryl to establish a recurring day for weekly project coordination sessions. | John Walter Shaidi | May 29, 2026 | Pending |
+6. **Schedule Weekly Meetings:** Consult with Cheryl to establish a recurring day for weekly project coordination sessions. | John Walter Shaidi | May 29, 2026 | Completed |
 
 ## **7\. Design**
 

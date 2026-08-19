@@ -138,11 +138,11 @@ The team officially kicked off the coordination for Upper Camp 6A, agreeing to a
 
 ### **5\. Risks, Issues, & Roadblocks**
 
-* **Risk/Issue:** Financial surprises late in the design process due to a lack of early budget integration.  
+* **Risk/Issue:** Financial surprises late in the design process due to a lack of early budget integration. (Status: Open)
   * **Mitigation/Next Step:** Cost estimations will be integrated by the end of Stage 3 so stakeholders understand expenditures before moving into the final concept phase.  
-* **Risk/Issue:** Potential delays caused by a lack of stakeholder alignment or last-minute changes from HODs.  
+* **Risk/Issue:** Potential delays caused by a lack of stakeholder alignment or last-minute changes from HODs. (Status: Open)
   * **Mitigation/Next Step:** Organize a dedicated presentation event at Stage 3 with physical material reviews to secure explicit buy-in before proceeding to detailed design.  
-* **Risk/Issue:** Roof structural impact from heavy centralized HVAC equipment.  
+* **Risk/Issue:** Roof structural impact from heavy centralized HVAC equipment. (Status: Open)
   * **Mitigation/Next Step:** MEP to prepare dimensioned sketches of the 12 HVAC condensers and fans to ensure they integrate into the layout without interfering with structural columns.
 
 ### **6\. Action Items (Task List)**
@@ -152,10 +152,10 @@ The team officially kicked off the coordination for Upper Camp 6A, agreeing to a
 | **Revise Project Program:** Update phases, timelines, budget milestones, and approval dates. | Camilo Mogni | ASAP | Completed |
 | **Establish ACC Protocol:** Set up shared documentation folders and grant group license access to the engineering team. | Busisiwe Mgwenya | ASAP | In Progress |
 | **Present Facade Proposal:** Develop and present a concept proposal for the exterior facade. | Design Team | July 3, 2026 | Pending |
-| **Verify Measurements:** Verify existing building data against as-built drawings for the office block. | Design Team | Ongoing | In Progress |
+| **Verify Measurements:** Verify existing building data against as-built drawings for the office block. | Design Team | Ongoing | Completed |
 | **Sketch HVAC Requirements:** Create dimensioned sketches for roof HVAC condensers and ventilation fans. | Pieter Fourie | ASAP | Pending |
 | **Share Heritage Documents:** Distribute current heritage documentation (elevations and roof status) to the team. | Camilo Mogni / Team | ASAP | Pending |
-| **Confirm Stairs Location:** Finalize the exact positioning of the access stairs leading to the roof. | Design Team | ASAP | Pending |
+| **Confirm Stairs Location:** Finalize the exact positioning of the access stairs leading to the roof. | Design Team | ASAP | Completed |
 
 ### **7\. Parking Lot**
 

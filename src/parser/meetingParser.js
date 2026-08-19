@@ -222,6 +222,13 @@ export function parseMeetingMarkdown(filePath) {
           const riskName = cols[0].replace(/\*\*/g, '').trim();
           const desc = cols[1].replace(/\*\*/g, '').trim();
           const mit = cols[2].replace(/\*\*/g, '').trim();
+          let status = 'Open';
+          if (cols.length >= 4) {
+            const possibleStatus = cols[3].replace(/\*\*/g, '').trim();
+            if (possibleStatus.toLowerCase() === 'closed' || possibleStatus.toLowerCase() === 'open') {
+              status = possibleStatus.charAt(0).toUpperCase() + possibleStatus.slice(1).toLowerCase();
+            }
+          }
 
           const fullDesc = `${riskName}: ${desc}`;
           const descLower = fullDesc.toLowerCase();
@@ -233,7 +240,7 @@ export function parseMeetingMarkdown(filePath) {
             contingency_measure: mit,
             impact_level: impact,
             likelihood: likelihood,
-            status: 'Open'
+            status: status
           });
         }
       }
@@ -261,12 +268,18 @@ export function parseMeetingMarkdown(filePath) {
           const impact = descLower.includes('severe') || descLower.includes('cost') || descLower.includes('fire') || descLower.includes('excavation') || descLower.includes('catastrophic') ? 'High' : 'Medium';
           const likelihood = descLower.includes('delay') || descLower.includes('capacity') || descLower.includes('unknown') || descLower.includes('vulnerable') ? 'High' : 'Medium';
 
+          let status = 'Open';
+          const statusMatch = block.match(/(?:\(Status:\s*|Status:\s*)(Open|Closed)\)?/i);
+          if (statusMatch) {
+            status = statusMatch[1].charAt(0).toUpperCase() + statusMatch[1].slice(1).toLowerCase();
+          }
+
           risks.push({
             description: description,
             contingency_measure: contingency,
             impact_level: impact,
             likelihood: likelihood,
-            status: 'Open'
+            status: status
           });
         }
       }

@@ -83,8 +83,8 @@ A highly productive alignment session between Camilo Mogni and John Walter Shaid
 | :---- | :---- | :---- | :---- |
 | **Distribute Consolidated Cash Flow:** Email the updated master consultant cash flow Excel to Eldridge, Real, and Cheryl. | John Walter Shaidi | July 7, 2026 (Within 30 mins) | Pending |
 | **Secure Staff Count:** Follow up with Real to get the total staff headcount and email it to King William. | John Walter Shaidi | July 7, 2026 (Immediate) | In Progress |
-| **Acquire Rooftop Eboard Design:** Request the selected concept design from NLA and share it with King William via Chat (CC Camilo). | John Walter Shaidi | July 7, 2026 | Pending |
-| **Update Seloxis Program:** Re-align Seloxis schedules with King William's stages (remove exterior works, simplify demo, replace fit-out with single-floor construction). | John Walter Shaidi | July 7, 2026 (By 3:00 PM) | Pending |
+| **Acquire Rooftop Eboard Design:** Request the selected concept design from NLA and share it with King William via Chat (CC Camilo). | John Walter Shaidi | July 7, 2026 | Completed |
+| **Update Seloxis Program:** Re-align Seloxis schedules with King William's stages (remove exterior works, simplify demo, replace fit-out with single-floor construction). | John Walter Shaidi | July 7, 2026 (By 3:00 PM) | Completed |
 | **Secure Quotations:** Call Daniel to secure the outstanding quotations for foundation work and the column rust treatment paint. | John Walter Shaidi | July 7, 2026 | Completed |
 | **Integrate Consultant Schedules:** Reach out to Andrew to obtain his proposal schedule projection and integrate it into the Master Cash Flow. | John Walter Shaidi | July 10, 2026 | Completed |
 | **Add Import Line Item:** Integrate the ![][image4] import cost line item into the master financial projection. | Camilo Mogni | July 10, 2026 | Completed |
