@@ -94,7 +94,26 @@ export default function App() {
     try {
       const res = await fetch('/api/stakeholders');
       const data = await res.json();
-      setStakeholders(data);
+      if (Array.isArray(data)) {
+        const uniqueMap = new Map();
+        for (const item of data) {
+          const cleanName = (item.name || '').replace(/^[\s\-\–\—•\*\d\.\:\)\(\\\`\#]+/, '').replace(/[\*\_\`]/g, '').trim();
+          const normKey = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (!uniqueMap.has(normKey)) {
+            uniqueMap.set(normKey, { ...item, name: cleanName });
+          } else {
+            const existing = uniqueMap.get(normKey);
+            const isExistingLead = (existing.role || '').toLowerCase().includes('lead') || (existing.role || '').toLowerCase().includes('manager');
+            const isNewLead = (item.role || '').toLowerCase().includes('lead') || (item.role || '').toLowerCase().includes('manager');
+            if (!isExistingLead && isNewLead) {
+              uniqueMap.set(normKey, { ...item, name: cleanName });
+            }
+          }
+        }
+        setStakeholders(Array.from(uniqueMap.values()));
+      } else {
+        setStakeholders(data);
+      }
     } catch (err) {
       console.error('Error fetching stakeholders:', err);
     }

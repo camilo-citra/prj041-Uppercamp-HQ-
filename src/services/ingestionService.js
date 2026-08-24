@@ -5,6 +5,77 @@ import { parseMeetingMarkdown } from '../parser/meetingParser.js';
 import { indexMeetingChunks } from '../rag/vectorStore.js';
 import { analyzeAndMapDecisions } from './decisionIntelligenceService.js';
 
+export function cleanAndNormalizeName(rawName) {
+  if (!rawName) return '';
+  let name = rawName;
+  
+  // Remove parenthetical details: e.g. "Camilo Mogni (Project Manager)" -> "Camilo Mogni"
+  name = name.replace(/\([^)]*\)/g, '');
+  // Remove bracket details: e.g. "Camilo Mogni [PM]" -> "Camilo Mogni"
+  name = name.replace(/\[[^\]]*\]/g, '');
+  // Strip markdown formatting symbols (*, _, `, #, ~)
+  name = name.replace(/[\*\_\`\#\~]/g, '');
+  // Strip leading bullet symbols, numbers, dashes, asterisks, spaces, colons
+  name = name.replace(/^[\s\-\–\—•\*\d\.\:\)\(]+/, '');
+  // Strip trailing punctuation & spaces
+  name = name.replace(/[\s\-\–\—•\*\.\:\)\(]+$/, '');
+  
+  // Collapse whitespace
+  return name.replace(/\s+/g, ' ').trim();
+}
+
+export function splitAttendees(attendeesStr) {
+  if (!attendeesStr) return [];
+  const tokens = [];
+  let current = '';
+  let inParen = 0;
+  for (let i = 0; i < attendeesStr.length; i++) {
+    const char = attendeesStr[i];
+    if (char === '(' || char === '[') inParen++;
+    else if (char === ')' || char === ']') inParen = Math.max(0, inParen - 1);
+
+    if ((char === ',' || char === ';' || char === '\n') && inParen === 0) {
+      if (current.trim()) tokens.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  if (current.trim()) tokens.push(current.trim());
+  return tokens;
+}
+
+export function findMatchingStakeholder(cleanName, existingStakeholders) {
+  if (!cleanName || cleanName.length < 2) return null;
+
+  const normClean = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!normClean) return null;
+
+  // 1. Direct exact or normalized name match
+  for (const s of existingStakeholders) {
+    const normExisting = s.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (normClean === normExisting) {
+      return s;
+    }
+  }
+
+  // 2. Substring / First Name / Full Name match against existing team
+  // e.g. cleanName "Pieter" matches "Pieter Fourie", "Enrica" matches "Enrica van der Linden", "Lunell" matches "Lunell de Blanche", "Camilo" matches "Camilo Mogni"
+  for (const s of existingStakeholders) {
+    const existingParts = s.name.toLowerCase().split(/\s+/);
+    const cleanParts = cleanName.toLowerCase().split(/\s+/);
+
+    if (cleanParts.length === 1 && cleanParts[0].length >= 3 && existingParts[0] === cleanParts[0]) {
+      return s;
+    }
+    if (existingParts.length === 1 && existingParts[0].length >= 3 && cleanParts[0] === existingParts[0]) {
+      return s;
+    }
+  }
+
+  return null;
+}
+
 export function ingestAllMeetings(rawDirectoryPath) {
   resetDatabase();
 
@@ -151,16 +222,23 @@ export function ingestAllMeetings(rawDirectoryPath) {
       insertStakeholderStmt.run(s.name, s.role, s.organization, s.key_responsibilities, s.status);
     }
 
-    // Auto-discover and register any new attendees found in parsed meetings
-    const existingNames = new Set(coreStakeholders.map(s => s.name.toLowerCase()));
+    // Auto-discover and register any new attendees found in parsed meetings cleanly
+    const registeredStakeholders = [...coreStakeholders];
     for (const mtg of parsedMeetings) {
       if (!mtg.attendees) continue;
-      const parsedNames = mtg.attendees.split(/[,;\n]/).map(n => n.trim()).filter(n => n.length > 2);
-      for (const name of parsedNames) {
-        const cleanName = name.replace(/\([^)]*\)/g, '').replace(/\[[^\]]*\]/g, '').trim();
-        if (cleanName && !existingNames.has(cleanName.toLowerCase())) {
+      const parsedTokens = splitAttendees(mtg.attendees);
+      for (const token of parsedTokens) {
+        const cleanName = cleanAndNormalizeName(token);
+        if (!cleanName || cleanName.length < 2) continue;
+
+        // Skip non-person words/phrases
+        const lower = cleanName.toLowerCase();
+        if (lower.includes('team') || lower.includes('department') || lower.includes('engineer)') || lower.includes('consultant')) continue;
+
+        const match = findMatchingStakeholder(cleanName, registeredStakeholders);
+        if (!match) {
           insertStakeholderStmt.run(cleanName, 'Project Team Member', 'Uppercamp Project Team', `Discovered as meeting participant in ${mtg.id}`, 'Active');
-          existingNames.add(cleanName.toLowerCase());
+          registeredStakeholders.push({ name: cleanName, role: 'Project Team Member', organization: 'Uppercamp Project Team' });
         }
       }
     }

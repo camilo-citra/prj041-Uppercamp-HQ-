@@ -226,27 +226,59 @@ app.patch('/api/risks/:id', (req, res) => {
 
 // Stakeholders & Team Directory Endpoint
 app.get('/api/stakeholders', (req, res) => {
-  const stakeholders = db.prepare(`SELECT * FROM stakeholders ORDER BY id ASC`).all();
+  const rawStakeholders = db.prepare(`SELECT * FROM stakeholders ORDER BY id ASC`).all();
   const meetingList = db.prepare(`SELECT id, attendees FROM meeting_metadata`).all();
   const actionList = db.prepare(`SELECT assignee FROM action_items`).all();
 
-  const enriched = stakeholders.map(s => {
-    const meetingsAttended = meetingList.filter(m =>
-      m.attendees && m.attendees.toLowerCase().includes(s.name.toLowerCase())
-    ).length;
+  // Deduplicate and consolidate stakeholders by normalized name
+  const deduplicatedMap = new Map();
 
-    const actionsAssigned = actionList.filter(a =>
-      a.assignee && a.assignee.toLowerCase().includes(s.name.toLowerCase().split(' ')[0])
-    ).length;
+  for (const s of rawStakeholders) {
+    const cleanName = s.name.replace(/^[\s\-\–\—•\*\d\.\:\)\(\\\`\#]+/, '').replace(/[\*\_\`]/g, '').trim();
+    const normKey = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-    return {
-      ...s,
-      meetings_attended: meetingsAttended,
-      actions_assigned: actionsAssigned
-    };
-  });
+    const meetingsAttended = meetingList.filter(m => {
+      if (!m.attendees) return false;
+      const lowerAtt = m.attendees.toLowerCase();
+      const firstWord = cleanName.toLowerCase().split(' ')[0];
+      return lowerAtt.includes(cleanName.toLowerCase()) || (firstWord.length >= 3 && lowerAtt.includes(firstWord));
+    }).length;
 
-  res.json(enriched);
+    const actionsAssigned = actionList.filter(a => {
+      if (!a.assignee) return false;
+      const lowerAssignee = a.assignee.toLowerCase();
+      const firstWord = cleanName.toLowerCase().split(' ')[0];
+      return lowerAssignee.includes(cleanName.toLowerCase()) || (firstWord.length >= 3 && lowerAssignee.includes(firstWord));
+    }).length;
+
+    if (!deduplicatedMap.has(normKey)) {
+      deduplicatedMap.set(normKey, {
+        ...s,
+        name: cleanName,
+        meetings_attended: meetingsAttended,
+        actions_assigned: actionsAssigned
+      });
+    } else {
+      const existing = deduplicatedMap.get(normKey);
+      // Prefer profile with higher authority role e.g. Lead/Manager over generic Team Member
+      const isExistingLead = existing.role.toLowerCase().includes('lead') || existing.role.toLowerCase().includes('manager') || existing.role.toLowerCase().includes('director');
+      const isNewLead = s.role.toLowerCase().includes('lead') || s.role.toLowerCase().includes('manager') || s.role.toLowerCase().includes('director');
+
+      if (!isExistingLead && isNewLead) {
+        deduplicatedMap.set(normKey, {
+          ...s,
+          name: cleanName,
+          meetings_attended: Math.max(existing.meetings_attended, meetingsAttended),
+          actions_assigned: Math.max(existing.actions_assigned, actionsAssigned)
+        });
+      } else {
+        existing.meetings_attended = Math.max(existing.meetings_attended, meetingsAttended);
+        existing.actions_assigned = Math.max(existing.actions_assigned, actionsAssigned);
+      }
+    }
+  }
+
+  res.json(Array.from(deduplicatedMap.values()));
 });
 
 // Update stakeholder details
@@ -259,13 +291,15 @@ app.put('/api/stakeholders/:id', (req, res) => {
       return res.status(400).json({ error: 'Name, role, and organization are required.' });
     }
 
+    const cleanName = name.replace(/^[\s\-\–\—•\*\d\.\:\)\(\\\`\#]+/, '').replace(/[\*\_\`]/g, '').trim();
+
     const stmt = db.prepare(`
       UPDATE stakeholders
       SET name = ?, role = ?, organization = ?, key_responsibilities = ?, status = ?
       WHERE id = ?
     `);
 
-    const result = stmt.run(name, role, organization, key_responsibilities || '', status || 'Active', id);
+    const result = stmt.run(cleanName, role, organization, key_responsibilities || '', status || 'Active', id);
 
     if (result.changes === 0) {
       return res.status(404).json({ error: 'Stakeholder not found.' });
@@ -288,12 +322,26 @@ app.post('/api/stakeholders', (req, res) => {
       return res.status(400).json({ error: 'Name, role, and organization are required.' });
     }
 
+    const cleanName = name.replace(/^[\s\-\–\—•\*\d\.\:\)\(\\\`\#]+/, '').replace(/[\*\_\`]/g, '').trim();
+    const normKey = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    // Check if matching stakeholder already exists
+    const existingList = db.prepare(`SELECT * FROM stakeholders`).all();
+    const existing = existingList.find(s => {
+      const sClean = s.name.replace(/^[\s\-\–\—•\*\d\.\:\)\(\\\`\#]+/, '').replace(/[\*\_\`]/g, '').trim();
+      return sClean.toLowerCase().replace(/[^a-z0-9]/g, '') === normKey;
+    });
+
+    if (existing) {
+      return res.status(409).json({ error: `A team member named "${cleanName}" already exists in the directory.`, stakeholder: existing });
+    }
+
     const stmt = db.prepare(`
       INSERT INTO stakeholders (name, role, organization, key_responsibilities, status)
       VALUES (?, ?, ?, ?, ?)
     `);
 
-    const result = stmt.run(name, role, organization, key_responsibilities || '', status || 'Active');
+    const result = stmt.run(cleanName, role, organization, key_responsibilities || '', status || 'Active');
     const created = db.prepare(`SELECT * FROM stakeholders WHERE id = ?`).get(result.lastInsertRowid);
     res.json({ success: true, stakeholder: created });
   } catch (error) {

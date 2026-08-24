@@ -53,7 +53,7 @@ export function parseMeetingMarkdown(filePath) {
     if (attSectionMatch) {
       attendees = attSectionMatch[1]
         .split('\n')
-        .map(line => line.replace(/^[\s*\-•\\*]+/, '').replace(/\*\*/g, '').trim())
+        .map(line => line.replace(/^[\s\-\–\—•\*\d\.\:\)\(\\\`\#]+/, '').replace(/[\*\_\`]/g, '').trim())
         .filter(line => line && !line.startsWith('#') && !line.toLowerCase().startsWith('apologies') && !line.toLowerCase().startsWith('attachments') && line.length < 80)
         .join(', ');
     }
