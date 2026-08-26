@@ -86,7 +86,7 @@ However, because the engineering department faces an immediate resource cliff—
 | **Brief Dwayne:** Instruct Dwayne Jacobs on the upcoming physical foundation investigation scope and excavation requirements. | Jacques Kruger | July 2, 2026 | Completed |
 | **Create Method Statement:** Draft a technical method statement detailing where and how to expose foundation sites and send it to Dwayne. | Daniel Mnthambala | July 3, 2026 | Completed |
 | **Expose Foundations:** Physically excavate, expose the foundation footings, take precise dimensional measurements, and retrieve core samples if required. | Dwayne Jacobs | July 10, 2026 | Completed |
-| **Conduct Foundation Assessment:** Perform structural calculations based on Dwayne's field measurements and compile an assessment report for Joel Baur and Camilo. | Daniel Mnthambala | July 17, 2026 | In Progress |
+| **Conduct Foundation Assessment:** Perform structural calculations based on Dwayne's field measurements and compile an assessment report for Joel Baur and Camilo. | Daniel Mnthambala | July 17, 2026 | Completed |
 | **Schedule Camilo/Engineering Sync:** Coordinate and book a meeting between Camilo, Daniel, and Stacy to review the foundation assessment results and plan the transition. | Daniel Mnthambala, Stacy Farrant | July 20, 2026 | Completed |
 | **Prepare Meeting Agenda:** Write and email a clear agenda outlining meeting objectives and scope boundaries for the upcoming design sync. | Jacques Kruger | July 17, 2026 | Completed |
 

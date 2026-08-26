@@ -62,11 +62,11 @@ The team reviewed updates on infrastructure (electrical and demolition) and safe
 
 ## **Risk Register**
 
-| Risk Name | Description | Mitigation |
+| Risk Name | Description | Mitigation | Status |
 | :---- | :---- | :---- |
-| Council Approval Delay (High) | The simultaneous land use and BDM applications may be held up by municipal processes, delaying construction. | Book a formal pre-consultation meeting with BDM leadership (Mr. Philander and Samantha Nassen) to secure early buy-in and clarity. |
-| Lift Integration Cost (Medium) | The mandatory commercial lift to the roof may exceed budget and cause structural complications. | Research "pit-less" lift options and consult immediately with local lift contractors to confirm structural integration requirements and operational capacity. |
-| Pod Aesthetic Impact (Medium) | The required second stairwell extending to the roof may detract from the visual impact of the EOD pod from the highway. | Test design modifications, such as bringing the stairwell forward and curving it, to minimize visual impact while maintaining fire compliance. |
+| Council Approval Delay (High) | The simultaneous land use and BDM applications may be held up by municipal processes, delaying construction. | Book a formal pre-consultation meeting with BDM leadership (Mr. Philander and Samantha Nassen) to secure early buy-in and clarity. | Open |
+| Lift Integration Cost (Medium) | The mandatory commercial lift to the roof may exceed budget and cause structural complications. | Research "pit-less" lift options and consult immediately with local lift contractors to confirm structural integration requirements and operational capacity. | Open |
+| Pod Aesthetic Impact (Medium) | The required second stairwell extending to the roof may detract from the visual impact of the EOD pod from the highway. | Test design modifications, such as bringing the stairwell forward and curving it, to minimize visual impact while maintaining fire compliance. | Open |
 
 ## **Issue Register**
 
@@ -78,17 +78,17 @@ The team reviewed updates on infrastructure (electrical and demolition) and safe
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
 | ACT-001 | Connect electrical contact: Provide contact information for the electrical contractor once the layout is finalized. | Camilo Mogni | ASAP | Pending |
-| ACT-002 | Contact BDM: Document the outcomes of the fire meeting and issue them to the Building Development Management division. | Kim Williams | 2026-08-25 | Pending |
-| ACT-003 | Schedule pre-consultation: Book a formal pre-consultation meeting with Building Development Management on the portal. | Camilo Mogni | 2026-09-15 | Pending |
-| ACT-004 | Update design capacity: Adjust architectural layouts and circulation based on a 90-person building capacity. | Camilo Mogni | ASAP | Pending |
-| ACT-005 | Research lift specifications: Identify suitable commercial lift providers and hardware specifications for the project. | Kim Williams | ASAP | Pending |
-| ACT-006 | Evaluate parking solutions: Investigate potential automated car-stacking or lift systems to optimize parking availability on site. | The group | Ongoing | Pending |
-| ACT-007 | Test Pod Design: Evaluate the pod corner layout including the refuge area and circulation requirements to confirm feasibility. | Camilo Mogni, Nicole | ASAP | Pending |
-| ACT-008 | Design Facade: Develop the aesthetic layout for the building exterior to maintain an industrial style. | Kim Williams | Ongoing | Pending |
-| ACT-009 | Verify Lift Capacity: Engage with lift contractors on site to confirm structural integration requirements. | Camilo Mogni | ASAP | Pending |
-| ACT-010 | Schedule Presentation: Send a meeting invitation for the project presentation scheduled for 28 September. | Camilo Mogni | ASAP | Pending |
-| ACT-011 | Prepare Technical Drawings: Finalize preliminary technical documentation for the interior renovation. | Camilo Mogni | 2026-09-04 | Pending |
-| ACT-012 | Distribute Design Specs: Provide mechanical and electrical teams with preliminary layouts to initiate their costing. | Camilo Mogni | 2026-09-04 | Pending |
+| ACT-002 | Contact BDM: Document the outcomes of the fire meeting and issue them to the Building Development Management division. | Kim Williams | 2026-08-25 | In Progress |
+| ACT-003 | Schedule pre-consultation: Book a formal pre-consultation meeting with Building Development Management on the portal. | Camilo Mogni | 2026-09-15 | In Progress |
+| ACT-004 | Update design capacity: Adjust architectural layouts and circulation based on a 90-person building capacity. | Camilo Mogni | ASAP | In Progress |
+| ACT-005 | Research lift specifications: Identify suitable commercial lift providers and hardware specifications for the project. | Kim Williams | ASAP | In Progress |
+| ACT-006 | Evaluate parking solutions: Investigate potential automated car-stacking or lift systems to optimize parking availability on site. | The group | Ongoing | In Progress |
+| ACT-007 | Test Pod Design: Evaluate the pod corner layout including the refuge area and circulation requirements to confirm feasibility. | Camilo Mogni, Nicole | ASAP | Completed |
+| ACT-008 | Design Facade: Develop the aesthetic layout for the building exterior to maintain an industrial style. | Kim Williams | Ongoing | Completed |
+| ACT-009 | Verify Lift Capacity: Engage with lift contractors on site to confirm structural integration requirements. | Camilo Mogni | ASAP | In Progress |
+| ACT-010 | Schedule Presentation: Send a meeting invitation for the project presentation scheduled for 28 September. | Camilo Mogni | ASAP | Completed |
+| ACT-011 | Prepare Technical Drawings: Finalize preliminary technical documentation for the interior renovation. | Camilo Mogni | 2026-09-04 | In Progress |
+| ACT-012 | Distribute Design Specs: Provide mechanical and electrical teams with preliminary layouts to initiate their costing. | Camilo Mogni | 2026-09-04 | In Progress |
 
 ## **Metrics**
 

@@ -61,7 +61,7 @@ Foundation testing confirmed that internal column bases are insufficient to supp
 
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
-| ACT-001 | Provide a markup drawing detailing sizes and positions for the EPoD structural design | Daniel Mnthambala | 2026-08-12 | In Progress |
+| ACT-001 | Provide a markup drawing detailing sizes and positions for the EPoD structural design | Daniel Mnthambala | 2026-08-12 | Completed |
 | ACT-002 | Define target elevation levels for the roof area to guide the structural design work | Nonhlanhla Mashego | ASAP | Completed |
 | ACT-003 | Obtain revised price estimate and technical methodology from Sovore for corrosion protection | Daniel Mnthambala | ASAP | In Progress |
 | ACT-004 | Organize an on-site inspection for Zipex to evaluate viable corrosion protection solutions | Daniel Mnthambala | ASAP | Completed |

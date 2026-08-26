@@ -88,7 +88,7 @@ The meeting focused on the architectural design strategy for the new campus head
 | Risk Name | Description | Mitigation | Status |
 | :---- | :---- | :---- |
 | Fire Safety Non-Compliance (High) | Uncertainty regarding second fire escape stairwell, exit widths (1200mm vs 1500mm), and sprinkler requirements could delay municipal plan approval. | Passage dimensions have been approved at 1200mm | Closed |
-| Accessibility & Elevator Compliance (Medium) | 5-level classification (including roof garden) may mandate a compliant elevator/stretcher lift, adding unexpected capital expense. | Engage building regulations consultant to explore motivations, home lift retrofits (R500k-R650k), or ground-floor disability accommodation exemptions. | Open |
+| Accessibility & Elevator Compliance (Medium) | 5-level classification (including roof garden) may mandate a compliant elevator/stretcher lift, adding unexpected capital expense. | Engage building regulations consultant to explore motivations, home lift retrofits (R500k-R650k), or ground-floor disability accommodation exemptions. | Closed |
 | Over-Budget Scope Creep (High) | Incorporating all wishlist amenities (full gym, sprinkler system, multi-floor buildout) exceeds the current R8M–R12M budget. | Maintain strict phased execution starting with Ground Floor \+ partial 1st Floor; defer gym and upper floor fit-outs to future phases. | Closed |
 | Structural Load & Pillar Constraints (Medium) | Roof EPOD and mezzanine placement could strain existing column capacity and foundation integrity due to corrosion/beam spans. | Finalize foundation/beam grid engineering details to utilize exterior perimeter beams rather than load-bearing internal columns. | Closed |
 
@@ -102,17 +102,17 @@ The meeting focused on the architectural design strategy for the new campus head
 
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
-| ACT-001 | Review latest building regulations regarding disabled access and fire safety. Awaiting feedback from the fire consultant. | Kim Williams | 2026-07-30 | In Progress |
+| ACT-001 | Review latest building regulations regarding disabled access and fire safety. Awaiting feedback from the fire consultant. | Kim Williams | 2026-07-30 | Completed |
 | ACT-002 | Confirm fire safety requirements, stairwell compliance, and required passage dimensions with Peter | Kim Williams | 2026-07-30 | Completed |
 | ACT-003 | Forward updated PDF layout documents and presentation to all meeting participants | Kim Williams | ASAP | Completed |
 | ACT-004 | Confirm office relocation plans for commercial and construction departments with team leads | Realm | 2026-07-30 | Completed |
 | ACT-005 | Consult Lisha regarding proposed collaboration wall to ensure alignment with marketing strategy | Kim Williams | 2026-07-30 | Completed |
 | ACT-006 | Organize separate logistics meeting to review delivery process and storage implications | Kim Williams | 2026-07-29 | Completed |
-| ACT-007 | Provide update and decision regarding future usage and retrofit options for the lift / lift shaft | Realm | 2026-08-05 | In Progress |
+| ACT-007 | Provide update and decision regarding future usage and retrofit options for the lift / lift shaft | Realm | 2026-08-05 | Completed |
 | ACT-008 | Schedule follow-up alignment session with Ralph, Joel, and team to finalize design brief requirements | Kim Williams | 2026-07-29 | Completed |
 | ACT-009 | Research billboard dimension market trends (1m vs 3m width) for roof EPOD signage | Realm | 2026-08-05 | Completed |
-| ACT-010 | Confirm necessity, structural treatment, and beam spans for existing structural pillars | Camilo | 2026-08-05 | Pending |
-| ACT-011 | Share detailed development documentation for section and mezzanine concepts once available | Nicole Vivier | 2026-08-05 | Pending |
+| ACT-010 | Confirm necessity, structural treatment, and beam spans for existing structural pillars | Camilo | 2026-08-05 | Completed |
+| ACT-011 | Share detailed development documentation for section and mezzanine concepts once available | Nicole Vivier | 2026-08-05 | In Progress |
 
 ## **Assumption Register**
 
