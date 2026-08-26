@@ -131,7 +131,7 @@ export default function ProjectIntelligenceHub() {
             <div className="stat-box">
               <span className="stat-label">Total Meetings Analyzed</span>
               <span className="stat-value">{domainSpectrum.meetingSpectrum.length}</span>
-              <span className="stat-sub font-mono">Minutes00 – Minutes05</span>
+              <span className="stat-sub font-mono">Minutes00 – {domainSpectrum?.meetingSpectrum?.length > 0 ? domainSpectrum.meetingSpectrum[domainSpectrum.meetingSpectrum.length - 1].meetingId : 'Minutes07'}</span>
             </div>
             <div className="stat-box">
               <span className="stat-label">Action Completion Velocity</span>
@@ -328,12 +328,9 @@ export default function ProjectIntelligenceHub() {
                   style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
                 >
                   <option value="All">All Meetings</option>
-                  <option value="Minutes00">Minutes00</option>
-                  <option value="Minutes01">Minutes01</option>
-                  <option value="Minutes02">Minutes02</option>
-                  <option value="Minutes03">Minutes03</option>
-                  <option value="Minutes04">Minutes04</option>
-                  <option value="Minutes05">Minutes05</option>
+                  {domainSpectrum?.meetingSpectrum?.map(m => (
+                    <option key={m.meetingId} value={m.meetingId}>{m.meetingId}</option>
+                  ))}
                 </select>
               </div>
 
@@ -800,7 +797,8 @@ function SvgInteractiveGraph({ graphData, nodeTypeFilter, meetingFilter, searchQ
   filteredNodes.forEach((n, i) => {
     let x, y;
     if (n.type === 'meeting') {
-      const idx = ['Minutes00', 'Minutes01', 'Minutes02', 'Minutes03', 'Minutes04', 'Minutes05'].indexOf(n.label);
+      const meetingList = graphData.nodes.filter(node => node.type === 'meeting').map(node => node.label).sort();
+      const idx = meetingList.indexOf(n.label);
       x = 100 + (idx >= 0 ? idx : i) * 110;
       y = 120;
     } else if (n.type === 'decision') {
