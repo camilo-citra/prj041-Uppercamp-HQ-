@@ -73,7 +73,7 @@ The meeting established that the office and factory projects will be managed and
 
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
-| ACT-001 | Introduce the consultant to the architectural firm Kim Williams. | Camilo Mogni | ASAP | Pending |
+| ACT-001 | Introduce the consultant to the architectural firm Kim Williams. | Camilo Mogni | ASAP | In Progress |
 | ACT-002 | Send notes regarding boundary encroachment issues to Peter (HVAC engineer). | Camilo Mogni | ASAP | Pending |
 | ACT-003 | Provide a timeline/schedule for invoicing aligned with the project schedule. | The Consultant | ASAP | Pending |
 | ACT-004 | Create a ventilation and air conditioning design for the office premises. | The Consultant | ASAP | Pending |
