@@ -77,7 +77,7 @@ The team reviewed updates on infrastructure (electrical and demolition) and safe
 
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
-| ACT-001 | Connect electrical contact: Provide contact information for the electrical contractor once the layout is finalized. | Camilo Mogni | ASAP | Pending |
+| ACT-001 | Connect electrical contact: Provide contact information for the electrical contractor once the layout is finalized. | Camilo Mogni | ASAP | Completed |
 | ACT-002 | Contact BDM: Document the outcomes of the fire meeting and issue them to the Building Development Management division. | Kim Williams | 2026-08-25 | In Progress |
 | ACT-003 | Schedule pre-consultation: Book a formal pre-consultation meeting with Building Development Management on the portal. | Camilo Mogni | 2026-09-15 | In Progress |
 | ACT-004 | Update design capacity: Adjust architectural layouts and circulation based on a 90-person building capacity. | Camilo Mogni | ASAP | In Progress |

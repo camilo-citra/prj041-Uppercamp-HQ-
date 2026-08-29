@@ -151,7 +151,7 @@ The team officially kicked off the coordination for Upper Camp 6A, agreeing to a
 | :---- | :---- | :---- | :---- |
 | **Revise Project Program:** Update phases, timelines, budget milestones, and approval dates. | Camilo Mogni | ASAP | Completed |
 | **Establish ACC Protocol:** Set up shared documentation folders and grant group license access to the engineering team. | Busisiwe Mgwenya | ASAP | Completed |
-| **Present Facade Proposal:** Develop and present a concept proposal for the exterior facade. | Design Team | July 3, 2026 | Pending |
+| **Present Facade Proposal:** Develop and present a concept proposal for the exterior facade. | Design Team | July 3, 2026 | In Progress |
 | **Verify Measurements:** Verify existing building data against as-built drawings for the office block. | Design Team | Ongoing | Completed |
 | **Sketch HVAC Requirements:** Create dimensioned sketches for roof HVAC condensers and ventilation fans. | Pieter Fourie | ASAP | Completed |
 | **Share Heritage Documents:** Distribute current heritage documentation (elevations and roof status) to the team. | Camilo Mogni / Team | ASAP | In Progress |
