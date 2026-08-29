@@ -66,7 +66,7 @@ The team reviewed updates on infrastructure (electrical and demolition) and safe
 | :---- | :---- | :---- |
 | Council Approval Delay (High) | The simultaneous land use and BDM applications may be held up by municipal processes, delaying construction. | Book a formal pre-consultation meeting with BDM leadership (Mr. Philander and Samantha Nassen) to secure early buy-in and clarity. | Open |
 | Lift Integration Cost (Medium) | The mandatory commercial lift to the roof may exceed budget and cause structural complications. | Research "pit-less" lift options and consult immediately with local lift contractors to confirm structural integration requirements and operational capacity. | Open |
-| Pod Aesthetic Impact (Medium) | The required second stairwell extending to the roof may detract from the visual impact of the EOD pod from the highway. | Test design modifications, such as bringing the stairwell forward and curving it, to minimize visual impact while maintaining fire compliance. | Open |
+| Pod Aesthetic Impact (Medium) | The required second stairwell extending to the roof may detract from the visual impact of the EOD pod from the highway. | Test design modifications, such as bringing the stairwell forward and curving it, to minimize visual impact while maintaining fire compliance. | Closed |
 
 ## **Issue Register**
 

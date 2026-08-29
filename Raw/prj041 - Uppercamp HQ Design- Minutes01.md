@@ -140,7 +140,7 @@ The team officially kicked off the coordination for Upper Camp 6A, agreeing to a
 
 * **Risk/Issue:** Financial surprises late in the design process due to a lack of early budget integration. (Status: Open)
   * **Mitigation/Next Step:** Cost estimations will be integrated by the end of Stage 3 so stakeholders understand expenditures before moving into the final concept phase.  
-* **Risk/Issue:** Potential delays caused by a lack of stakeholder alignment or last-minute changes from HODs. (Status: Open)
+* **Risk/Issue:** Potential delays caused by a lack of stakeholder alignment or last-minute changes from HODs. (Status: Closed)
   * **Mitigation/Next Step:** Organize a dedicated presentation event at Stage 3 with physical material reviews to secure explicit buy-in before proceeding to detailed design.  
 * **Risk/Issue:** Roof structural impact from heavy centralized HVAC equipment. (Status: Open)
   * **Mitigation/Next Step:** MEP to prepare dimensioned sketches of the 12 HVAC condensers and fans to ensure they integrate into the layout without interfering with structural columns.

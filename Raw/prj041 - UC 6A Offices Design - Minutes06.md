@@ -62,7 +62,7 @@ The meeting established that the office and factory projects will be managed and
 
 | Risk Name | Description | Mitigation | Status |
 | :---- | :---- | :---- |
-| Factory Layout Uncertainty (Medium) | The lack of a fixed layout for the factory site may delay final electrical and extraction designs. | Await confirmation of the layout before finalizing designs to prevent rework. | Open |
+| Factory Layout Uncertainty (Medium) | The lack of a fixed layout for the factory site may delay final electrical and extraction designs. | Await confirmation of the layout before finalizing designs to prevent rework. | Closed |
 | Compliance Delays (High) | Failure to secure necessary HVAC and fire designs by an engineer could delay council approval for the office building. | Appoint an electrical engineer promptly to finalize designs and council submission documentation. | Open |
 
 ## **Issue Register**

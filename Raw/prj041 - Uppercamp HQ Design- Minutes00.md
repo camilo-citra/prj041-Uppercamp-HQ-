@@ -55,9 +55,9 @@ The session successfully established the critical design constraints dictated by
 
 * **Risk/Issue:** Lift installation and associated structural excavation (1.5m down) poses significant cost and waterproofing challenges. (Status: Open)
   * **Mitigation/Next Step:** The design team must verify with the council if full accessibility compliance is mandatory for the second and third floors before committing to the lift installation.  
-* **Risk/Issue:** High occupancy calculations for the roof terrace could mandate a 1.8m wide staircase, consuming valuable floor space on lower levels. (Status: Open)
+* **Risk/Issue:** High occupancy calculations for the roof terrace could mandate a 1.8m wide staircase, consuming valuable floor space on lower levels. (Status: Closed)
   * **Mitigation/Next Step:** Pieter to draft a conceptual layout plotting the longest escape routes, which will be tested with the Fire Chief for alternative compliance paths.  
-* **Risk/Issue:** Structural capacity for the new roof terrace and condenser loads is currently unknown. (Status: Open)
+* **Risk/Issue:** Structural capacity for the new roof terrace and condenser loads is currently unknown. (Status: Closed)
   * **Mitigation/Next Step:** Await the structural engineering report (expected Friday) to determine if existing columns require reinforcement.
 
 ## **6\. Action Items (Task List)**
