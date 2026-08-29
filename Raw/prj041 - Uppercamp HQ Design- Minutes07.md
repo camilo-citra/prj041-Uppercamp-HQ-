@@ -82,7 +82,7 @@ The team reviewed updates on infrastructure (electrical and demolition) and safe
 | ACT-003 | Schedule pre-consultation: Book a formal pre-consultation meeting with Building Development Management on the portal. | Camilo Mogni | 2026-09-15 | In Progress |
 | ACT-004 | Update design capacity: Adjust architectural layouts and circulation based on a 90-person building capacity. | Camilo Mogni | ASAP | In Progress |
 | ACT-005 | Research lift specifications: Identify suitable commercial lift providers and hardware specifications for the project. | Kim Williams | ASAP | In Progress |
-| ACT-006 | Evaluate parking solutions: Investigate potential automated car-stacking or lift systems to optimize parking availability on site. | The group | Ongoing | In Progress |
+| ACT-006 | Evaluate parking solutions: Investigate potential automated car-stacking or lift systems to optimize parking availability on site. | The group | Ongoing | Completed |
 | ACT-007 | Test Pod Design: Evaluate the pod corner layout including the refuge area and circulation requirements to confirm feasibility. | Camilo Mogni, Nicole | ASAP | Completed |
 | ACT-008 | Design Facade: Develop the aesthetic layout for the building exterior to maintain an industrial style. | Kim Williams | Ongoing | Completed |
 | ACT-009 | Verify Lift Capacity: Engage with lift contractors on site to confirm structural integration requirements. | Camilo Mogni | ASAP | In Progress |
