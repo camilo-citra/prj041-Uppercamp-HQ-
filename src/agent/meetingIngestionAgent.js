@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import db from '../db/index.js';
 import { ingestAllMeetings } from '../services/ingestionService.js';
 import { syncDbToRaw } from '../../scripts/sync_db_to_raw.js';
+import { runProjectAnalysis } from './projectAnalysisAgent.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,7 +38,14 @@ export function runIngestionPipeline(reason = 'Manual or Scheduled Trigger') {
       console.error('[MeetingIngestionAgent] Warning during bi-directional raw sync:', syncErr.message);
     }
 
-    // 3. Extract metrics across all core modules
+    // 3. Automatically regenerate Continuous Project Intelligence Analysis
+    try {
+      runProjectAnalysis(`Meeting Ingestion Pipeline Trigger (${reason})`);
+    } catch (analysisErr) {
+      console.error('[MeetingIngestionAgent] Warning during analysis regeneration:', analysisErr.message);
+    }
+
+    // 4. Extract metrics across all core modules
     const meetingCount = db.prepare('SELECT count(*) as count FROM meeting_metadata').get().count;
     const briefCount = db.prepare('SELECT count(*) as count FROM brief').get().count;
     const decisionCount = db.prepare('SELECT count(*) as count FROM decisions_taken').get().count;
@@ -58,6 +66,7 @@ export function runIngestionPipeline(reason = 'Manual or Scheduled Trigger') {
     console.log(` 🔍 6. Assumptions Tracked:      ${assumptionCount}`);
     console.log(` 👥 7. Project Team / Roster:    ${stakeholderCount}`);
     console.log(` 🧠 8. RAG Vector Intelligence:  ${vectorCount} chunks`);
+    console.log(` 📊 9. Continuous Analysis:      Regenerated & Cached`);
     console.log(`======================================================\n`);
   } catch (error) {
     console.error('❌ [MeetingIngestionAgent] ERROR DURING INGESTION:', error);

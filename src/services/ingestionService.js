@@ -4,6 +4,7 @@ import db, { resetDatabase } from '../db/index.js';
 import { parseMeetingMarkdown } from '../parser/meetingParser.js';
 import { indexMeetingChunks } from '../rag/vectorStore.js';
 import { analyzeAndMapDecisions } from './decisionIntelligenceService.js';
+import { runProjectAnalysis } from '../agent/projectAnalysisAgent.js';
 
 export function cleanAndNormalizeName(rawName) {
   if (!rawName) return '';
@@ -251,6 +252,13 @@ export function ingestAllMeetings(rawDirectoryPath) {
     console.error('Decision analysis during ingestion warning:', err.message);
   }
 
-  console.log('Successfully ingested all meeting minutes into SQLite and Vector Store.');
+  // Run automated continuous thematic and qualitative content analysis
+  try {
+    runProjectAnalysis('Ingestion Service Pipeline Complete');
+  } catch (err) {
+    console.error('Project analysis generation during ingestion warning:', err.message);
+  }
+
+  console.log('Successfully ingested all meeting minutes into SQLite, Vector Store, and regenerated Continuous Analysis.');
 }
 

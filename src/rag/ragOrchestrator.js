@@ -123,3 +123,198 @@ export function answerRAGQuery(query, filters = {}) {
     sourcesCount: totalSources
   };
 }
+
+/**
+ * Proactively queries Vector Database for cross-meeting metadata tags and semantic clusters.
+ * Retrieves overlapping discussions from Agenda items, Executive Summaries, Decisions, and Risks.
+ */
+export function getThematicAnalysisClusters() {
+  const chunks = db.prepare(`
+    SELECT vc.*, m.title as meeting_title
+    FROM vector_chunks vc
+    JOIN meeting_metadata m ON vc.meeting_id = m.id
+    ORDER BY vc.date ASC
+  `).all();
+
+  const meetings = db.prepare(`SELECT id, title, date, executive_summary FROM meeting_metadata ORDER BY date ASC`).all();
+  const decisions = db.prepare(`
+    SELECT d.*, m.date as meeting_date, m.title as meeting_title 
+    FROM decisions_taken d
+    JOIN meeting_metadata m ON d.meeting_id = m.id
+    ORDER BY m.date ASC
+  `).all();
+  const risks = db.prepare(`
+    SELECT r.*, m.date as meeting_date, m.title as meeting_title
+    FROM risk_raised r
+    JOIN meeting_metadata m ON r.meeting_id = m.id
+    ORDER BY m.date ASC
+  `).all();
+
+  // Define comprehensive semantic cluster templates with keyword signatures
+  const clusterDefinitions = [
+    {
+      id: 'compliance_fire_egress',
+      title: 'Fire Safety, Egress & Council BDM Approvals',
+      category: 'Regulatory & Compliance',
+      keywords: ['fire', 'egress', 'staircase', 'passage', '1200mm', '1500mm', 'bdm', 'council', 'departure', 'capacity', '90 people', 'safety', 'fire chief', 'disabled access'],
+      icon: 'ShieldAlert',
+      accentColor: '#ef4444'
+    },
+    {
+      id: 'budget_seloxis_governance',
+      title: 'Budget Caps, Financial Modeling & Stage 3 Freeze',
+      category: 'Cost & Commercial Governance',
+      keywords: ['budget', 'cost', 'seloxis', 'cash flow', 'stage 3', 'freeze', 'r8m', 'r12m', 'sign-off', 'financial', 'variance', 'fee', 'commercial'],
+      icon: 'CircleDollarSign',
+      accentColor: '#8b5cf6'
+    },
+    {
+      id: 'interior_neighborhood_framework',
+      title: 'Architectural Neighborhood Framework & EPOD Specs',
+      category: 'Spatial & Interior Architecture',
+      keywords: ['neighborhood', 'connect', 'build', 'inspire', 'community', 'boardroom', 'epod', 'acoustic', 'terrace', 'mezzanine', 'layout', 'pod', 'fit-out', 'revit'],
+      icon: 'LayoutGrid',
+      accentColor: '#38bdf8'
+    },
+    {
+      id: 'structural_demolition_prep',
+      title: 'Structural Integrity, Demolition & Site Readiness',
+      category: 'Civil & Engineering',
+      keywords: ['demolition', 'september 28', 'structural', 'trial pit', 'column', 'lift shaft', 'facade', 'loading', 'slab', 'roof garden', 'excavation', 'foundation'],
+      icon: 'Hammer',
+      accentColor: '#f59e0b'
+    },
+    {
+      id: 'mep_hvac_infrastructure',
+      title: 'MEP, HVAC & Wet Services Coordination',
+      category: 'Building Systems',
+      keywords: ['mep', 'hvac', 'condenser', 'wet services', 'electrical', 'ventilation', 'plumbing', 'duct', 'air conditioning', 'power', 'load'],
+      icon: 'Cpu',
+      accentColor: '#10b981'
+    },
+    {
+      id: 'procurement_contractor_alignment',
+      title: 'Contractor Procurement & Operational Delivery',
+      category: 'Execution & Operations',
+      keywords: ['contractor', 'procurement', 'tender', 'acc', 'milestone', 'schedule', 'relocation', 'coordination', 'deliverables', 'site'],
+      icon: 'Users',
+      accentColor: '#06b6d4'
+    }
+  ];
+
+  const analyzedClusters = clusterDefinitions.map(def => {
+    const matchedChunks = [];
+    const citedMeetingsMap = new Map();
+    const relatedDecisions = [];
+    const relatedRisks = [];
+
+    // 1. Scan vector chunks
+    for (const chunk of chunks) {
+      const textToScan = `${chunk.subject} ${chunk.content}`.toLowerCase();
+      let matchCount = 0;
+      for (const kw of def.keywords) {
+        if (textToScan.includes(kw)) matchCount++;
+      }
+
+      if (matchCount > 0) {
+        matchedChunks.push({
+          id: chunk.id,
+          meeting_id: chunk.meeting_id,
+          date: chunk.date,
+          subject: chunk.subject,
+          section_type: chunk.section_type,
+          excerpt: chunk.content.length > 200 ? chunk.content.slice(0, 197) + '...' : chunk.content,
+          score: matchCount
+        });
+
+        if (!citedMeetingsMap.has(chunk.meeting_id)) {
+          citedMeetingsMap.set(chunk.meeting_id, {
+            meeting_id: chunk.meeting_id,
+            date: chunk.date,
+            count: 1
+          });
+        } else {
+          citedMeetingsMap.get(chunk.meeting_id).count++;
+        }
+      }
+    }
+
+    // 2. Scan decisions
+    for (const d of decisions) {
+      const dText = `${d.impact_area} ${d.summary} ${d.theme || ''} ${d.rationale || ''}`.toLowerCase();
+      if (def.keywords.some(kw => dText.includes(kw))) {
+        relatedDecisions.push({
+          id: d.id,
+          decision_num: d.decision_num,
+          impact_area: d.impact_area,
+          summary: d.summary,
+          meeting_id: d.meeting_id,
+          date: d.meeting_date
+        });
+        if (!citedMeetingsMap.has(d.meeting_id)) {
+          citedMeetingsMap.set(d.meeting_id, {
+            meeting_id: d.meeting_id,
+            date: d.meeting_date,
+            count: 1
+          });
+        }
+      }
+    }
+
+    // 3. Scan risks
+    for (const r of risks) {
+      const rText = `${r.description} ${r.contingency_measure || ''}`.toLowerCase();
+      if (def.keywords.some(kw => rText.includes(kw))) {
+        relatedRisks.push({
+          id: r.id,
+          risk_code: r.risk_code,
+          description: r.description,
+          impact_level: r.impact_level,
+          likelihood: r.likelihood,
+          meeting_id: r.meeting_id,
+          date: r.meeting_date
+        });
+        if (!citedMeetingsMap.has(r.meeting_id)) {
+          citedMeetingsMap.set(r.meeting_id, {
+            meeting_id: r.meeting_id,
+            date: r.meeting_date,
+            count: 1
+          });
+        }
+      }
+    }
+
+    const citedMeetings = Array.from(citedMeetingsMap.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Calculate theme recurrence velocity & intensity
+    const totalEvidenceCount = matchedChunks.length + relatedDecisions.length + relatedRisks.length;
+    const meetingSpanCount = citedMeetings.length;
+    const recurrencePercentage = meetings.length > 0 ? Math.round((meetingSpanCount / meetings.length) * 100) : 0;
+
+    return {
+      id: def.id,
+      title: def.title,
+      category: def.category,
+      accentColor: def.accentColor,
+      icon: def.icon,
+      meetingSpanCount,
+      recurrencePercentage,
+      totalEvidenceCount,
+      citedMeetings,
+      topExcerpts: matchedChunks.sort((a, b) => b.score - a.score).slice(0, 4),
+      relatedDecisions: relatedDecisions.slice(0, 4),
+      relatedRisks: relatedRisks.slice(0, 3)
+    };
+  });
+
+  // Sort clusters by highest cross-meeting persistence and evidence volume
+  analyzedClusters.sort((a, b) => {
+    if (b.meetingSpanCount !== a.meetingSpanCount) {
+      return b.meetingSpanCount - a.meetingSpanCount;
+    }
+    return b.totalEvidenceCount - a.totalEvidenceCount;
+  });
+
+  return analyzedClusters;
+}
+

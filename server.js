@@ -11,6 +11,7 @@ import { analyzeAndMapDecisions, buildDecisionTimelineNarrative } from './src/se
 import { updateDecisionVectorChunk } from './src/rag/vectorStore.js';
 import { runIngestionPipeline } from './src/agent/meetingIngestionAgent.js';
 import { getDomainFocusSpectrum, getActionVelocityAndCapacity, getRiskLifecycleTrajectory, getCausalDecisionGraph, getProjectRetrospective } from './src/services/projectIntelligenceService.js';
+import { getLatestProjectAnalysis, runProjectAnalysis } from './src/agent/projectAnalysisAgent.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -520,6 +521,32 @@ app.get('/api/analytics/retrospective', (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching retrospective knowledge:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Continuous Thematic & Qualitative Content Analysis Endpoints
+app.get('/api/analysis', (req, res) => {
+  try {
+    const force = req.query.refresh === 'true';
+    const analysis = getLatestProjectAnalysis(force);
+    res.json(analysis);
+  } catch (error) {
+    console.error('Error retrieving project analysis:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/analysis/regenerate', (req, res) => {
+  try {
+    const analysis = runProjectAnalysis('Manual User Trigger via REST API');
+    res.json({
+      success: true,
+      message: 'Analysis regenerated successfully.',
+      analysis
+    });
+  } catch (error) {
+    console.error('Error regenerating analysis:', error);
     res.status(500).json({ error: error.message });
   }
 });

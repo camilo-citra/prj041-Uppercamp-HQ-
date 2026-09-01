@@ -6,6 +6,7 @@ import {
   GitCommit, Sparkles, Link2, Compass, BrainCircuit
 } from 'lucide-react';
 import ProjectIntelligenceHub from './ProjectIntelligenceHub.jsx';
+import AnalysisHub from './AnalysisHub.jsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('meetings');
@@ -613,6 +614,18 @@ export default function App() {
             style={{ background: activeTab === 'intelligence' ? 'rgba(56, 189, 248, 0.2)' : undefined, borderColor: activeTab === 'intelligence' ? 'var(--primary-cyan)' : undefined }}
           >
             <BrainCircuit size={16} style={{ color: 'var(--primary-cyan)' }} /> Project Intelligence
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'analysis' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analysis')}
+            style={{ 
+              background: activeTab === 'analysis' ? 'linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(139, 92, 246, 0.25))' : undefined,
+              borderColor: activeTab === 'analysis' ? 'var(--primary-cyan)' : undefined,
+              color: activeTab === 'analysis' ? '#fff' : undefined,
+              boxShadow: activeTab === 'analysis' ? '0 0 12px rgba(56, 189, 248, 0.3)' : undefined
+            }}
+          >
+            <Sparkles size={16} style={{ color: activeTab === 'analysis' ? '#38bdf8' : '#a78bfa' }} /> Analysis Hub
           </button>
         </nav>
 
@@ -1417,6 +1430,11 @@ export default function App() {
         {/* TAB 8: PROJECT INTELLIGENCE & EXPERIENCE HUB */}
         {activeTab === 'intelligence' && (
           <ProjectIntelligenceHub />
+        )}
+
+        {/* TAB 9: CONTINUOUS THEMATIC & QUALITATIVE ANALYSIS HUB */}
+        {activeTab === 'analysis' && (
+          <AnalysisHub />
         )}
 
         {/* TAB 5: DECISION TIMELINE & LOGIC MAP */}
