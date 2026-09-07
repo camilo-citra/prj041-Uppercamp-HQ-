@@ -49,10 +49,10 @@ The team discussed the strategy for an upcoming council meeting, agreeing to pri
 
 ## **Risk Register**
 
-| Risk Name | Description | Mitigation |
+| Risk Name | Description | Mitigation | Status |
 | :---- | :---- | :---- |
-| Compliance Delay (High) | Discrepancy between understood stair tread depth (250mm) and requested depth (300mm) could delay compliance approval under Part S. | Nonhlanhla to urgently verify the specific requirements under Part S regulations regarding ambulant persons. |
-| Approval Derailment (Medium) | Addressing the building four administrative penalty too early in the council meeting might derail the approval process for the office building. | Strategically structure the meeting agenda to secure office building discussions first before introducing broader site issues. |
+| Compliance Delay (High) | Discrepancy between understood stair tread depth (250mm) and requested depth (300mm) could delay compliance approval under Part S. | Nonhlanhla to urgently verify the specific requirements under Part S regulations regarding ambulant persons. | Open |
+| Approval Derailment (Medium) | Addressing the building four administrative penalty too early in the council meeting might derail the approval process for the office building. | Strategically structure the meeting agenda to secure office building discussions first before introducing broader site issues. | Open |
 
 ## **Issue Register**
 
@@ -66,7 +66,7 @@ The team discussed the strategy for an upcoming council meeting, agreeing to pri
 | ACT-002 | Draft and send a line-by-line email response addressing technical inquiries, including annotated survey screenshots for sewage connections. | Nonhlanhla Mashego | 2026-09-07 | Pending |
 | ACT-003 | Verify the approach for declaring building four with Nicole to resolve administrative penalty status. | Nonhlanhla Mashego | 2026-09-09 | Pending |
 | ACT-004 | Follow up with Andrea regarding the fire detection system installation. | Camilo Mogni | ASAP | Pending |
-| ACT-005 | Follow up to ensure the council meeting invite has been received. | Camilo Mogni | ASAP | Pending |
+| ACT-005 | Follow up to ensure the council meeting invite has been received. | Camilo Mogni | ASAP | Completed |
 
 ## **Metrics**
 
