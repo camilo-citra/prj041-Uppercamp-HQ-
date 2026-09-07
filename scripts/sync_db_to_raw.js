@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
+import { extractMeetingId } from '../src/parser/meetingParser.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,8 +25,7 @@ export function syncDbToRaw() {
     const fullPath = path.join(rawDir, file);
     let content = fs.readFileSync(fullPath, 'utf8');
 
-    const idMatch = file.match(/Minutes\d+/i);
-    const meetingId = idMatch ? idMatch[0] : file.replace(/\.md$/, '');
+    const meetingId = extractMeetingId(file);
 
     const dbActions = db.prepare('SELECT item_num, action_code, assignee, status, description FROM action_items WHERE meeting_id = ? ORDER BY item_num ASC').all(meetingId);
     const dbRisks = db.prepare('SELECT id, risk_code, description, status FROM risk_raised WHERE meeting_id = ? ORDER BY id ASC').all(meetingId);

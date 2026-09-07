@@ -1,13 +1,29 @@
 import fs from 'fs';
 import path from 'path';
 
+export function extractMeetingId(filePathOrName) {
+  const filename = path.basename(filePathOrName);
+  const base = filename.replace(/\.md$/i, '');
+
+  // Sub-project check e.g. UC 6A Offices Design
+  if (/UC\s*6A\s*Offices/i.test(base)) {
+    const numMatch = base.match(/Minutes(\d+)/i);
+    return numMatch ? `UC6A-Minutes${numMatch[1]}` : `UC6A-${base}`;
+  }
+
+  // Standard MinutesXX match
+  const idMatch = base.match(/Minutes\d+/i);
+  if (idMatch) return idMatch[0];
+
+  return base.replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
 export function parseMeetingMarkdown(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const filename = path.basename(filePath);
   
-  // Extract ID from filename e.g. Minutes00
-  const idMatch = filename.match(/Minutes\d+/i);
-  const id = idMatch ? idMatch[0] : filename.replace(/\.md$/, '');
+  // Extract unique ID from filename
+  const id = extractMeetingId(filename);
 
   // Extract Title
   const titleMatch = content.match(/^#\s*\*\*?([^\*\n]+)\*\*?/m) || content.match(/^#\s*([^\n]+)/m);

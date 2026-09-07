@@ -12,6 +12,7 @@ import { updateDecisionVectorChunk } from './src/rag/vectorStore.js';
 import { runIngestionPipeline } from './src/agent/meetingIngestionAgent.js';
 import { getDomainFocusSpectrum, getActionVelocityAndCapacity, getRiskLifecycleTrajectory, getCausalDecisionGraph, getProjectRetrospective } from './src/services/projectIntelligenceService.js';
 import { getLatestProjectAnalysis, runProjectAnalysis } from './src/agent/projectAnalysisAgent.js';
+import { extractMeetingId } from './src/parser/meetingParser.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,8 +54,7 @@ app.post('/api/meetings/upload', (req, res) => {
     // Trigger agent ingestion pipeline (Parses markdown, updates DB across all 6 modules & syncs raw)
     runIngestionPipeline(`File Upload: ${safeFilename}`);
 
-    const idMatch = safeFilename.match(/Minutes\d+/i);
-    const meetingId = idMatch ? idMatch[0] : safeFilename.replace(/\.md$/, '');
+    const meetingId = extractMeetingId(safeFilename);
 
     res.json({
       success: true,

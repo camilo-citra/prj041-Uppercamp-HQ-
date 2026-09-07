@@ -96,6 +96,22 @@ export function ingestAllMeetings(rawDirectoryPath) {
   // Sort chronologically by date
   parsedMeetings.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+  // Deduplicate meeting IDs across parsed files to prevent constraint collisions
+  const seenIds = new Set();
+  for (const mtg of parsedMeetings) {
+    if (seenIds.has(mtg.id)) {
+      let counter = 2;
+      let candidateId = `${mtg.id}_${counter}`;
+      while (seenIds.has(candidateId)) {
+        counter++;
+        candidateId = `${mtg.id}_${counter}`;
+      }
+      console.warn(`[Ingestion] Duplicate meeting ID detected for "${mtg.raw_file_name}". Assigning unique ID: "${candidateId}"`);
+      mtg.id = candidateId;
+    }
+    seenIds.add(mtg.id);
+  }
+
   // Determine latest meeting for dynamic Brief update
   const latestMtg = parsedMeetings.length > 0 ? parsedMeetings[parsedMeetings.length - 1] : null;
   const latestMtgId = latestMtg ? latestMtg.id : 'Minutes00';
@@ -118,7 +134,7 @@ export function ingestAllMeetings(rawDirectoryPath) {
   );
 
   const insertMeetingMetaStmt = db.prepare(`
-    INSERT INTO meeting_metadata (
+    INSERT OR REPLACE INTO meeting_metadata (
       id, title, date, time, location, pm, attendees, apologies, raw_file_name, gemini_link, executive_summary, raw_markdown
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
