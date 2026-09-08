@@ -63,7 +63,7 @@ The team discussed the strategy for an upcoming council meeting, agreeing to pri
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
 | ACT-001 | Investigate fire and disability regulations (Part S) to verify if required stair tread depth is 250mm or 300mm. | Nonhlanhla Mashego | 2026-09-08 | Pending |
-| ACT-002 | Draft and send a line-by-line email response addressing technical inquiries, including annotated survey screenshots for sewage connections. | Nonhlanhla Mashego | 2026-09-07 | Pending |
+| ACT-002 | Draft and send a line-by-line email response addressing technical inquiries, including annotated survey screenshots for sewage connections. | Nonhlanhla Mashego | 2026-09-07 | Completed |
 | ACT-003 | Verify the approach for declaring building four with Nicole to resolve administrative penalty status. | Nonhlanhla Mashego | 2026-09-09 | Pending |
 | ACT-004 | Follow up with Andrea regarding the fire detection system installation. | Camilo Mogni | ASAP | Pending |
 | ACT-005 | Follow up to ensure the council meeting invite has been received. | Camilo Mogni | ASAP | Completed |
