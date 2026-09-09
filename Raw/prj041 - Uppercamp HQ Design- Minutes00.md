@@ -68,7 +68,7 @@ The session successfully established the critical design constraints dictated by
 2. **Draft Fire & HVAC Concept:** Create a high-level fire/AC concept design based on the provided CAD layouts, determining condenser space and escape distances. | Pieter | Next Week | Pending |   
 3. **Verify Accessibility Compliance:** Determine if the upper floors require strict disability compliance (impacts lift and refuge areas). | Design Team / John | ASAP | Completed |   
 4. **Consult Fire Chief:** Present the preliminary fire design concept to Benjamin Ellis for feedback/approval. | Pieter | Following Concept Draft | Completed |   
-5. **Distribute Structural Report:** Share the structural engineering report with the wider team upon receipt. | John Walter Shaidi | May 29, 2026 | In Progress |   
+5. **Distribute Structural Report:** Share the structural engineering report with the wider team upon receipt. | John Walter Shaidi | May 29, 2026 | Completed |   
 6. **Schedule Weekly Meetings:** Consult with Cheryl to establish a recurring day for weekly project coordination sessions. | John Walter Shaidi | May 29, 2026 | Completed |
 
 ## **7\. Design**

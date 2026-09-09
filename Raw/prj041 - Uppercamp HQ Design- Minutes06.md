@@ -85,7 +85,7 @@ The team reviewed updates on infrastructure (electrical and demolition) and safe
 | ACT-006 | Evaluate parking solutions: Investigate potential automated car-stacking or lift systems to optimize parking availability on site. | The group | Ongoing | Completed |
 | ACT-007 | Test Pod Design: Evaluate the pod corner layout including the refuge area and circulation requirements to confirm feasibility. | Camilo Mogni, Nicole | ASAP | Completed |
 | ACT-008 | Design Facade: Develop the aesthetic layout for the building exterior to maintain an industrial style. | Kim Williams | Ongoing | Completed |
-| ACT-009 | Verify Lift Capacity: Engage with lift contractors on site to confirm structural integration requirements. | Camilo Mogni | ASAP | In Progress |
+| ACT-009 | Verify Lift Capacity: Engage with lift contractors on site to confirm structural integration requirements. | Camilo Mogni | ASAP | Completed |
 | ACT-010 | Schedule Presentation: Send a meeting invitation for the project presentation scheduled for 28 September. | Camilo Mogni | ASAP | Completed |
 | ACT-011 | Prepare Technical Drawings: Finalize preliminary technical documentation for the interior renovation. | Camilo Mogni | 2026-09-04 | In Progress |
 | ACT-012 | Distribute Design Specs: Provide mechanical and electrical teams with preliminary layouts to initiate their costing. | Camilo Mogni | 2026-09-04 | In Progress |

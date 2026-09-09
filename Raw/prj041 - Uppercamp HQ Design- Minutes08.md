@@ -85,11 +85,11 @@ The project team confirmed the approved layout changes for the Citra Head Office
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
 | ACT-001 | Provide preliminary mechanical (HVAC) proposal and costing | Pieter Fourie | 2026-09-22 | Pending |
-| ACT-002 | Submit updated architectural proposal for expanded scope | Enrica Van Der Linden | ASAP | Pending |
+| ACT-002 | Submit updated architectural proposal for expanded scope | Enrica Van Der Linden | ASAP | Completed |
 | ACT-003 | Coordinate Building A refuse and ablution planning submission strategy | Enrica Van Der Linden | 2026-09-18 | Pending |
 | ACT-004 | Meet to finalize HVAC aesthetics and plant locations | Kim Williams / Pieter Fourie | 2026-09-10 | Pending |
 | ACT-005 | Confirm structural locations for roof HVAC plant and riser shafts | Camilo Mogni / Structural Eng. | 2026-09-22 | Pending |
-| ACT-006 | Resolve ablution requirements for potential second-floor gym | Kim Williams / Enrica Van Der Linden | 2026-09-22 | Pending |
+| ACT-006 | Resolve ablution requirements for potential second-floor gym | Kim Williams / Enrica Van Der Linden | 2026-09-22 | In Progress |
 
 ## **Metrics**
 
