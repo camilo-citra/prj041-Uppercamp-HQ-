@@ -60,19 +60,19 @@ The team established a multi-phased submission roadmap for the Uppercamp site. T
 
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
-| ACT-001 | Introduce the building contractor to Camilo Mogni to assess whole-building construction programs and commercial pricing | Kim Williams | ASAP | Pending |
-| ACT-002 | Clean up and distribute updated Building 6B and Building 4 models and survey drawings to the team | Nonhlanhla Mashego | 2026-09-09 | Pending |
+| ACT-001 | Introduce the building contractor to Camilo Mogni to assess whole-building construction programs and commercial pricing | Kim Williams | ASAP | Completed |
+| ACT-002 | Clean up and distribute updated Building 6B and Building 4 models and survey drawings to the team | Nonhlanhla Mashego | 2026-09-09 | Completed |
 | ACT-003 | Update council submission drawings to include the designated 10-bin refuse room behind the Building B roller shutter | Enrica Van Der Linden | 2026-09-18 | Pending |
 | ACT-004 | Design new internal ablution facilities within Building 6B to replace external courtyard units | Enrica Van Der Linden | 2026-09-25 | Pending |
-| ACT-005 | Prioritize and lodge the sitewide administrative penalty application and regularization motivation with council | Nonhlanhla Mashego | ASAP | Pending |
-| ACT-006 | Submit updated concept plans and interior fit-out estimations for the Middle Building (6A) | Kim Williams, Enrica Van Der Linden | 2026-09-30 | Pending |
+| ACT-005 | Prioritize and lodge the sitewide administrative penalty application and regularization motivation with council | Nonhlanhla Mashego | ASAP | In Progress |
+| ACT-006 | Submit updated concept plans and interior fit-out estimations for the Middle Building (6A) | Kim Williams, Enrica Van Der Linden | 2026-09-30 | Completed |
 | ACT-007 | Contact City Health authorities (Rory Cox) to clarify regulatory status of external municipal land sewer connections | Enrica Van Der Linden | 2026-09-15 | Pending |
 | ACT-008 | Upload high-resolution PDF of surveyor drawing detailing manhole positions to the project drive | Nonhlanhla Mashego | 2026-09-09 | Completed |
-| ACT-009 | Forward lift technical specifications, cost comparisons, and staircase clearance impact data to Nonhlanhla and Camilo | Kim Williams | ASAP | Pending |
-| ACT-010 | Issue calendar invitations and reserve rooms for the in-person facade and roof design workshop for Wednesday at 1:30 PM | Nicole Vivier | 2026-09-11 | Pending |
-| ACT-011 | Email Citra EPOD/EOT product development brief, competitor marketing deck, and concept drawings to Kim Williams | Nicole Vivier | 2026-09-11 | Pending |
-| ACT-012 | Review Citra EPOD development brief and concept designs over the weekend and provide interior finish feedback | Kim Williams | 2026-09-15 | Pending |
-| ACT-013 | Review lift technical options and staircase structural impact to finalize lift selection | Camilo Mogni | 2026-09-15 | Pending |
+| ACT-009 | Forward lift technical specifications, cost comparisons, and staircase clearance impact data to Nonhlanhla and Camilo | Kim Williams | ASAP | Completed |
+| ACT-010 | Issue calendar invitations and reserve rooms for the in-person facade and roof design workshop for Wednesday at 1:30 PM | Nicole Vivier | 2026-09-11 | Completed |
+| ACT-011 | Email Citra EPOD/EOT product development brief, competitor marketing deck, and concept drawings to Kim Williams | Nicole Vivier | 2026-09-11 | Completed |
+| ACT-012 | Review Citra EPOD development brief and concept designs over the weekend and provide interior finish feedback | Kim Williams | 2026-09-15 | Completed |
+| ACT-013 | Review lift technical options and staircase structural impact to finalize lift selection | Camilo Mogni | 2026-09-15 | In Progress |
 
 ## **Dependency Register**
 

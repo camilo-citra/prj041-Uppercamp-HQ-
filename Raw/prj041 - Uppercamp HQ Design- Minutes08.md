@@ -72,7 +72,7 @@ The project team confirmed the approved layout changes for the Citra Head Office
 | Risk Name | Description | Mitigation | Status |
 | :---- | :---- | :---- |
 | Budget Exceedance (High) | The expanded architectural scope (lift, terrace, Building A changes) and unknown infrastructure costs (HVAC, Electrical) may exceed the available fit-out budget. | Establish preliminary costs by Sept 22nd for a consolidated budget review on Sept 27th. Implement a layered/phased approach if necessary. | Open |
-| Statutory Approval Delays (Medium) | The inclusion of the lift, Building A changes, and refuse relocation may complicate or delay Council submissions. | Enrica and Nicole to coordinate submission strategies immediately to ensure alignment and minimize delays. | Open |
+| Statutory Approval Delays (Medium) | The inclusion of the lift, Building A changes, and refuse relocation may complicate or delay Council submissions. | Enrica and Nicole to coordinate submission strategies immediately to ensure alignment and minimize delays. | Closed |
 | Infrastructure Spatial Conflicts (Medium) | HVAC equipment (condensers, fresh air fans, risers) requires specific structural locations and may conflict with architectural intent. | Meeting scheduled (Sept 10\) to review spatial requirements. Structural engineer input needed for plant locations. | Open |
 
 ## **Issue Register**
@@ -84,12 +84,12 @@ The project team confirmed the approved layout changes for the Citra Head Office
 
 | ID | Task Description | Assignee | Deadline | Status |
 | :---- | :---- | :---- | :---- | :---- |
-| ACT-001 | Provide preliminary mechanical (HVAC) proposal and costing | Pieter Fourie | 2026-09-22 | In Progress |
+| ACT-001 | Provide preliminary mechanical (HVAC) proposal and costing | Pieter Fourie | 2026-09-22 | Completed |
 | ACT-002 | Submit updated architectural proposal for expanded scope | Enrica Van Der Linden | ASAP | Completed |
 | ACT-003 | Coordinate Building A refuse and ablution planning submission strategy | Enrica Van Der Linden | 2026-09-18 | Completed |
-| ACT-004 | Meet to finalize HVAC aesthetics and plant locations | Kim Williams / Pieter Fourie | 2026-09-10 | In Progress |
+| ACT-004 | Meet to finalize HVAC aesthetics and plant locations | Kim Williams / Pieter Fourie | 2026-09-10 | Completed |
 | ACT-005 | Confirm structural locations for roof HVAC plant and riser shafts | Camilo Mogni / Structural Eng. | 2026-09-22 | Pending |
-| ACT-006 | Resolve ablution requirements for potential second-floor gym | Kim Williams / Enrica Van Der Linden | 2026-09-22 | In Progress |
+| ACT-006 | Resolve ablution requirements for potential second-floor gym | Kim Williams / Enrica Van Der Linden | 2026-09-22 | Completed |
 
 ## **Metrics**
 
