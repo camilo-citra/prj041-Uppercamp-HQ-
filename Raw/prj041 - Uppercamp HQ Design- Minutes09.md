@@ -67,7 +67,7 @@ The team established a multi-phased submission roadmap for the Uppercamp site. T
 | ACT-005 | Prioritize and lodge the sitewide administrative penalty application and regularization motivation with council | Nonhlanhla Mashego | ASAP | Pending |
 | ACT-006 | Submit updated concept plans and interior fit-out estimations for the Middle Building (6A) | Kim Williams, Enrica Van Der Linden | 2026-09-30 | Pending |
 | ACT-007 | Contact City Health authorities (Rory Cox) to clarify regulatory status of external municipal land sewer connections | Enrica Van Der Linden | 2026-09-15 | Pending |
-| ACT-008 | Upload high-resolution PDF of surveyor drawing detailing manhole positions to the project drive | Nonhlanhla Mashego | 2026-09-09 | Pending |
+| ACT-008 | Upload high-resolution PDF of surveyor drawing detailing manhole positions to the project drive | Nonhlanhla Mashego | 2026-09-09 | Completed |
 | ACT-009 | Forward lift technical specifications, cost comparisons, and staircase clearance impact data to Nonhlanhla and Camilo | Kim Williams | ASAP | Pending |
 | ACT-010 | Issue calendar invitations and reserve rooms for the in-person facade and roof design workshop for Wednesday at 1:30 PM | Nicole Vivier | 2026-09-11 | Pending |
 | ACT-011 | Email Citra EPOD/EOT product development brief, competitor marketing deck, and concept drawings to Kim Williams | Nicole Vivier | 2026-09-11 | Pending |

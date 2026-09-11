@@ -65,7 +65,7 @@ The session successfully established the critical design constraints dictated by
 | **Task / Action Item** | **Assignee(s)** | **Deadline** | **Status** | 
 
 1. **Provide CAD Layouts:** Send current CAD layouts of the EOT and accessible roof space. | Design Team | ASAP | Completed |   
-2. **Draft Fire & HVAC Concept:** Create a high-level fire/AC concept design based on the provided CAD layouts, determining condenser space and escape distances. | Pieter | Next Week | Pending |   
+2. **Draft Fire & HVAC Concept:** Create a high-level fire/AC concept design based on the provided CAD layouts, determining condenser space and escape distances. | Pieter | Next Week | Completed |   
 3. **Verify Accessibility Compliance:** Determine if the upper floors require strict disability compliance (impacts lift and refuge areas). | Design Team / John | ASAP | Completed |   
 4. **Consult Fire Chief:** Present the preliminary fire design concept to Benjamin Ellis for feedback/approval. | Pieter | Following Concept Draft | Completed |   
 5. **Distribute Structural Report:** Share the structural engineering report with the wider team upon receipt. | John Walter Shaidi | May 29, 2026 | Completed |   
