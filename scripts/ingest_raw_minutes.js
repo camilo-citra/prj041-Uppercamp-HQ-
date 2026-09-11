@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 const rawDir = path.join(__dirname, '../Raw');
 
 console.log('Starting Ingestion of Raw Meeting Minutes...');
-ingestAllMeetings(rawDir);
+await ingestAllMeetings(rawDir);
 
 // Verify row counts across all 6 core tables
 const meetingCount = db.prepare('SELECT count(*) as count FROM meeting_metadata').get().count;

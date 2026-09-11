@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { extractMeetingWithOllama } from '../services/ollamaService.js';
 
 export function extractMeetingId(filePathOrName) {
   const filename = path.basename(filePathOrName);
@@ -447,3 +448,102 @@ function inferAssumptionsFromMeeting(meetingId, content, decisions, risks) {
   }
   return assumptions;
 }
+
+/**
+ * Evaluates whether the regex extraction captured the document accurately
+ * or if non-standard formatting caused data extraction misses.
+ */
+export function evaluateParseQuality(parsedResult, rawContent) {
+  if (!rawContent) return { needsFallback: false, score: 100 };
+
+  const nonBlankLines = rawContent.split('\n').filter(l => l.trim().length > 0).length;
+  
+  // If file is short (< 15 lines), regex parse is sufficient
+  if (nonBlankLines < 15) {
+    return { needsFallback: false, score: 100 };
+  }
+
+  const decCount = parsedResult.decisions ? parsedResult.decisions.length : 0;
+  const actCount = parsedResult.action_items ? parsedResult.action_items.length : 0;
+  const rskCount = parsedResult.risks ? parsedResult.risks.length : 0;
+  const hasExec = !!(parsedResult.executive_summary && parsedResult.executive_summary.length > 30);
+
+  let score = 100;
+  const reasons = [];
+
+  if (nonBlankLines > 35 && decCount === 0 && actCount === 0) {
+    score -= 60;
+    reasons.push('Substantial meeting minute with zero extracted decisions and zero action items');
+  }
+
+  if (nonBlankLines > 40 && !hasExec) {
+    score -= 25;
+    reasons.push('Missing executive summary in detailed meeting minute');
+  }
+
+  const needsFallback = score < 60;
+  return {
+    needsFallback,
+    score,
+    reasons,
+    entityCount: decCount + actCount + rskCount
+  };
+}
+
+/**
+ * Enhanced parser that runs standard regex first, then automatically activates
+ * Ollama local LLM fallback if parse quality indicates formatting misses.
+ */
+export async function parseMeetingMarkdownWithFallback(filePathOrContent, isRawContent = false) {
+  let content = '';
+  let filename = 'Minutes.md';
+
+  if (isRawContent) {
+    content = filePathOrContent;
+  } else {
+    content = fs.readFileSync(filePathOrContent, 'utf8');
+    filename = path.basename(filePathOrContent);
+  }
+
+  // 1. Initial fast deterministic parse
+  const parsed = parseMeetingMarkdown(isRawContent ? filePathOrContent : filePathOrContent);
+  
+  // 2. Evaluate parse quality
+  const quality = evaluateParseQuality(parsed, content);
+  
+  if (!quality.needsFallback) {
+    return parsed;
+  }
+
+  console.log(`[Parser] Format deviation detected in "${filename}" (Quality Score: ${quality.score}%). Attempting Ollama fallback...`);
+
+  // 3. Fallback to Ollama local LLM if active
+  const ollamaResult = await extractMeetingWithOllama(content, parsed.id);
+  if (!ollamaResult) {
+    console.log(`[Parser] Ollama offline or unavailable. Retaining best-effort deterministic parse.`);
+    return parsed;
+  }
+
+  console.log(`[Parser] ✅ Successfully enriched "${filename}" with Ollama structured extraction.`);
+
+  // Merge Ollama results, preferring LLM output for empty fields
+  return {
+    ...parsed,
+    title: parsed.title === 'Project Meeting' && ollamaResult.title ? ollamaResult.title : parsed.title,
+    date: parsed.date === '2026-06-01' && ollamaResult.date ? ollamaResult.date : parsed.date,
+    time: parsed.time || ollamaResult.time || '',
+    location: parsed.location || ollamaResult.location || 'Uppercamp Offices & Online',
+    pm: parsed.pm || ollamaResult.pm || 'Camilo Mogni',
+    attendees: parsed.attendees || ollamaResult.attendees || '',
+    apologies: parsed.apologies || ollamaResult.apologies || 'None recorded',
+    executive_summary: (!parsed.executive_summary || parsed.executive_summary.length < 20) && ollamaResult.executive_summary
+      ? ollamaResult.executive_summary
+      : parsed.executive_summary,
+    decisions: (parsed.decisions && parsed.decisions.length > 0) ? parsed.decisions : (ollamaResult.decisions || []),
+    action_items: (parsed.action_items && parsed.action_items.length > 0) ? parsed.action_items : (ollamaResult.action_items || []),
+    risks: (parsed.risks && parsed.risks.length > 0) ? parsed.risks : (ollamaResult.risks || []),
+    assumptions: (parsed.assumptions && parsed.assumptions.length > 0) ? parsed.assumptions : (ollamaResult.assumptions || []),
+    dependencies: (parsed.dependencies && parsed.dependencies.length > 0) ? parsed.dependencies : (ollamaResult.dependencies || [])
+  };
+}
+

@@ -13,7 +13,7 @@ const rawDir = path.join(__dirname, '../../Raw');
 let isProcessing = false;
 let debounceTimeout = null;
 
-export function runIngestionPipeline(reason = 'Manual or Scheduled Trigger') {
+export async function runIngestionPipeline(reason = 'Manual or Scheduled Trigger') {
   if (isProcessing) {
     console.log(`[MeetingIngestionAgent] Ingestion already in progress. Queueing event (${reason})...`);
     return;
@@ -29,7 +29,7 @@ export function runIngestionPipeline(reason = 'Manual or Scheduled Trigger') {
 
   try {
     // 1. Core Ingestion (Parses meetings, populates DB & RAG vector store)
-    ingestAllMeetings(rawDir);
+    await ingestAllMeetings(rawDir);
 
     // 2. Bi-directional Sync back to Markdown files
     try {

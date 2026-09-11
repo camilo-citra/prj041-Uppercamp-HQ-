@@ -1,7 +1,8 @@
 import db from '../db/index.js';
 import { searchVectorChunks } from './vectorStore.js';
+import { synthesizeRAGNarrativeWithOllama, checkOllamaStatus } from '../services/ollamaService.js';
 
-export function answerRAGQuery(query, filters = {}) {
+export async function answerRAGQuery(query, filters = {}) {
   // Perform vector/similarity search over discussions and summaries
   const matchedChunks = searchVectorChunks(query, filters, 6);
 
@@ -57,43 +58,68 @@ export function answerRAGQuery(query, filters = {}) {
     keyTakeaways.push(`Discussion notes extracted from ${new Set(matchedChunks.map(c => c.meeting_id)).size} meeting session(s).`);
   }
 
-  // Synthesize Executive Consolidated Narrative
-  const overviewParts = [];
-  overviewParts.push(`### Executive Summary Synthesis`);
-  overviewParts.push(`Based on project meeting records for **prj041 - Uppercamp HQ**, the query **"${query}"** yields the following consolidated intelligence:\n`);
+  // Attempt LLM narrative synthesis via Ollama if available
+  let consolidatedSummary = '';
+  let llmPowered = false;
+  let activeModel = null;
 
-  if (decisions.length) {
-    overviewParts.push(`#### 📌 Key Decisions Taken`);
-    decisions.forEach(d => {
-      overviewParts.push(`- **Decision ${d.decision_num} (${d.impact_area} | ${d.meeting_id} - ${d.date}):** ${d.summary}`);
-    });
-    overviewParts.push(``);
+  try {
+    const ollamaStatus = await checkOllamaStatus();
+    if (ollamaStatus.available) {
+      const llmNarrative = await synthesizeRAGNarrativeWithOllama(
+        query,
+        { decisions, actions, risks },
+        matchedChunks
+      );
+      if (llmNarrative) {
+        consolidatedSummary = llmNarrative;
+        llmPowered = true;
+        activeModel = ollamaStatus.activeModel;
+      }
+    }
+  } catch (err) {
+    console.warn('[RAG] Ollama synthesis failed, falling back to deterministic template:', err.message);
   }
 
-  if (actions.length) {
-    overviewParts.push(`#### 📋 Immediate Action Items & Task Allocations`);
-    actions.forEach(a => {
-      overviewParts.push(`- **[${a.meeting_id}]** ${a.description} *(Assigned: ${a.assignee} | Due: ${a.due_date} | Status: ${a.status})*`);
-    });
-    overviewParts.push(``);
-  }
+  if (!consolidatedSummary) {
+    // Deterministic fallback synthesis
+    const overviewParts = [];
+    overviewParts.push(`### Executive Summary Synthesis`);
+    overviewParts.push(`Based on project meeting records for **prj041 - Uppercamp HQ**, the query **"${query}"** yields the following consolidated intelligence:\n`);
 
-  if (risks.length) {
-    overviewParts.push(`#### ⚠️ Risk Factors & Contingency Measures`);
-    risks.forEach(r => {
-      overviewParts.push(`- **[${r.meeting_id}] Risk:** ${r.description}\n  *Mitigation:* ${r.contingency_measure} (Impact: ${r.impact_level}, Likelihood: ${r.likelihood})`);
-    });
-    overviewParts.push(``);
-  }
+    if (decisions.length) {
+      overviewParts.push(`#### 📌 Key Decisions Taken`);
+      decisions.forEach(d => {
+        overviewParts.push(`- **Decision ${d.decision_num} (${d.impact_area} | ${d.meeting_id} - ${d.date}):** ${d.summary}`);
+      });
+      overviewParts.push(``);
+    }
 
-  if (matchedChunks.length) {
-    overviewParts.push(`#### 💬 Contextual Discussion Excerpts`);
-    matchedChunks.forEach(c => {
-      overviewParts.push(`- **[${c.meeting_id} - ${c.subject} (${c.section_type})]:** "${c.content.slice(0, 240)}..."`);
-    });
-  }
+    if (actions.length) {
+      overviewParts.push(`#### 📋 Immediate Action Items & Task Allocations`);
+      actions.forEach(a => {
+        overviewParts.push(`- **[${a.meeting_id}]** ${a.description} *(Assigned: ${a.assignee} | Due: ${a.due_date} | Status: ${a.status})*`);
+      });
+      overviewParts.push(``);
+    }
 
-  const consolidatedSummary = overviewParts.join('\n');
+    if (risks.length) {
+      overviewParts.push(`#### ⚠️ Risk Factors & Contingency Measures`);
+      risks.forEach(r => {
+        overviewParts.push(`- **[${r.meeting_id}] Risk:** ${r.description}\n  *Mitigation:* ${r.contingency_measure} (Impact: ${r.impact_level}, Likelihood: ${r.likelihood})`);
+      });
+      overviewParts.push(``);
+    }
+
+    if (matchedChunks.length) {
+      overviewParts.push(`#### 💬 Contextual Discussion Excerpts`);
+      matchedChunks.forEach(c => {
+        overviewParts.push(`- **[${c.meeting_id} - ${c.subject} (${c.section_type})]:** "${c.content.slice(0, 240)}..."`);
+      });
+    }
+
+    consolidatedSummary = overviewParts.join('\n');
+  }
 
   // Build Citations List
   const citations = [];
@@ -120,7 +146,9 @@ export function answerRAGQuery(query, filters = {}) {
     riskSummary: risks,
     decisionsSummary: decisions,
     citations: uniqueCitations,
-    sourcesCount: totalSources
+    sourcesCount: totalSources,
+    llmPowered,
+    model: activeModel
   };
 }
 

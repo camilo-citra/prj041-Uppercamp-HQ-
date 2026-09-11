@@ -13,6 +13,7 @@ import { runIngestionPipeline } from './src/agent/meetingIngestionAgent.js';
 import { getDomainFocusSpectrum, getActionVelocityAndCapacity, getRiskLifecycleTrajectory, getCausalDecisionGraph, getProjectRetrospective } from './src/services/projectIntelligenceService.js';
 import { getLatestProjectAnalysis, runProjectAnalysis } from './src/agent/projectAnalysisAgent.js';
 import { extractMeetingId } from './src/parser/meetingParser.js';
+import { checkOllamaStatus } from './src/services/ollamaService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,9 +25,9 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 // Ingest trigger endpoint
-app.post('/api/ingest', (req, res) => {
+app.post('/api/ingest', async (req, res) => {
   try {
-    runIngestionPipeline('HTTP REST API Trigger');
+    await runIngestionPipeline('HTTP REST API Trigger');
     res.json({ success: true, message: 'Ingestion completed successfully.' });
   } catch (error) {
     console.error('Ingestion failed:', error);
@@ -35,7 +36,7 @@ app.post('/api/ingest', (req, res) => {
 });
 
 // Upload & Process New Meeting Summary Endpoint
-app.post('/api/meetings/upload', (req, res) => {
+app.post('/api/meetings/upload', async (req, res) => {
   try {
     const { filename, content } = req.body;
     if (!filename || !content) {
@@ -52,7 +53,7 @@ app.post('/api/meetings/upload', (req, res) => {
     fs.writeFileSync(targetPath, content, 'utf8');
 
     // Trigger agent ingestion pipeline (Parses markdown, updates DB across all 6 modules & syncs raw)
-    runIngestionPipeline(`File Upload: ${safeFilename}`);
+    await runIngestionPipeline(`File Upload: ${safeFilename}`);
 
     const meetingId = extractMeetingId(safeFilename);
 
@@ -100,7 +101,7 @@ app.get('/api/meetings/:id', (req, res) => {
   });
 });
 
-app.delete('/api/meetings/:id', (req, res) => {
+app.delete('/api/meetings/:id', async (req, res) => {
   try {
     const meeting = db.prepare(`SELECT * FROM meeting_metadata WHERE id = ?`).get(req.params.id);
     if (!meeting) return res.status(404).json({ error: 'Meeting not found' });
@@ -114,7 +115,7 @@ app.delete('/api/meetings/:id', (req, res) => {
     }
 
     // Re-run ingestion to update DB and vector store
-    ingestAllMeetings(rawDir);
+    await ingestAllMeetings(rawDir);
 
     res.json({ success: true, message: `Meeting ${req.params.id} deleted and database re-synced.` });
   } catch (error) {
@@ -384,13 +385,28 @@ app.get('/api/brief', (req, res) => {
   res.json({ brief, assumptions });
 });
 
-// RAG AI Query endpoint
-app.post('/api/rag/query', (req, res) => {
-  const { query, filters } = req.body;
-  if (!query) return res.status(400).json({ error: 'Query parameter required' });
+// Local LLM & Ollama Status endpoint
+app.get('/api/llm/status', async (req, res) => {
+  try {
+    const status = await checkOllamaStatus();
+    res.json(status);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-  const result = answerRAGQuery(query, filters || {});
-  res.json(result);
+// RAG AI Query endpoint
+app.post('/api/rag/query', async (req, res) => {
+  try {
+    const { query, filters } = req.body;
+    if (!query) return res.status(400).json({ error: 'Query parameter required' });
+
+    const result = await answerRAGQuery(query, filters || {});
+    res.json(result);
+  } catch (error) {
+    console.error('RAG query error:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Decisions Intelligence & Timeline endpoints

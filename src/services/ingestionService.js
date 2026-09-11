@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import db, { resetDatabase } from '../db/index.js';
-import { parseMeetingMarkdown } from '../parser/meetingParser.js';
+import { parseMeetingMarkdown, parseMeetingMarkdownWithFallback } from '../parser/meetingParser.js';
 import { indexMeetingChunks } from '../rag/vectorStore.js';
 import { analyzeAndMapDecisions } from './decisionIntelligenceService.js';
 import { runProjectAnalysis } from '../agent/projectAnalysisAgent.js';
@@ -77,7 +77,7 @@ export function findMatchingStakeholder(cleanName, existingStakeholders) {
   return null;
 }
 
-export function ingestAllMeetings(rawDirectoryPath) {
+export async function ingestAllMeetings(rawDirectoryPath) {
   resetDatabase();
 
   const files = fs.readdirSync(rawDirectoryPath)
@@ -89,7 +89,7 @@ export function ingestAllMeetings(rawDirectoryPath) {
   const parsedMeetings = [];
   for (const file of files) {
     const fullPath = path.join(rawDirectoryPath, file);
-    const parsed = parseMeetingMarkdown(fullPath);
+    const parsed = await parseMeetingMarkdownWithFallback(fullPath);
     parsedMeetings.push(parsed);
   }
 
