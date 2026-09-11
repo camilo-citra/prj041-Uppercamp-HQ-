@@ -1290,8 +1290,8 @@ export default function App() {
                     />
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.35rem' }}>
-                    {['All', 'Citra', 'Kim Williams Design', 'Engineering Consultants'].map((org) => (
+                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                    {['All', 'Citra', 'Kim Williams Design', 'Invictus Engineering', 'Linden Projects', 'External Consultant'].map((org) => (
                       <button
                         key={org}
                         className={`tab-btn ${stakeholderOrgFilter === org ? 'active' : ''}`}
@@ -1319,14 +1319,16 @@ export default function App() {
                   .map((person) => {
                     const initials = person.name.split(' ').map(n => n[0]).join('').slice(0, 2);
                     const orgColor = person.organization.includes('Kim Williams') ? '#c084fc' :
-                      person.organization.includes('Engineering') ? '#f87171' :
-                        person.organization.includes('Executive') ? '#fbbf24' : '#38bdf8';
+                      person.organization.includes('Invictus') ? '#f87171' :
+                      person.organization.includes('Linden') ? '#34d399' :
+                      person.organization.includes('External') || person.organization.includes('Consultant') ? '#fb923c' :
+                      person.organization.includes('Executive') ? '#fbbf24' : '#38bdf8';
 
                     return (
                       <div key={person.id} style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1rem' }}>
                         <div>
                           <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center', marginBottom: '0.85rem' }}>
-                            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: `rgba(${orgColor === '#c084fc' ? '192, 132, 252' : orgColor === '#f87171' ? '248, 113, 113' : orgColor === '#fbbf24' ? '251, 191, 36' : '56, 189, 248'}, 0.2)`, color: orgColor, border: `1px solid ${orgColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.05rem', fontFamily: 'var(--font-heading)' }}>
+                            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: `rgba(${orgColor === '#c084fc' ? '192, 132, 252' : orgColor === '#f87171' ? '248, 113, 113' : orgColor === '#34d399' ? '52, 211, 153' : orgColor === '#fb923c' ? '251, 146, 60' : orgColor === '#fbbf24' ? '251, 191, 36' : '56, 189, 248'}, 0.2)`, color: orgColor, border: `1px solid ${orgColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.05rem', fontFamily: 'var(--font-heading)' }}>
                               {initials}
                             </div>
                             <div style={{ flex: 1 }}>
@@ -1356,7 +1358,7 @@ export default function App() {
                           </div>
 
                           <div style={{ marginBottom: '0.75rem' }}>
-                            <span className="badge badge-in-progress" style={{ fontSize: '0.72rem', background: 'rgba(30, 41, 59, 0.8)' }}>
+                            <span className="badge badge-in-progress" style={{ fontSize: '0.72rem', background: 'rgba(30, 41, 59, 0.8)', borderColor: orgColor, color: orgColor }}>
                               {person.organization}
                             </span>
                           </div>
@@ -1367,7 +1369,7 @@ export default function App() {
                         </div>
 
                         <div style={{ paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
-                          <span>Meetings Attended: <strong style={{ color: '#fff' }}>{person.meetings_attended} / 5</strong></span>
+                          <span>Meetings Attended: <strong style={{ color: '#fff' }}>{person.meetings_attended} / {person.total_meetings || (meetings && meetings.length) || 11}</strong></span>
                           <span>Actions Assigned: <strong style={{ color: person.actions_assigned > 0 ? 'var(--primary-cyan)' : 'var(--text-muted)' }}>{person.actions_assigned}</strong></span>
                         </div>
                       </div>

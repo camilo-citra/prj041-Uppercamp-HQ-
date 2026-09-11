@@ -240,18 +240,24 @@ app.get('/api/stakeholders', (req, res) => {
     const cleanName = s.name.replace(/^[\s\-\–\—•\*\d\.\:\)\(\\\`\#]+/, '').replace(/[\*\_\`]/g, '').trim();
     const normKey = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
+    const parts = cleanName.toLowerCase().split(/\s+/).filter(p => p.length > 0);
+    const firstWord = parts[0] || '';
+    const lastWord = parts[parts.length - 1] || '';
+
     const meetingsAttended = meetingList.filter(m => {
       if (!m.attendees) return false;
       const lowerAtt = m.attendees.toLowerCase();
-      const firstWord = cleanName.toLowerCase().split(' ')[0];
-      return lowerAtt.includes(cleanName.toLowerCase()) || (firstWord.length >= 3 && lowerAtt.includes(firstWord));
+      return lowerAtt.includes(cleanName.toLowerCase()) ||
+        (parts.length >= 2 && lowerAtt.includes(`${firstWord} ${lastWord}`)) ||
+        (firstWord.length >= 3 && !['team', 'the', 'all'].includes(firstWord) && lowerAtt.includes(firstWord));
     }).length;
 
     const actionsAssigned = actionList.filter(a => {
       if (!a.assignee) return false;
       const lowerAssignee = a.assignee.toLowerCase();
-      const firstWord = cleanName.toLowerCase().split(' ')[0];
-      return lowerAssignee.includes(cleanName.toLowerCase()) || (firstWord.length >= 3 && lowerAssignee.includes(firstWord));
+      return lowerAssignee.includes(cleanName.toLowerCase()) ||
+        (parts.length >= 2 && lowerAssignee.includes(`${firstWord} ${lastWord}`)) ||
+        (firstWord.length >= 4 && !['team', 'the', 'all', 'architects'].includes(firstWord) && lowerAssignee.includes(firstWord));
     }).length;
 
     if (!deduplicatedMap.has(normKey)) {
@@ -259,7 +265,8 @@ app.get('/api/stakeholders', (req, res) => {
         ...s,
         name: cleanName,
         meetings_attended: meetingsAttended,
-        actions_assigned: actionsAssigned
+        actions_assigned: actionsAssigned,
+        total_meetings: meetingList.length
       });
     } else {
       const existing = deduplicatedMap.get(normKey);
@@ -272,7 +279,8 @@ app.get('/api/stakeholders', (req, res) => {
           ...s,
           name: cleanName,
           meetings_attended: Math.max(existing.meetings_attended, meetingsAttended),
-          actions_assigned: Math.max(existing.actions_assigned, actionsAssigned)
+          actions_assigned: Math.max(existing.actions_assigned, actionsAssigned),
+          total_meetings: meetingList.length
         });
       } else {
         existing.meetings_attended = Math.max(existing.meetings_attended, meetingsAttended);

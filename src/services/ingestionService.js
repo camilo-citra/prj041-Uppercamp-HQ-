@@ -60,17 +60,29 @@ export function findMatchingStakeholder(cleanName, existingStakeholders) {
     }
   }
 
-  // 2. Substring / First Name / Full Name match against existing team
-  // e.g. cleanName "Pieter" matches "Pieter Fourie", "Enrica" matches "Enrica van der Linden", "Lunell" matches "Lunell de Blanche", "Camilo" matches "Camilo Mogni"
-  for (const s of existingStakeholders) {
-    const existingParts = s.name.toLowerCase().split(/\s+/);
-    const cleanParts = cleanName.toLowerCase().split(/\s+/);
+  // 2. Multi-part / First & Last / Substring matching
+  // Matches "John Shaidi" -> "John Walter Shaidi", "Andries" -> "Andries de Klerk", "Lisha" -> "Lisha Klopper", "Pieter" -> "Pieter Fourie"
+  const cleanParts = cleanName.toLowerCase().split(/\s+/).filter(p => p.length > 0);
 
-    if (cleanParts.length === 1 && cleanParts[0].length >= 3 && existingParts[0] === cleanParts[0]) {
-      return s;
+  for (const s of existingStakeholders) {
+    const existingParts = s.name.toLowerCase().split(/\s+/).filter(p => p.length > 0);
+
+    // Single name match (e.g. "Andries", "Pieter", "Enrica", "Lunell", "Lisha", "Camilo", "Realm")
+    if (cleanParts.length === 1 && cleanParts[0].length >= 3) {
+      if (existingParts[0] === cleanParts[0] || existingParts.includes(cleanParts[0])) {
+        return s;
+      }
     }
-    if (existingParts.length === 1 && existingParts[0].length >= 3 && cleanParts[0] === existingParts[0]) {
-      return s;
+
+    // First and last name match (e.g. "John Shaidi" matches "John Walter Shaidi")
+    if (cleanParts.length >= 2 && existingParts.length >= 2) {
+      if (cleanParts[0] === existingParts[0] && cleanParts[cleanParts.length - 1] === existingParts[existingParts.length - 1]) {
+        return s;
+      }
+      // Substring check
+      if (s.name.toLowerCase().includes(cleanName.toLowerCase()) || cleanName.toLowerCase().includes(s.name.toLowerCase())) {
+        return s;
+      }
     }
   }
 
@@ -221,18 +233,22 @@ export async function ingestAllMeetings(rawDirectoryPath) {
       { name: 'Camilo Mogni', role: 'Project Manager & Lead', organization: 'Citra Management', key_responsibilities: 'Overall project governance, Stage 3 concept freeze, budget alignment & stakeholder coordination', status: 'Active' },
       { name: 'John Walter Shaidi', role: 'Project Coordinator & Financial Model Lead', organization: 'Citra Management', key_responsibilities: 'Consultant cash flow modeling, master schedule tracking, and Seloxis alignment', status: 'Active' },
       { name: 'Kim Williams', role: 'Principal Interior Designer & Framework Lead', organization: 'Kim Williams Design', key_responsibilities: 'Behavioral neighborhood framework (Connect, Build, Inspire, Community) & layout design', status: 'Active' },
-      { name: 'Pieter Fourie', role: 'Fire, Wet Services & Mechanical Lead Engineer', organization: 'Engineering Consultants', key_responsibilities: 'Fire safety egress compliance, 1200mm passage verification, staircase & MEP coordination', status: 'Active' },
-      { name: 'Nicole Vivier', role: 'Interior Architectural Specialist', organization: 'Kim Williams Design', key_responsibilities: 'Section, mezzanine concepts, and detailed architectural development documentation', status: 'Active' },
+      { name: 'Pieter Fourie', role: 'Fire, Wet Services & Mechanical Lead Engineer', organization: 'Invictus Engineering', key_responsibilities: 'Fire safety egress compliance, 1200mm passage verification, staircase & MEP coordination', status: 'Active' },
+      { name: 'Nicole Vivier', role: 'Interior Architectural Specialist / EPOD Lead', organization: 'Citra', key_responsibilities: 'Turnkey modular EPOD product development, section, mezzanine concepts & detailed architectural documentation', status: 'Active' },
       { name: 'Cheryl Hillman', role: 'Workspace Strategy & Operations Lead', organization: 'Citra Operations', key_responsibilities: 'Recurring coordination sessions, 10-seater boardroom passage optimization & desk ratios', status: 'Active' },
-      { name: 'Jacques Kruger', role: 'Operations Director', organization: 'Citra Operations', key_responsibilities: 'Operational workflow alignment, ground floor logistics & facility space planning', status: 'Active' },
+      { name: 'Jacques Kruger', role: 'HoD Engineering', organization: 'Citra SA', key_responsibilities: 'Operational workflow alignment, ground floor logistics & facility space planning', status: 'Active' },
       { name: 'Joel Baur', role: 'Executive Director / Stakeholder Lead', organization: 'Citra Executive', key_responsibilities: 'Executive sign-off, Stage 3 brief finalization & strategic campus direction', status: 'Active' },
       { name: 'Realm Chitando', role: 'Commercial & Construction Lead', organization: 'Citra Construction', key_responsibilities: 'Office relocation plans, lift shaft usage decisions & billboard market trend research', status: 'Active' },
-      { name: 'Nonhlanhla Mashego', role: 'Stakeholder & Project Operations', organization: 'Citra Management', key_responsibilities: 'Project administration, stakeholder communication & operational coordination', status: 'Active' },
-      { name: 'Enrica van der Linden', role: 'Design & Space Planning Specialist', organization: 'Kim Williams Design', key_responsibilities: 'Detailed space planning, material selections & design documentation', status: 'Active' },
+      { name: 'Nonhlanhla Mashego', role: 'Architect & Statutory Submissions Lead', organization: 'Citra', key_responsibilities: 'Building 4 council submissions, site regularization drawings & project administration', status: 'Active' },
+      { name: 'Enrica van der Linden', role: 'Design & Space Planning Specialist / Statutory Submissions Lead', organization: 'Linden Projects', key_responsibilities: 'Buildings 6A & 6B consolidated council submissions, space planning, material selections & design documentation', status: 'Active' },
       { name: 'Lunell de Blanche', role: '3D Visualization & Design Specialist', organization: 'Kim Williams Design', key_responsibilities: 'Conceptual renderings, presentation materials & 3D layout modeling', status: 'Active' },
       { name: 'Busisiwe Mgwenya', role: 'Stakeholder Team Member', organization: 'Citra Management', key_responsibilities: 'Departmental requirements gathering & Stage 3 feedback review', status: 'Active' },
       { name: 'Farai Dhlamini', role: 'Stakeholder Team Member', organization: 'Citra Operations', key_responsibilities: 'Facility feedback & operational requirements alignment', status: 'Active' },
-      { name: 'Lisha', role: 'Marketing Strategy & Collaboration Lead', organization: 'Citra Marketing', key_responsibilities: 'Proposed collaboration wall strategy & brand alignment', status: 'Active' }
+      { name: 'Lisha Klopper', role: 'Marketing Strategy & Collaboration Lead', organization: 'Citra Marketing', key_responsibilities: 'Proposed collaboration wall strategy & brand alignment', status: 'Active' },
+      { name: 'Andries de Klerk', role: 'Consultant for Electrical Engineering Services', organization: 'External Consultant', key_responsibilities: 'Electrical engineering designs, electrical infrastructure integration & council documentation', status: 'Active' },
+      { name: 'Dwayne Jacobs', role: 'HoD Citra Construction', organization: 'Citra Construction', key_responsibilities: 'Site investigations, physical foundation excavations, footing exposure & construction management', status: 'Active' },
+      { name: 'Daniel Mnthambala', role: 'Structural & Civil Engineering Lead', organization: 'Citra Engineering', key_responsibilities: 'Foundation load calculations, perimeter steel girder transfer strategy, CBT v1.1 and corrosion protection coordination', status: 'Active' },
+      { name: 'Harvey Stoltz', role: 'Quantity Surveyor', organization: 'Citra Construction', key_responsibilities: 'Cost estimating, bill of quantities, commercial alignment & construction cost management', status: 'Active' }
     ];
 
     for (const s of coreStakeholders) {

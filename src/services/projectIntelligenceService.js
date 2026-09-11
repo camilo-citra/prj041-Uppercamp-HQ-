@@ -162,12 +162,16 @@ export function getActionVelocityAndCapacity() {
   
   const capacityMatrix = stakeholders.map(s => {
     const sNameLower = s.name.toLowerCase();
-    const firstName = sNameLower.split(' ')[0];
+    const parts = sNameLower.split(/\s+/).filter(p => p.length > 0);
+    const firstName = parts[0] || '';
+    const lastName = parts[parts.length - 1] || '';
 
     const sActions = actions.filter(a => {
       if (!a.assignee) return false;
       const assignLower = a.assignee.toLowerCase();
-      return assignLower.includes(sNameLower) || assignLower.includes(firstName);
+      return assignLower.includes(sNameLower) ||
+        (parts.length >= 2 && assignLower.includes(`${firstName} ${lastName}`)) ||
+        (firstName.length >= 4 && !['team', 'the', 'all', 'architects'].includes(firstName) && assignLower.includes(firstName));
     });
 
     const total = sActions.length;
