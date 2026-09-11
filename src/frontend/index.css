@@ -1865,3 +1865,735 @@ body {
   50% { opacity: 0.4; transform: scale(0.85); }
 }
 
+/* ==========================================================================
+   LIGHT-THEME FINANCIAL ROI & CAPITAL GOVERNANCE WIDGET
+   ========================================================================== */
+
+.financial-roi-widget-light {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  font-family: var(--font-body);
+}
+
+.financial-widget-loading-card {
+  background: #ffffff;
+  color: #0284c7;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.widget-header-light {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+.widget-title-group {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.widget-icon-pill {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.widget-main-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.widget-sub-title {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+.budget-tag-light {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.live-pill-light {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.widget-actions-light {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-widget-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-widget-toggle:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.btn-widget-toggle.active {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: #7dd3fc;
+}
+
+.btn-widget-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 0.95rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+  transition: all 0.15s ease;
+}
+
+.btn-widget-pdf:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+
+.btn-widget-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-widget-refresh:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Simple Terms Interactive Drawer */
+.simple-terms-drawer-light {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.simple-terms-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.simple-terms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+
+.simple-term-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+/* KPI Top Grid */
+.roi-kpi-grid-light {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.roi-kpi-card-light {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.roi-kpi-card-light:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.roi-kpi-card-light.highlight-green {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.roi-kpi-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.roi-kpi-val {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.roi-kpi-val.text-green-700 {
+  color: #15803d;
+}
+
+.roi-kpi-sub-row {
+  display: flex;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.roi-badge-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+
+.roi-badge-pill.green {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.roi-badge-pill.blue {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.roi-progress-track {
+  width: 100%;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+
+.roi-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* 4 Value Pillars Breakdown */
+.roi-pillars-section-light {
+  margin-top: 1.5rem;
+}
+
+.roi-pillars-title {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 0.85rem;
+}
+
+.roi-pillars-grid-light {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.roi-pillar-card-light {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pillar-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pillar-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.pillar-pct-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.pillar-amount-light {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.pillar-desc-light {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.4;
+  min-height: 2.2rem;
+}
+
+/* Chronological Trajectory Section */
+.roi-trajectory-section-light {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.roi-trajectory-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+  height: 120px;
+  padding-top: 1rem;
+  overflow-x: auto;
+}
+
+.roi-bar-col {
+  flex: 1;
+  min-width: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  height: 100%;
+}
+
+.roi-bar-val {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0369a1;
+}
+
+.roi-bar-container {
+  width: 100%;
+  max-width: 32px;
+  height: 65px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.roi-bar-fill {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.5s ease;
+}
+
+.roi-bar-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   A4 PRINT / PDF EXPORT MODAL & SHEET
+   ========================================================================== */
+
+.pdf-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.pdf-modal-toolbar {
+  width: 100%;
+  max-width: 850px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e293b;
+  padding: 0.85rem 1.25rem;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: none;
+}
+
+.pdf-print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #0284c7;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pdf-print-btn:hover {
+  background: #0369a1;
+}
+
+.pdf-close-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.pdf-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.pdf-document-sheet {
+  width: 100%;
+  max-width: 850px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 2.5rem;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-body);
+}
+
+.pdf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #0f172a;
+  margin-bottom: 1.5rem;
+}
+
+.pdf-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pdf-logo-badge {
+  width: 48px;
+  height: 48px;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.25rem;
+}
+
+.pdf-title {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.pdf-subtitle {
+  font-size: 0.85rem;
+  color: #475569;
+  margin: 0;
+}
+
+.pdf-header-right {
+  text-align: right;
+  font-size: 0.75rem;
+  color: #334155;
+}
+
+.pdf-meta-item {
+  margin-bottom: 0.2rem;
+}
+
+.pdf-summary-banner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pdf-banner-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pdf-banner-item.highlight-green {
+  background: #f0fdf4;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+}
+
+.pdf-banner-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.pdf-banner-value {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.pdf-banner-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.pdf-section {
+  margin-bottom: 1.5rem;
+}
+
+.pdf-section-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.35rem;
+}
+
+.pdf-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pdf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.pdf-table th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 700;
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #e2e8f0;
+}
+
+.pdf-table td {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+}
+
+.pdf-table-total td {
+  background: #f8fafc;
+  font-weight: 700;
+}
+
+.pdf-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.pdf-badge.green { background: #dcfce7; color: #166534; }
+.pdf-badge.blue { background: #e0f2fe; color: #0369a1; }
+
+.pdf-callout-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.pdf-callout-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.pdf-callout-box h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.3rem;
+}
+
+.pdf-callout-box p {
+  font-size: 0.7rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.pdf-footer-signoff {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #cbd5e1;
+}
+
+.pdf-sign-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-sign-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 2rem;
+}
+
+.pdf-sign-line {
+  border-bottom: 1px solid #94a3b8;
+  margin-bottom: 0.35rem;
+}
+
+.pdf-sign-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ==========================================================================
+   PRINT MEDIA RULES
+   ========================================================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .header-bar,
+  .no-print,
+  .pdf-modal-toolbar,
+  .app-container > *:not(.pdf-modal-overlay),
+  .nav-tabs,
+  .btn-widget-pdf,
+  .btn-widget-toggle,
+  .btn-widget-refresh {
+    display: none !important;
+  }
+
+  .pdf-modal-overlay {
+    position: static !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+
+  .pdf-document-sheet {
+    max-width: 100% !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .pdf-section {
+    page-break-inside: avoid;
+  }
+}
+
+

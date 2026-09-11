@@ -14,6 +14,7 @@ import { getDomainFocusSpectrum, getActionVelocityAndCapacity, getRiskLifecycleT
 import { getLatestProjectAnalysis, runProjectAnalysis } from './src/agent/projectAnalysisAgent.js';
 import { extractMeetingId } from './src/parser/meetingParser.js';
 import { checkOllamaStatus } from './src/services/ollamaService.js';
+import { calculateProjectRoi } from './src/services/financialRoiService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -537,6 +538,20 @@ app.get('/api/analytics/retrospective', (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching retrospective knowledge:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Financial ROI & Cumulative Savings Endpoint
+app.get('/api/analytics/financial-roi', (req, res) => {
+  try {
+    const roiData = calculateProjectRoi();
+    res.json({
+      success: true,
+      ...roiData
+    });
+  } catch (error) {
+    console.error('Error calculating financial ROI:', error);
     res.status(500).json({ error: error.message });
   }
 });

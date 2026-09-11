@@ -3,10 +3,11 @@ import {
   Calendar, CheckSquare, AlertTriangle, FileText, Search, RefreshCw,
   ExternalLink, Layers, MessageSquare, ChevronRight, User, Users, MapPin, Clock, Copy, Check,
   Upload, FilePlus, CheckCircle, CheckCircle2, X, Trash2, Edit2, Plus, Save, UserPlus, ShieldAlert, Network, Grid,
-  GitCommit, Sparkles, Link2, Compass, BrainCircuit
+  GitCommit, Sparkles, Link2, Compass, BrainCircuit, DollarSign, TrendingUp
 } from 'lucide-react';
 import ProjectIntelligenceHub from './ProjectIntelligenceHub.jsx';
 import AnalysisHub from './AnalysisHub.jsx';
+import FinancialRoiWidget from './FinancialRoiWidget.jsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('meetings');
@@ -71,6 +72,10 @@ export default function App() {
   const [ingesting, setIngesting] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState(null);
 
+  // Financial ROI & Cumulative Savings State
+  const [financialData, setFinancialData] = useState(null);
+  const [financialLoading, setFinancialLoading] = useState(false);
+
   useEffect(() => {
     fetchMeetings();
     fetchActions();
@@ -78,7 +83,23 @@ export default function App() {
     fetchBrief();
     fetchStakeholders();
     fetchDecisions();
+    fetchFinancialData();
   }, []);
+
+  const fetchFinancialData = async () => {
+    setFinancialLoading(true);
+    try {
+      const res = await fetch('/api/analytics/financial-roi');
+      const data = await res.json();
+      if (data.success) {
+        setFinancialData(data);
+      }
+    } catch (err) {
+      console.error('Error fetching financial ROI:', err);
+    } finally {
+      setFinancialLoading(false);
+    }
+  };
 
   const fetchDecisions = async () => {
     try {
@@ -310,6 +331,7 @@ export default function App() {
       await fetchBrief();
       await fetchStakeholders();
       await fetchDecisions();
+      await fetchFinancialData();
       if (selectedMeetingId) fetchMeetingDetail(selectedMeetingId);
     } catch (err) {
       console.error('Ingestion error:', err);
@@ -353,20 +375,14 @@ export default function App() {
         await fetchRisks();
         await fetchBrief();
         await fetchStakeholders();
-        if (data.meeting_id) {
-          setSelectedMeetingId(data.meeting_id);
-          fetchMeetingDetail(data.meeting_id);
-        }
-        setTimeout(() => {
-          setShowUploadModal(false);
-          setUploadContent('');
-          setUploadStatusMsg(null);
-        }, 1200);
+        await fetchDecisions();
+        await fetchFinancialData();
+        setShowUploadModal(false);
       } else {
-        setUploadStatusMsg(`❌ Error: ${data.error}`);
+        setUploadStatusMsg(`❌ Error: ${data.error || 'Upload failed'}`);
       }
     } catch (err) {
-      console.error('Upload error:', err);
+      console.error('Error uploading meeting:', err);
       setUploadStatusMsg(`❌ Error: ${err.message}`);
     } finally {
       setUploading(false);
@@ -489,6 +505,7 @@ export default function App() {
       });
       setEditingRiskId(null);
       fetchRisks();
+      fetchFinancialData();
     } catch (err) {
       console.error('Risk update failed:', err);
     }
@@ -536,6 +553,7 @@ export default function App() {
       });
       setEditingActionId(null);
       fetchActions();
+      fetchFinancialData();
       if (selectedMeetingId) fetchMeetingDetail(selectedMeetingId);
     } catch (err) {
       console.error('Action update failed:', err);
@@ -609,6 +627,18 @@ export default function App() {
             <MessageSquare size={16} /> RAG Intelligence
           </button>
           <button
+            className={`tab-btn ${activeTab === 'financial' ? 'active' : ''}`}
+            onClick={() => setActiveTab('financial')}
+            style={{ 
+              background: activeTab === 'financial' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(56, 189, 248, 0.25))' : undefined,
+              borderColor: activeTab === 'financial' ? '#10b981' : undefined,
+              color: activeTab === 'financial' ? '#fff' : undefined,
+              boxShadow: activeTab === 'financial' ? '0 0 12px rgba(16, 185, 129, 0.3)' : undefined
+            }}
+          >
+            <DollarSign size={16} style={{ color: activeTab === 'financial' ? '#10b981' : '#34d399' }} /> Financial ROI (R12M)
+          </button>
+          <button
             className={`tab-btn ${activeTab === 'intelligence' ? 'active' : ''}`}
             onClick={() => setActiveTab('intelligence')}
             style={{ background: activeTab === 'intelligence' ? 'rgba(56, 189, 248, 0.2)' : undefined, borderColor: activeTab === 'intelligence' ? 'var(--primary-cyan)' : undefined }}
@@ -654,7 +684,13 @@ export default function App() {
       <main className="main-viewport">
         {/* TAB 1: MEETINGS VIEW */}
         {activeTab === 'meetings' && (
-          <div className="meeting-layout">
+          <div>
+            <FinancialRoiWidget
+              financialData={financialData}
+              loading={financialLoading}
+              onRefresh={fetchFinancialData}
+            />
+            <div className="meeting-layout">
             <div className="meeting-list">
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                 Chronological Sessions ({meetings.length})
@@ -883,6 +919,7 @@ export default function App() {
             ) : (
               <div className="glass-card">Select a meeting from the list</div>
             )}
+          </div>
           </div>
         )}
 
@@ -1427,12 +1464,28 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 8: PROJECT INTELLIGENCE & EXPERIENCE HUB */}
-        {activeTab === 'intelligence' && (
-          <ProjectIntelligenceHub />
+        {/* TAB 8: FINANCIAL ROI & CAPITAL GOVERNANCE WIDGET */}
+        {activeTab === 'financial' && (
+          <FinancialRoiWidget
+            financialData={financialData}
+            loading={financialLoading}
+            onRefresh={fetchFinancialData}
+          />
         )}
 
-        {/* TAB 9: CONTINUOUS THEMATIC & QUALITATIVE ANALYSIS HUB */}
+        {/* TAB 9: PROJECT INTELLIGENCE & EXPERIENCE HUB */}
+        {activeTab === 'intelligence' && (
+          <div>
+            <FinancialRoiWidget
+              financialData={financialData}
+              loading={financialLoading}
+              onRefresh={fetchFinancialData}
+            />
+            <ProjectIntelligenceHub />
+          </div>
+        )}
+
+        {/* TAB 10: CONTINUOUS THEMATIC & QUALITATIVE ANALYSIS HUB */}
         {activeTab === 'analysis' && (
           <AnalysisHub />
         )}

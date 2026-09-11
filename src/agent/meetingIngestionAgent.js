@@ -5,6 +5,7 @@ import db from '../db/index.js';
 import { ingestAllMeetings } from '../services/ingestionService.js';
 import { syncDbToRaw } from '../../scripts/sync_db_to_raw.js';
 import { runProjectAnalysis } from './projectAnalysisAgent.js';
+import { calculateProjectRoi } from '../services/financialRoiService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,6 +56,14 @@ export async function runIngestionPipeline(reason = 'Manual or Scheduled Trigger
     const stakeholderCount = db.prepare('SELECT count(*) as count FROM stakeholders').get().count;
     const vectorCount = db.prepare('SELECT count(*) as count FROM vector_chunks').get().count;
 
+    // 5. Compute and log updated Financial ROI & Savings
+    let roiMetrics = null;
+    try {
+      roiMetrics = calculateProjectRoi();
+    } catch (roiErr) {
+      console.error('[MeetingIngestionAgent] Warning during financial ROI recalculation:', roiErr.message);
+    }
+
     const duration = Date.now() - startTime;
     console.log(`\n✅ [MeetingIngestionAgent] PIPELINE SUCCESSFULLY EXECUTED IN ${duration}ms`);
     console.log(`------------------------------------------------------`);
@@ -67,6 +76,9 @@ export async function runIngestionPipeline(reason = 'Manual or Scheduled Trigger
     console.log(` 👥 7. Project Team / Roster:    ${stakeholderCount}`);
     console.log(` 🧠 8. RAG Vector Intelligence:  ${vectorCount} chunks`);
     console.log(` 📊 9. Continuous Analysis:      Regenerated & Cached`);
+    if (roiMetrics) {
+      console.log(` 💰 10. Financial Savings Protected: R${roiMetrics.savings.total.toLocaleString()} (${roiMetrics.savings.budgetDefenseRatePct}% of R12M CapEx)`);
+    }
     console.log(`======================================================\n`);
   } catch (error) {
     console.error('❌ [MeetingIngestionAgent] ERROR DURING INGESTION:', error);
